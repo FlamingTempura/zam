@@ -1,0 +1,10 @@
+{
+  "author": "Peter West",
+  "description": "Simple data binding",
+  "homepage": "https://github.com/FlamingTempura/tack",
+  "main": "./tack.js",
+  "name": "tack",
+  "scripts": {},
+  "version": "0.0.1",
+  "license": "ISC"
+}
