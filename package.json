@@ -6,5 +6,8 @@
   "name": "tack",
   "scripts": {},
   "version": "0.0.1",
-  "license": "ISC"
+  "license": "ISC",
+  "devDependencies": {
+    "pegjs": "^0.10.0"
+  }
 }

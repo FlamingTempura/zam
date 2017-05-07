@@ -2,10 +2,16 @@
 	'use strict';
 
 	var parser = this.parser;
+	var prefix = 'ta-';
+
 	if (typeof module !== 'undefined') { parser = require('./parser'); }
 
 	var toArray = function (nonarray) {
 		return Array.prototype.slice.call(nonarray);
+	};
+
+	var stringify = function (value) {
+		return String(value !== null ? value : '');
 	};
 
 	var tack = function (el) {
@@ -16,127 +22,133 @@
 
 		component.data = {};
 
-		component.eval = function (result) {
-			//console.log('-> eval:', result.type);
-			var value,
-				set = function (val) { return val; };
-			if (result.type === 'Array') {
-				value = result.elements;
-			} else if (result.type === 'Object') {
-				value = result.properties;
-			} else if (result.type === 'Literal') {
-				value = result.value;
-			} else if (result.type === 'Identifier') {
-				value = component.data[result.name];
+		component.eval = function (syntax) {
+			var value, set;
+
+			if (syntax.type === 'Literal') { value = syntax.value; } else 
+
+			if (syntax.type === 'Array') { value = syntax.elements; } else
+			
+			if (syntax.type === 'Object') { console.log('obj', syntax);
+				let obj = {};
+				syntax.properties.forEach(function (prop) { obj[prop.key] = component.eval(prop.value).value; });
+				value = obj;
+			} else
+
+			if (syntax.type === 'Identifier') {
+				value = component.data[syntax.name];
 				set = function (val) {
-					component.data[result.name] = val;
-					console.log('po');
+					component.data[syntax.name] = val;
 					component.update();
 					return val;
 				};
-			} else if (result.type === 'Member') {
-				var obj = component.eval(result.object).value,
-					prop = component.eval(result.property).value;
+			} else 
+
+			if (syntax.type === 'Member') {
+				var obj = component.eval(syntax.object).value,
+					prop = component.eval(syntax.property).value;
 				value = typeof obj !== 'undefined' || obj.hasOwnProperty(prop) ? obj[prop] : '';
 				set = function (val) {
 					obj[prop] = val;
-					console.log('pa');
 					component.update();
 					return val;
 				};
-			} else if (result.type === 'Assignment') {
-				let left = component.eval(result.left),
-					right = component.eval(result.right);
+			} else
+
+			if (syntax.type === 'Assignment') {
+				let left = component.eval(syntax.left),
+					right = component.eval(syntax.right);
 				set = left.set;
-				if (result.operator === '=' ) { return set(right.value); } else
-				if (result.operator === '*=') { return set(left.value * right.value); } else
-				if (result.operator === '/=') { return set(left.value / right.value); } else
-				if (result.operator === '%=') { return set(left.value % right.value); } else
-				if (result.operator === '+=') { return set(left.value + right.value); } else
-				if (result.operator === '-=') { return set(left.value - right.value); }
-			} else if (result.type === 'Update') {
-				var argument = component.eval(result.argument);
+				if (syntax.operator === '=' ) { return set(right.value); } else
+				if (syntax.operator === '*=') { return set(left.value * right.value); } else
+				if (syntax.operator === '/=') { return set(left.value / right.value); } else
+				if (syntax.operator === '%=') { return set(left.value % right.value); } else
+				if (syntax.operator === '+=') { return set(left.value + right.value); } else
+				if (syntax.operator === '-=') { return set(left.value - right.value); }
+			} else 
+
+			if (syntax.type === 'Update') {
+				let argument = component.eval(syntax.argument);
 				set = argument.set;
-				if (result.operator === '++' &&  result.prefix) { value = set(argument.value + 1) - 1; } else
-				if (result.operator === '--' &&  result.prefix) { value = set(argument.value - 1) - 1; } else
-				if (result.operator === '++' && !result.prefix) { value = set(argument.value + 1); } else
-				if (result.operator === '--' && !result.prefix) { value = set(argument.value - 1); }
-			} else if (result.type === 'Conditional') {
-				value = component.eval(result.test).value ?
-					component.eval(result.consequent).value :
-					component.eval(result.alternate).value;
-			} else if (result.type === 'Binary' || result.type === 'Logical') {
-				let left  = component.eval(result.left),
-					right = component.eval(result.right);
-				//console.log('compare', left.val)
-				if (result.operator === '===') { value = left.value === right.value; } else
-				if (result.operator === '!==') { value = left.value !== right.value; } else
-				if (result.operator === '==' ) { value = left.value ==  right.value; } else
-				if (result.operator === '!=' ) { value = left.value !=  right.value; } else
-				if (result.operator === '<'  ) { value = left.value <   right.value; } else
-				if (result.operator === '>'  ) { value = left.value >   right.value; } else
-				if (result.operator === '<=' ) { value = left.value <=  right.value; } else
-				if (result.operator === '>=' ) { value = left.value >=  right.value; } else
-				if (result.operator === '&&' ) { value = left.value &&  right.value; } else
-				if (result.operator === '||' ) { value = left.value ||  right.value; } else
-				if (result.operator === '+'  ) { value = left.value +   right.value; } else
-				if (result.operator === '-'  ) { value = left.value -   right.value; } else
-				if (result.operator === '*'  ) { value = left.value *   right.value; } else
-				if (result.operator === '/'  ) { value = left.value /   right.value; } else
-				if (result.operator === '%'  ) { value = left.value %   right.value; }
-			} else if (result.type === 'Call') {
-				var callee = component.eval(result.callee).value,
-					args = component.eval(result.arguments).value;
-				value = callee.apply(null, args);
-			} else if (result.type === 'Formatter') {
-				var formatter = tack.formatters[result.formatter];
-				if (typeof formatter !== 'function') {
-					console.error('No formatter named ' + result.formatter);
-					value = '';
-				} else {
-					value = formatter(component.eval(result.subject).value, result.parameter);
-				}
-			}
+				if (syntax.operator === '++' &&  syntax.prefix) { value = set(argument.value + 1) - 1; } else
+				if (syntax.operator === '--' &&  syntax.prefix) { value = set(argument.value - 1) - 1; } else
+				if (syntax.operator === '++' && !syntax.prefix) { value = set(argument.value + 1); } else
+				if (syntax.operator === '--' && !syntax.prefix) { value = set(argument.value - 1); }
+			} else 
+
+			if (syntax.type === 'Conditional') {
+				value = component.eval(syntax.test).value ?
+					component.eval(syntax.consequent).value :
+					component.eval(syntax.alternate).value;
+			} else 
+
+			if (syntax.type === 'Unary') {
+				let argument = component.eval(syntax.argument);
+				if (syntax.operator === '!') { value = !argument.value; } else
+				if (syntax.operator === '+') { value = +argument.value; } else
+				if (syntax.operator === '-' ) { value = -argument.value; }
+			} else 
+
+			if (syntax.type === 'Binary' || syntax.type === 'Logical') {
+				let left  = component.eval(syntax.left),
+					right = component.eval(syntax.right);
+				if (syntax.operator === '===') { value = left.value === right.value; } else
+				if (syntax.operator === '!==') { value = left.value !== right.value; } else
+				if (syntax.operator === '==' ) { value = left.value ==  right.value; } else
+				if (syntax.operator === '!=' ) { value = left.value !=  right.value; } else
+				if (syntax.operator === '<'  ) { value = left.value <   right.value; } else
+				if (syntax.operator === '>'  ) { value = left.value >   right.value; } else
+				if (syntax.operator === '<=' ) { value = left.value <=  right.value; } else
+				if (syntax.operator === '>=' ) { value = left.value >=  right.value; } else
+				if (syntax.operator === '&&' ) { value = left.value &&  right.value; } else
+				if (syntax.operator === '||' ) { value = left.value ||  right.value; } else
+				if (syntax.operator === '+'  ) { value = left.value +   right.value; } else
+				if (syntax.operator === '-'  ) { value = left.value -   right.value; } else
+				if (syntax.operator === '*'  ) { value = left.value *   right.value; } else
+				if (syntax.operator === '/'  ) { value = left.value /   right.value; } else
+				if (syntax.operator === '%'  ) { value = left.value %   right.value; }
+			} else 
+
+			if (syntax.type === 'Call') {
+				let caller = component.eval(syntax.callee.object),
+					callee = component.eval(syntax.callee).value,
+					args = syntax.arguments.map(function (arg) {
+						return component.eval(arg).value;
+					});
+				console.log('call', syntax, args);
+				console.log('calling', callee, 'on', caller, 'with, args')
+				value = callee.apply(caller.value, args);
+			} 
+
 			return {
 				value: value,
 				set: set
 			};
 		};
 
-		component.parse = function (exp) {
-			//console.log('parse:', exp);
-			return parser.parse(exp);
-		};
+		var createBinding = function (binder, node, match, syntax) {
 
-		var createBinding = function (binder, node, attr, expr) {
-			//console.log('bind:', node, attr, expr);
-			var prevValue,
-				parsed = component.parse(expr || 'undefined');
+			if (typeof binder === 'function') { binder = { update: binder }; }
+
 			var binding = {
 				component: component,
 				block: binder.block,
+				syntax: syntax,
+				eval: function (syntax_) {
+					return component.eval(syntax_ || syntax).value;
+				},
 				update: function () {
-					var evaled = component.eval(parsed);
-					//if (typeof prevValue === 'undefined' || val !== prevValue) { // this fails with arrays
-						console.log('updating');
-						binder.update.call(binding, node, evaled.value);
-						prevValue = evaled.val;
-					//}
+					console.log('updating');
+					if (binder.update) { binder.update.call(binding, node); }
 				},
 				remove: function () {
 					var i = node.taBindings.indexOf(binding);
 					if (i > -1) { node.taBindings.splice(i, 1); }
-				},
-				set: function (val) {
-					var evaled = component.eval(parsed);
-					return evaled.set(val);
 				}
 			};
-
-			if (typeof binder === 'function') { binder = { update: binder }; }
 			
 			if (binder.create) {
-				binder.create.call(binding, node, attr);
+				binder.create.apply(binding, [node].concat(match));
 			}
 
 			node.taBindings.push(binding);
@@ -157,45 +169,54 @@
 				var block = false;
 
 				toArray(node.attributes).forEach(function (attr) {
-					var key = Object.keys(tack.binders).find(function (k) {
-						return attr.name.match(new RegExp('^ta-(?:' + k + ')$'));
+					Object.keys(tack.directives).sort(function (a, b) {
+						return (tack.directives[a].order || 100) - (tack.directives[b].order || 100);
+					}).find(function (key) {
+						var match = attr.name.match(new RegExp('^' + prefix + '(?:' + key + ')$'));
+						if (match) {
+							var syntax = parser.parse(attr.value || 'undefined', { startRule: 'Expression' });
+							node.removeAttribute(attr.name);
+							var binding = createBinding(tack.directives[key], node, match, syntax);
+							if (binding.block) { block = true; }
+							if (nodes.indexOf(node) === -1) { nodes.push(node); }
+							//console.log('parsing expression', attr.value, block, node.childNodes);
+						}
+						return match;
 					});
-					if (key) {
-						var binding = createBinding(tack.binders[key], node, attr.name, attr.value);
-						if (binding.block) { block = true; }
-						if (nodes.indexOf(node) === -1) { nodes.push(node); }
-					}
 				});
 
 				if (!block) {
+					//console.log(node, );
 					toArray(node.childNodes).forEach(createBindings);
 				}
 			}
 
-			if (node.nodeType === Node.TEXT_NODE && node.nodeValue.match('{{')) {
-				var tmpl = node.nodeValue,
-					startMarker = document.createComment('fa-text'),
+			if (node.nodeType === Node.TEXT_NODE && node.nodeValue.indexOf('{{') > -1) {
+				var text = node.nodeValue;
+				//console.log('parsing text', text);
+				var syntax = parser.parse(text, { startRule: 'Text' });
+				//console.log('syntax text', syntax);
+				var startMarker = document.createComment('fa-text'),
 					endMarker = document.createComment('/fa-text');
 				node.parentNode.insertBefore(startMarker, node);
 				node.parentNode.insertBefore(endMarker, node);
 				node.parentNode.removeChild(node);
-				tmpl.replace(/([^{]*)(?:{{([^}]*)}})?([^{]*)/g, function (match, before, exp, after) {
-					var textNode;
-					if (before) {
-						textNode = document.createTextNode(before);
-						endMarker.parentNode.insertBefore(textNode, endMarker);
-					}
-					if (exp) {
-						textNode = document.createTextNode('{{ ' + exp + ' }}');
-						textNode.taComponent = component;
-						textNode.taBindings = [];
-						endMarker.parentNode.insertBefore(textNode, endMarker);
-						createBinding(tack.binders.text, textNode, '', exp);
-						nodes.push(textNode);
-					}
-					if (after) {
-						textNode = document.createTextNode(after);
-						endMarker.parentNode.insertBefore(textNode, endMarker);
+				syntax.forEach(function (part) {
+					var newNode;
+					if (typeof part === 'string') {
+						newNode = document.createTextNode(part);
+						endMarker.parentNode.insertBefore(newNode, endMarker);
+					} else {
+						if (part.html) {
+							newNode = document.createElement('span');
+						} else {
+							newNode = document.createTextNode('###');
+						}
+						newNode.taComponent = component;
+						newNode.taBindings = [];
+						endMarker.parentNode.insertBefore(newNode, endMarker);
+						createBinding(inlineParser, newNode, ['', part.html ? 'html' : 'text'], part.expression);
+						nodes.push(newNode);
 					}
 				});
 			}
@@ -216,21 +237,22 @@
 		return component;
 	};
 
-	tack.binders = {};
+	tack.directives = {};
 
-	tack.binders['each-.+'] = {
+	tack.directives['each-(.+)'] = {
+		order: 1,
 		block: true,
-		create: function (el, attr) {
-			this.varname = attr.split('-').pop();
+		create: function (el, attr, varname) {
+			this.varname = varname;
 			this.items = [];
 			this.startMarker = document.createComment(attr);
 			this.endMarker = document.createComment('/' + attr);
-			el.removeAttribute(attr);
 			el.parentNode.insertBefore(this.startMarker, el);
 			el.parentNode.insertBefore(this.endMarker, el);
 			el.parentNode.removeChild(el);
 		},	
-		update: function (el, array) {
+		update: function (el) {
+			var array = this.eval() || [];
 			var that = this;
 			// remove old nodes
 			that.items.forEach(function (item) {
@@ -258,136 +280,126 @@
 		}
 	};
 
-	tack.binders['if|else-if|else'] = {
-		block: true,
+	tack.directives.exist = {
+		order: 2,
+		block: true, // this prevents wasting effort when element does not exist
 		create: function (el, attr) {
-			if (attr.indexOf('else') > -1) {
-				this.isElse = true;
-				this.prevIfs = el.taPrevIfs;
-				if (!this.prevIfs) {
-					throw { message: 'No if before else/else-if' };
-				}
-			}
-			if (attr.indexOf('if') > -1) {
-				this.isIf = true;
-				var next = el.nextSibling; // look forward for any else statements
-				while (next) {
-					if (next.attributes && (next.hasAttribute('ta-else-if') || next.hasAttribute('ta-else'))) {
-						next.taPrevIfs = (this.prevIfs || []).concat([this]);
-						break;
-					}
-					next = next.nextSibling;
-				}
-			}
 			this.startMarker = document.createComment(attr);
 			this.endMarker = document.createComment('/' + attr);
-			el.removeAttribute(attr);
 			el.parentNode.insertBefore(this.startMarker, el);
 			el.parentNode.insertBefore(this.endMarker, el);
 			el.parentNode.removeChild(el);
 		},	
-		update: function (el, ifResult) {
-			var that = this;
-			var result = (!this.isIf || ifResult) && (!this.isElse || this.prevIfs.reduce(function (memo, prevIf) { return memo && !prevIf.result; }, true));
-			if (result !== this.result) {
-				if (result) {
-					var clone = el.cloneNode(true);
-					that.item = { el: clone, tack: tack(clone) };
-					that.item.tack.data = that.component.data;
-					that.endMarker.parentNode.insertBefore(that.item.el, that.endMarker);
-				} else if (that.item) {
-					that.endMarker.parentNode.removeChild(that.item.el);
-					// TODO: destroy tack
-					delete that.item;
+		update: function (el) {
+			var value = !!this.eval();
+			if (value !== this.prevValue) {
+				if (value) {
+					this.clone = el.cloneNode(true);
+					this.tack = tack(this.clone);
+					this.tack.data = this.component.data;
+					this.endMarker.parentNode.insertBefore(this.clone, this.endMarker);
+				} else if (this.clone) {
+					this.endMarker.parentNode.removeChild(this.clone);
+					// TODO: tack.destroy();
 				}
-				this.result = result;
+				this.prevValue = value;
+			}
+			if (this.clone) {
+				this.tack.update();
 			}
 		}
 	};
 
-	tack.binders.show = function (el, value) {
-		value = !!value;
+	tack.directives.show = function (el) {
+		var value = !!this.eval();
 		if (value !== this.prevValue) {
 			el.style.display = value ? '' : 'none';
 			this.prevValue = value;
 		}
 	};
 
-	tack.binders.hide = function (el, value) {
-		value = !!value;
-		if (value !== this.prevValue) {
-			el.style.display = value ? 'none' : '';
-			this.prevValue = value;
+	var booleanAttributes = ['selected', 'checked', 'disabled', 'readonly', 'multiple', 'ismap', 'defer', 'noresize'];
+	tack.directives['attr-(.+)'] = {
+		create: function (el, attr, attribute) {
+			this.attribute = attribute;
+		},
+		update: function (el) {
+			var value = this.eval();
+			if (booleanAttributes.indexOf(this.attribute) > -1) {
+				value = value ? this.attribute : undefined;
+			}
+			if (typeof value === 'undefined') {
+				el.removeAttribute(this.attribute);
+			} else {
+				el.setAttribute(this.attribute, value);
+			}
+		}
+	};
+
+	tack.directives['class-(.+)'] = {
+		create: function (el, attr, classname) {
+			this.classname = classname;
+		},
+		update: function (el) {
+			el.classList.toggle(this.classname, !!this.eval());
+		}
+	};
+
+	tack.directives['style-(.+)'] = {
+		create: function (el, attr, style) {
+			this.style = style;
+		},
+		update: function (el) {
+			el.style[this.style] = this.eval();
 		}
 	};
 	
-	tack.binders['attr-.+'] = function () {
-
+	var inlineParser = tack.directives['(text|html)'] = {
+		create: function (el, attr, type) {
+			this.type = type;
+		},
+		update: function (el) {
+			var value = stringify(this.eval());
+			if (value !== this.prevValue) {
+				if (this.type === 'html') {
+					el.innerHTML = value;
+				} else {
+					el.textContent = value;
+				}
+				this.prevValue = value;
+			}
+		}
 	};
-	
-	tack.binders['on-.+'] = {
-		eval: false,
-		create: function (el) {
-			console.log('on', arguments);
-			//el.addEventListener()
+
+	tack.directives['on-(.+)'] = {
+		create: function (el, attr, event) {
+			var that = this;
+			el.addEventListener(event, function () {
+				that.eval();
+				that.component.update();
+			});
 		}
 	};
 	
-	tack.binders['class'] = function () {
-
-	};
-
-	tack.binders.model = {
+	tack.directives.model = {
 		create: function (el) {
-			var that = this,
-				value;
+			var that = this;
 			var onchange = function () {
-				if (el.value !== value) {
-					/*console.log('');
-					console.log('');
-					console.log('model old:', value);*/
-					that.prevValue = value;
-					value = that.set(el.value);
-					//console.log('model new:', value);
-
+				if (el.value !== that.prevValue) {
+					that.eval({ type: 'Assignment', operator: '=', left: that.syntax, right: { type: 'Literal', value: el.value } }); // evaluate "<expression> = <value>"
+					that.prevValue = el.value;
 				}
 			};
-			//el.addEventListener('change', onchange);
-			el.addEventListener('keyup', onchange);
+			el.addEventListener('input', onchange);
 		},
-		update: function (el, value) {
-			value = String(value);
+		update: function (el) { // update dom
+			var value = stringify(this.eval());
 			if (value !== this.prevValue) {
 				el.value = value;
+				this.prevValue = value;
 			}
 		}
 	};
-	tack.binders.text = function (el, value) {
-		value = String(value);
-		if (value !== this.prevValue) {
-			if (el.nodeType === Node.TEXT_NODE) {
-				el.textContent = value !== null ? value : '';
-			} else {
-				el.innerText = value !== null ? value : '';
-			}
-			this.prevValue = value;
-		}
-	};
-	tack.binders.html = function (el, value) {
-		value = String(value);
-		if (value !== this.prevValue) {
-			el.innerHTML = value;
-			this.prevValue = value;
-		}
-	};
-
-
-	tack.formatters = {};
-
-	tack.formatters.number = function (value, decimals) {
-		return Number(value).toFixed(Number(decimals || 2));
-	};
-	
 
 	if (typeof (typeof module !== 'undefined' && module !== null ? module.exports : void 0) === 'object') {
 		module.exports = tack;

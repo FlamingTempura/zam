@@ -1,11 +1,7 @@
 /* global tack, $ */
 'use strict';
 
-tack.formatters.formatDate = function (val) {
-	return val.toISOString();
-};
-
-var post = tack($('#post'));
+/*var post = tack($('#post'));
 
 post.data.date = new Date();
 post.data.author = { name: 'Me' };
@@ -32,7 +28,24 @@ setInterval(function () {
 
 var login = tack($('#login'));
 login.data.password = '123';
-login.update();
+login.update();*/
 /*setInterval(function () {
 	login.update();
 }, 100)*/
+
+var thing = tack($('#thing'));
+
+thing.data.color = 'red';
+thing.data.memos = [{ title: 'blah' }, { title: 'blahdeblah' }];
+thing.update();
+setInterval(function () {
+	//thing.data.color = thing.data.color === 'red' ? 'green' : 'red';
+	thing.data.upper = !thing.data.upper;
+	thing.data.disable = !thing.data.disable;
+	thing.data.greeting = thing.data.upper ? '<strong ta-style-color="\'blue\'">Hello!</strong>' : '<em>Welcome</em>';
+	/*thing.data.memos.push({ title: Math.random() });
+	if (Math.random() > 0.3) {
+		thing.data.memos.shift();
+	}*/
+	thing.update();
+}, 1000);
