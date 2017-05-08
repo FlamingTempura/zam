@@ -33,6 +33,10 @@ login.$();*/
 	login.$();
 }, 100)*/
 
+tack.root.beer = function () {
+	return 'beer';
+};
+
 var view = tack($('#thing'));
 
 view.color = 'red';

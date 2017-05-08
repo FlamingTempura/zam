@@ -5,7 +5,8 @@ var fs = require('fs'),
 	rollup = require('rollup'),
 	pegjs = require('rollup-plugin-pegjs'),
 	uglify = require('rollup-plugin-uglify'),
-	harmony = require('uglify-js-harmony');
+	harmony = require('uglify-js-harmony'),
+	json = require('rollup-plugin-json');
 
 return rollup.rollup({
 	entry: 'src/tack.js',
@@ -14,6 +15,7 @@ return rollup.rollup({
 			allowedStartRules: ['Text', 'Expression'],
 			optimize: 'size' // 'speed'
 		}),
+		json(),
 		uglify({
 			compress: {
         		dead_code: true,
@@ -27,7 +29,7 @@ return rollup.rollup({
         		properties: true
         	},
         	output: {
-        		//beautify: true
+        		beautify: true
         	}
 		}, harmony.minify)
 	]

@@ -21,6 +21,11 @@
 		<div ta-each-memo="memos">
 			<h3>Memo: {{ memo.title }}</h3>
 		</div>
+		Beer? {{ beer() }}
+		<div ta-skip>this {{ thing }} will appear as it is (including curly braces) </div>
+		{{ "my" + "name" }} <!-- shows myname -->
+		{{ Date.now() }} <!-- current unix timestamp -->
+		{{ JSON.stringify({ a: 1, b: 2 }) }} <!-- shows {a:1,b:2} -->
 	</div>
  
  	<div id="login">

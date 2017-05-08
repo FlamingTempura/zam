@@ -1,6 +1,7 @@
 'use strict';
 
 import parser from './grammar.pegjs';
+import { version } from '../package.json';
 
 var parse = parser.parse;
 
@@ -101,12 +102,12 @@ var evaluate = function (syntax, data) {
 	} else 
 
 	if (type === 'Call') {
-		var caller = evaluate(syntax.callee.object, data),
+		var caller = syntax.callee.object ? evaluate(syntax.callee.object, data).value : data,
 			callee = evaluate(syntax.callee, data).value,
 			args = syntax.arguments.map(function (arg_) {
 				return evaluate(arg_, data).value;
 			});
-		value = callee.apply(caller.value, args);
+		value = callee ? callee.apply(caller, args) : undefined;
 	} 
 
 	return {
@@ -116,7 +117,7 @@ var evaluate = function (syntax, data) {
 };
 
 var tack = function (el, parentComponent) {
-	el = el[0] || el; // convert from jquery
+	el = typeof el === 'string' ? document.querySelector(el) : el[0] || el; // convert from string or jquery
 
 	var component = {},
 		nodes = [];
@@ -139,10 +140,14 @@ var tack = function (el, parentComponent) {
 			block: directive.block,
 			syntax: syntax,
 			eval: function (syntax_) { // evaluate expression (expression in attribute value by default)
-				var value = evaluate(syntax_ || syntax, component).value;
-				if (typeof value === 'undefined' && parentComponent) {
-					value = evaluate(syntax_ || syntax, parentComponent).value; // TODO: all parents
-				}
+				var scopes = [component],
+					value;
+				if (parentComponent) { scopes.push(parentComponent); } // TODO: all parents
+				scopes.push(tack.root, window);
+				scopes.find(function (component_) {
+					value = evaluate(syntax_ || syntax, component_).value;
+					return value;
+				});
 				return value;
 			},
 			update: function () {
@@ -222,9 +227,19 @@ var tack = function (el, parentComponent) {
 	return component;
 };
 
+tack.version = version;
 tack.prefix = 'ta-';
-
+tack.root = {};
 tack.directives = {};
+tack.currency = '£';
+
+tack.root.number = function (number, decimals) {
+	return Number(number).toFixed(decimals || 2);
+};
+tack.root.percent = function (number, decimals) {
+	return Number(number * 100).toFixed(decimals || 2) + '%';
+};
+
 
 var inlineParser = tack.directives['(text|html)'] = function (el, attr, type) {
 	var value = stringify(this.eval());
@@ -361,6 +376,11 @@ tack.directives['on-(.+)'] = {
 			that.component.$();
 		});
 	}
+};
+
+tack.directives.skip = {
+	order: 0,
+	block: true
 };
 
 export default tack;
