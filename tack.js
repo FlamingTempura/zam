@@ -12,7 +12,7 @@ var stringify = function (value) {
 	return String(value !== null ? value : '');
 };
 
-var evaluate = function (data, update, syntax) {
+var evaluate = function (syntax, data) {
 	var value, set,
 		type = syntax.type,
 		operator = syntax.operator;
@@ -21,43 +21,41 @@ var evaluate = function (data, update, syntax) {
 
 	if (type === 'Array') {
 		value = syntax.elements.map(function (item) {
-			return evaluate(data, update, item).value;
+			return evaluate(item, data).value;
 		});
 	} else
 	
 	if (type === 'Object') {
 		value = {};
-		syntax.properties.forEach(function (prop) { value[prop.key] = evaluate(data, update, prop.value).value; });
+		syntax.properties.forEach(function (prop) { value[prop.key] = evaluate(prop.value, data).value; });
 	} else
 
 	if (type === 'Identifier') {
 		value = data[syntax.name];
 		set = function (val) {
 			data[syntax.name] = val;
-			//update();
 			return val;
 		};
 	} else 
 
 	if (type === 'Member') {
-		var subject = evaluate(data, update, syntax.object).value,
-			prop = evaluate(data, update, syntax.property).value;
+		var subject = evaluate(syntax.object, data).value,
+			prop = evaluate(syntax.property, data).value;
 		value = typeof subject !== 'undefined' ? subject[prop] : undefined;
 		set = function (val) {
 			subject[prop] = val;
-			//update();
 			return val;
 		};
 	} else
 
 	if (type === 'Conditional') {
-		value = evaluate(data, update, syntax.test).value ?
-			evaluate(data, update, syntax.consequent).value :
-			evaluate(data, update, syntax.alternate).value;
+		value = evaluate(syntax.test, data).value ?
+			evaluate(syntax.consequent, data).value :
+			evaluate(syntax.alternate, data).value;
 	} else 
 
 	if (type === 'Unary' || type === 'Update') {
-		let arg = evaluate(data, update, syntax.argument),
+		let arg = evaluate(syntax.argument, data),
 			argv = arg.value;
 		value = operator === '!' ? !argv :
 		        operator === '+' ? +argv :
@@ -72,9 +70,9 @@ var evaluate = function (data, update, syntax) {
 	} else 
 
 	if (type === 'Binary' || type === 'Logical' || type === 'Assignment') {
-		let left  = evaluate(data, update, syntax.left),
+		let left  = evaluate(syntax.left, data),
 			leftv = left.value,
-			rightv = evaluate(data, update, syntax.right).value;
+			rightv = evaluate(syntax.right, data).value;
 		value = operator === '===' ? leftv === rightv :
 		        operator === '!==' ? leftv !== rightv :
 		        operator === '=='  ? leftv ==  rightv :
@@ -103,10 +101,10 @@ var evaluate = function (data, update, syntax) {
 	} else 
 
 	if (type === 'Call') {
-		let caller = evaluate(data, update, syntax.callee.object),
-			callee = evaluate(data, update, syntax.callee).value,
+		let caller = evaluate(syntax.callee.object, data),
+			callee = evaluate(syntax.callee, data).value,
 			args = syntax.arguments.map(function (arg) {
-				return evaluate(data, update, arg).value;
+				return evaluate(arg, data).value;
 			});
 		value = callee.apply(caller.value, args);
 	} 
@@ -134,10 +132,9 @@ var tack = function (el, data) {
 			block: directive.block,
 			syntax: syntax,
 			eval: function (syntax_) { // evaluate expression (expression in attribute value by default)
-				return evaluate(component.data, component.update, syntax_ || syntax).value;
+				return evaluate(syntax_ || syntax, component.data).value;
 			},
 			update: function () {
-				//console.log('updating');
 				if (directive.update) { directive.update.apply(binding, [node].concat(attrMatch)); }
 			},
 			remove: function () {
@@ -184,15 +181,12 @@ var tack = function (el, data) {
 				}
 			});
 			if (!blocked) {
-				//console.log(node, );
 				toArray(node.childNodes).forEach(createBindings);
 			}
 		} else
 
 		if (node.nodeType === Node.TEXT_NODE && node.nodeValue.indexOf('{{') > -1) {
 			var text = node.nodeValue;
-			//console.log('parsing text', text);
-			//console.log('syntax text', syntax);
 			parse(text, { startRule: 'Text' }).forEach(function (part) {
 				var newNode;
 				if (typeof part === 'string') {
@@ -229,41 +223,23 @@ tack.prefix = 'ta-';
 
 tack.directives = {};
 
-tack.directives['each-(.+)'] = {
-	order: 1,
-	block: true, // do not continue traversing through this dom element (separate tack will be created)
-	create: function (el, attr) {
-		this.items = [];
-		this.endMarker = document.createComment(attr);
-		el.parentNode.insertBefore(this.endMarker, el);
-		el.parentNode.removeChild(el);
-	},	
-	update: function (el, attr, varname) {
-		var that = this,
-			array = this.eval() || [];
-		// remove old nodes
-		that.items.forEach(function (item) {
-			if (array.indexOf(item.data) === -1) {
-				that.endMarker.parentNode.removeChild(item.el);
-				// TODO: destroy tack
-				that.items.splice(that.items.indexOf(item), 1);
-			}
-		});
-		
-		// create new nodes / update existing nodes
-		array.forEach(function (data) {
-			var item = that.items.find(function (item) {
-				return item.data === data;
-			});
-			if (!item) {
-				var clone = el.cloneNode(true);
-				item = { el: clone, tack: tack(clone), data: data };
-				item.tack.data[varname] = data;
-				that.items.push(item);
-			}
-			item.tack.update();
-			that.endMarker.parentNode.insertBefore(item.el, that.endMarker);
-		});
+var inlineParser = tack.directives['(text|html)'] = function (el, attr, type) {
+	var value = stringify(this.eval());
+	if (value !== this.prevValue) {
+		if (type === 'html') {
+			el.innerHTML = value;
+		} else {
+			el.textContent = value;
+		}
+		this.prevValue = value;
+	}
+};
+
+tack.directives.show = function (el) {
+	var value = !!this.eval();
+	if (value !== this.prevValue) {
+		el.style.display = value ? '' : 'none';
+		this.prevValue = value;
 	}
 };
 
@@ -271,8 +247,8 @@ tack.directives.exist = {
 	order: 2,
 	block: true, // this prevents wasting effort when element does not exist
 	create: function (el, attr) {
-		this.endMarker = document.createComment(attr);
-		el.parentNode.insertBefore(this.endMarker, el);
+		this.marker = document.createComment(attr);
+		el.parentNode.insertBefore(this.marker, el);
 		el.parentNode.removeChild(el);
 	},	
 	update: function (el) {
@@ -281,9 +257,9 @@ tack.directives.exist = {
 			if (value) {
 				this.clone = el.cloneNode(true);
 				this.tack = tack(this.clone, this.component.data);
-				this.endMarker.parentNode.insertBefore(this.clone, this.endMarker);
+				this.marker.parentNode.insertBefore(this.clone, this.marker);
 			} else if (this.clone) {
-				this.endMarker.parentNode.removeChild(this.clone);
+				this.marker.parentNode.removeChild(this.clone);
 				// TODO: tack.destroy();
 			}
 			this.prevValue = value;
@@ -294,11 +270,41 @@ tack.directives.exist = {
 	}
 };
 
-tack.directives.show = function (el) {
-	var value = !!this.eval();
-	if (value !== this.prevValue) {
-		el.style.display = value ? '' : 'none';
-		this.prevValue = value;
+tack.directives['each-(.+)'] = {
+	order: 1,
+	block: true, // do not continue traversing through this dom element (separate tack will be created)
+	create: function (el, attr) {
+		this.items = [];
+		this.marker = document.createComment(attr);
+		el.parentNode.insertBefore(this.marker, el);
+		el.parentNode.removeChild(el);
+	},	
+	update: function (el, attr, varname) {
+		var that = this,
+			array = this.eval() || [];
+		// remove old nodes
+		that.items.forEach(function (item) {
+			if (array.indexOf(item.data) === -1) {
+				that.marker.parentNode.removeChild(item.el);
+				// TODO: destroy tack
+				that.items.splice(that.items.indexOf(item), 1);
+			}
+		});
+		
+		// create new nodes / update existing nodes
+		array.forEach(function (data) {
+			var item = that.items.find(function (item_) {
+				return item_.data === data;
+			});
+			if (!item) {
+				var clone = el.cloneNode(true);
+				item = { el: clone, tack: tack(clone), data: data };
+				item.tack.data[varname] = data;
+				that.items.push(item);
+			}
+			item.tack.update();
+			that.marker.parentNode.insertBefore(item.el, that.marker);
+		});
 	}
 };
 
@@ -323,28 +329,6 @@ tack.directives['style-(.+)'] = function (el, attr, style) {
 	el.style[style] = this.eval();
 };
 
-var inlineParser = tack.directives['(text|html)'] = function (el, attr, type) {
-	var value = stringify(this.eval());
-	if (value !== this.prevValue) {
-		if (type === 'html') {
-			el.innerHTML = value;
-		} else {
-			el.textContent = value;
-		}
-		this.prevValue = value;
-	}
-};
-
-tack.directives['on-(.+)'] = {
-	create: function (el, attr, event) {
-		var that = this;
-		el.addEventListener(event, function () {
-			that.eval();
-			that.component.update();
-		});
-	}
-};
-
 tack.directives.model = {
 	create: function (el) {
 		var that = this;
@@ -363,6 +347,16 @@ tack.directives.model = {
 			el.value = value;
 			this.prevValue = value;
 		}
+	}
+};
+
+tack.directives['on-(.+)'] = {
+	create: function (el, attr, event) {
+		var that = this;
+		el.addEventListener(event, function () {
+			that.eval();
+			that.component.update();
+		});
 	}
 };
 
