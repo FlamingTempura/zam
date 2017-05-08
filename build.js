@@ -8,12 +8,12 @@ var fs = require('fs'),
 	harmony = require('uglify-js-harmony'),
 	json = require('rollup-plugin-json');
 
-return rollup.rollup({
-	entry: 'src/tack.js',
+rollup.rollup({
+	entry: 'src/index.js',
 	plugins: [
 		pegjs({
 			allowedStartRules: ['Text', 'Expression'],
-			optimize: 'size' // 'speed'
+			optimize: 'speed' // 'speed'
 		}),
 		json(),
 		uglify({
@@ -34,12 +34,13 @@ return rollup.rollup({
 		}, harmony.minify)
 	]
 }).then(function (bundle) {
-	return bundle.generate({
+	var browser = bundle.generate({
 		//sourceMap: true,
 		moduleName: 'tack',
-		format: 'iife',
+		format: 'umd',
 		indent: false
 	});
-}).then(function (result) {
-	fs.writeFileSync('tack.js', result.code, 'utf8');
+	fs.writeFileSync('tack.js', browser.code, 'utf8');
+}).catch(function (err) {
+	console.error(err.stack);
 });

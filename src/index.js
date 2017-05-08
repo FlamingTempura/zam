@@ -15,8 +15,8 @@ var stringify = function (value) {
 	return String(value !== null && typeof value !== 'undefined' ? value : '');
 };
 
-var evaluate = function (syntax, data) {
-	var value, set,
+var evaluate = function (syntax, scopes) {
+	var value, set, scope,
 		type = syntax.type,
 		operator = syntax.operator;
 
@@ -24,26 +24,27 @@ var evaluate = function (syntax, data) {
 
 	if (type === 'Array') {
 		value = syntax.elements.map(function (item) {
-			return evaluate(item, data).value;
+			return evaluate(item, scopes).value;
 		});
 	} else
 	
 	if (type === 'Object') {
 		value = {};
-		syntax.properties.forEach(function (prop) { value[prop.key] = evaluate(prop.value, data).value; });
+		syntax.properties.forEach(function (prop) { value[prop.key] = evaluate(prop.value, scopes).value; });
 	} else
 
 	if (type === 'Identifier') {
-		value = data[syntax.name];
+		scope = scopes.find(function (scope_) { return typeof scope_[syntax.name] !== 'undefined'; }) || scopes[0]; // is data in parent scopes? no? then just use current scope
+		value = scope[syntax.name];
 		set = function (val) {
-			data[syntax.name] = val;
+			scope[syntax.name] = val;
 			return val;
 		};
 	} else 
 
 	if (type === 'Member') {
-		var subject = evaluate(syntax.object, data).value,
-			prop = evaluate(syntax.property, data).value;
+		var subject = evaluate(syntax.object, scopes).value,
+			prop = evaluate(syntax.property, scopes).value;
 		value = typeof subject !== 'undefined' ? subject[prop] : undefined;
 		set = function (val) {
 			subject[prop] = val;
@@ -52,13 +53,13 @@ var evaluate = function (syntax, data) {
 	} else
 
 	if (type === 'Conditional') {
-		value = evaluate(syntax.test, data).value ?
-			evaluate(syntax.consequent, data).value :
-			evaluate(syntax.alternate, data).value;
+		value = evaluate(syntax.test, scopes).value ?
+			evaluate(syntax.consequent, scopes).value :
+			evaluate(syntax.alternate, scopes).value;
 	} else 
 
 	if (type === 'Unary' || type === 'Update') {
-		var arg = evaluate(syntax.argument, data),
+		var arg = evaluate(syntax.argument, scopes),
 			argv = arg.value;
 		value = operator === '!' ? !argv :
 		        operator === '+' ? +argv :
@@ -67,15 +68,15 @@ var evaluate = function (syntax, data) {
 		        operator === '--' ? argv - 1 : null;
 		if (type === 'Update') {
 			set = arg.set;
-			value = set(value);
+			if (set) { value = set(value); }
 			if (syntax.prefix) { value += operator === '++' ? -1 : 1; }
 		}
 	} else 
 
 	if (type === 'Binary' || type === 'Logical' || type === 'Assignment') {
-		var left  = evaluate(syntax.left, data),
+		var left  = evaluate(syntax.left, scopes),
 			leftv = left.value,
-			rightv = evaluate(syntax.right, data).value;
+			rightv = evaluate(syntax.right, scopes).value;
 		value = operator === '===' ? leftv === rightv :
 		        operator === '!==' ? leftv !== rightv :
 		        operator === '=='  ? leftv ==  rightv :
@@ -104,10 +105,10 @@ var evaluate = function (syntax, data) {
 	} else 
 
 	if (type === 'Call') {
-		var caller = syntax.callee.object ? evaluate(syntax.callee.object, data).value : data,
-			callee = evaluate(syntax.callee, data).value,
+		var caller = syntax.callee.object ? evaluate(syntax.callee.object, scopes).value : scopes[0],
+			callee = evaluate(syntax.callee, scopes).value,
 			args = syntax.arguments.map(function (arg_) {
-				return evaluate(arg_, data).value;
+				return evaluate(arg_, scopes).value;
 			});
 		value = callee ? callee.apply(caller, args) : undefined;
 	} 
@@ -142,15 +143,10 @@ var tack = function (el, parentComponent) {
 			block: directive.block,
 			syntax: syntax,
 			eval: function (syntax_) { // evaluate expression (expression in attribute value by default)
-				var scopes = [component],
-					value;
+				var scopes = [component];
 				if (parentComponent) { scopes.push(parentComponent); } // TODO: all parents
 				scopes.push(tack.root, global_);
-				scopes.find(function (component_) {
-					value = evaluate(syntax_ || syntax, component_).value;
-					return value;
-				});
-				return value;
+				return evaluate(syntax_ || syntax, scopes).value;
 			},
 			update: function () {
 				if (directive.update) { directive.update.apply(binding, [node].concat(attrMatch)); }
@@ -235,6 +231,8 @@ tack.prefix = 'ta-';
 tack.root = {};
 tack.directives = {};
 tack.currency = '£';
+tack.parse = parse;
+tack.evaluate = evaluate;
 
 tack.root.number = function (number, decimals) {
 	return Number(number).toFixed(decimals || 2);
@@ -271,7 +269,7 @@ tack.directives.show = function (el) {
 };
 
 tack.directives.exist = {
-	order: 2,
+	order: 3,
 	block: true, // this prevents wasting effort when element does not exist
 	create: function (el, attr) {
 		this.marker = document.createComment(attr);
@@ -298,7 +296,7 @@ tack.directives.exist = {
 };
 
 tack.directives['each-(.+)'] = {
-	order: 1,
+	order: 2,
 	block: true, // do not continue traversing through this dom element (separate tack will be created)
 	create: function (el, attr) {
 		this.items = [];
@@ -390,7 +388,7 @@ tack.directives['on-(.+)'] = {
 };
 
 tack.directives.skip = {
-	order: 0,
+	order: 1,
 	block: true
 };
 

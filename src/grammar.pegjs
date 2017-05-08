@@ -5,7 +5,7 @@
     Member: "object",
   };
 
-  var buildTree = function (type, head, tail) {
+ /* var buildTree = function (type, head, tail) {
     if (tail.length === 0) {
       return head;
     } else {
@@ -16,7 +16,22 @@
         right: buildTree(type, tail[0].arg, tail.slice(1))
       };
     }
-  };
+  };*/
+
+  var buildTree = function (type, head, tail) {
+    if (tail.length === 0) {
+      return head;
+    } else {
+      return tail.reduce(function (head, tail) {
+          return {
+              type: type,
+              operator: tail.operator,
+              left: head,
+              right: tail.arg
+             };
+      }, head);
+    }
+  }
 }
 
 Text
@@ -52,7 +67,7 @@ LogicalORExpression
 
 LogicalANDExpression
   = head:EqualityExpression
-    tail:( _ "&&" _ arg:EqualityExpression { return arg; })*
+    tail:( _ "&&" _ arg:EqualityExpression { return { operator: '&&', arg: arg }; })*
     { return buildTree('Logical', head, tail); }
 
 EqualityExpression
@@ -109,7 +124,7 @@ CallExpression
 
 MemberExpression
   = head:(
-      Identifier / Literal / ArrayLiteral / ObjectLiteral
+      Identifier / Literal / ArrayLiteral / ObjectLiteral / "(" _ expression:Expression _ ")" { return expression; }
     )
     tail:(
         _ "[" _ property:Expression _ "]"
@@ -160,7 +175,7 @@ PropertyNameAndValueList
 
 PropertyAssignment
   = key:(Identifier / StringLiteral / NumericLiteral) _ ":" _ value:Expression
-    { return { type: "Property", key: key.name, value: value }; }
+    { return { type: "Property", key: key.name || key.value, value: value }; }
 
 Literal
   = KeywordLiteral

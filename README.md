@@ -143,12 +143,14 @@ var view = tacks(document.body);
 
 #### `ta-on-*` - Event handler
 
+Execute an expression when an event happens. Event data is available in `$event`.
+
 ```html
-<input type="button" ta-on-click="doSomething()">
+<input type="button" ta-on-click="doSomething($event)">
 <script>
 var view = tacks(document.body);
-view.doSomething = function () {
-	console.log('click!');
+view.doSomething = function (e) {
+	console.log('click!', e.clientX, e.clientY);
 }
 </script>
 ```
