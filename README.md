@@ -36,6 +36,25 @@ view.update();
 
 Warning: Be aware that binding HTML can cause [XSS attacks](https://en.wikipedia.org/wiki/Cross-site_scripting). You should not use user-entered content without sanitisation.
 
+
+### ta-show - Conditional visibility
+
+Conditionally display the element. Equivelant to `attr-display="thing ? "" : 'none'"`.
+
+```html
+<div ta-show="showMe">My name is {{ me.name }}</div>
+<button ta-on-click="hide()">Hide</button>
+<script>
+var view = tacks(document.body);
+view.data.me = { name: 'Bob' };
+view.data.showMe = true;
+view.data.hide = function () {
+	view.data.showMe = false;
+};
+view.update();
+</script>
+```
+
 ### ta-exist - Conditional existance
 
 Render the element only if the result of the expression is [truthy](https://developer.mozilla.org/en/docs/Glossary/Truthy) (e.g. true, 1). Unlike ta-show, the directives inside the element will not be updated while the element is hidden (since the element is in fact destroyed when falsey and recreated when truthy). This directive occurs after ta-each and before anything else.
@@ -75,22 +94,13 @@ view.update();
 </script>
 ```
 
-### ta-show - Conditional visibility
-
-Conditionally display the element. Equivelant to `attr-display="thing ? "" : 'none'"`.
+### ta-attr-* - Attribute value
 
 ```html
-<div ta-show="showMe">My name is {{ me.name }}</div>
-<button ta-on-click="hide()">Hide</button>
+<button attr-disabled="showMe"></button>
 <script>
 var view = tacks(document.body);
-view.data.me = { name: 'Bob' };
-view.data.showMe = true;
-view.data.hide = function () {
-	view.data.showMe = false;
-};
-view.update();
-</script>
+</script>	
 ```
 
 ### ta-class-* - Conditional class name
@@ -100,15 +110,6 @@ view.update();
 <script>
 var view = tacks(document.body);
 </script>
-```
-
-### ta-attr-* - Attribute value
-
-```html
-<button attr-disabled="showMe"></button>
-<script>
-var view = tacks(document.body);
-</script>	
 ```
 
 ### ta-style-* - Style value
