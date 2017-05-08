@@ -11,7 +11,7 @@
 		<div ta-class-upper="upper" ta-html="greeting">Greetings</div>
 		<button ta-attr-disabled="disable">OK</button>
 		<button ta-show="disable">OK</button>
-		<h1 ta-exist="color !== 'green'">{{ greeting }}</h1>
+		<h1 ta-exist="color !== 'green'" ta-html="greeting"></h1>
 		Text: {{ greeting }}<br>
 		HTML: {{{ greeting }}}<br>
 		Enter red or green:
@@ -48,9 +48,9 @@
 		</div>
 	</div> -->
 
-	<script src="parser.js"></script>
+	<!-- <script src="parser.js"></script> -->
 	<script src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
-	<script src="tack.js"></script>
+	<script src="tack.dist.js"></script>
 	<script src="test.js"></script>
 </body>
 </html>
