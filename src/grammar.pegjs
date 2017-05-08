@@ -1,9 +1,9 @@
 
 {
-  var TYPES_TO_PROPERTY_NAMES = {
+  /*var TYPES_TO_PROPERTY_NAMES = {
     Call:   "callee",
     Member: "object",
-  };
+  };*/
 
  /* var buildTree = function (type, head, tail) {
     if (tail.length === 0) {
@@ -107,35 +107,36 @@ CallExpression
       callee:MemberExpression _ args:Arguments
       { return { type: "Call", callee: callee, arguments: args }; }
     )
-    tail:(
-        _ args:Arguments
-        { return { type: "Call", arguments: args }; }
-      / _ "[" _ property:Expression _ "]"
-        { return { type: "Member", property: property }; }
-      / _ "." _ property:Identifier
-        { return { type: "Member", property: { type: 'Literal', value: property.name } }; }
-    )*
+    tail:MembershipExpression
     {
-      return tail.reduce(function(result, element) {
-        element[TYPES_TO_PROPERTY_NAMES[element.type]] = result;
-        return element;
+      return tail.reduce(function (result, property) {
+        //property[TYPES_TO_PROPERTY_NAMES[property.type]] = result;
+        return { type: "Member", property: property, object: result };
+      }, head);
+    }
+    
+MemberExpression
+  = head:(
+      NewExpression / Identifier / Literal / ArrayLiteral / ObjectLiteral / "(" _ expression:Expression _ ")" { return expression; }
+    )
+    tail:MembershipExpression
+    {
+      return tail.reduce(function(result, property) {
+        return { type: "Member", object: result, property: property };
       }, head);
     }
 
-MemberExpression
-  = head:(
-      Identifier / Literal / ArrayLiteral / ObjectLiteral / "(" _ expression:Expression _ ")" { return expression; }
-    )
-    tail:(
+MembershipExpression
+  = members:(
         _ "[" _ property:Expression _ "]"
-        { return { property: property }; }
+        { return property; }
       / _ "." _ property:Identifier 
-        { return { property: { type: 'Literal', value: property.name } }; }
+        { return { type: 'Literal', value: property.name }; }
     )*
-    {
-      return tail.reduce(function(result, element) {
-        return { type: "Member", object: result, property: element.property };
-      }, head);
+
+NewExpression
+  = "new" _ callee:MemberExpression args:(_ args:Arguments { return args; })? {
+      return { type: "NewExpression", callee: callee, arguments: args || [] };
     }
 
 Arguments

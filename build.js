@@ -16,7 +16,7 @@ rollup.rollup({
 			optimize: 'speed' // 'speed'
 		}),
 		json(),
-		uglify({
+		/*uglify({
 			compress: {
         		dead_code: true,
         		unused: true,
@@ -31,7 +31,7 @@ rollup.rollup({
         	output: {
         		beautify: true
         	}
-		}, harmony.minify)
+		}, harmony.minify)*/
 	]
 }).then(function (bundle) {
 	var browser = bundle.generate({

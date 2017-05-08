@@ -15,8 +15,32 @@ var stringify = function (value) {
 	return String(value !== null && typeof value !== 'undefined' ? value : '');
 };
 
+var arrayRemove = function (array, element) {
+	var i = array.indexOf(element);
+	if (i > -1) { array.splice(i, 1); }
+};
+
+var findParent = function (elements, node) {
+	var parent;
+	elements.find(function (element) {
+		var isParent = element.children.find(function (element_) {
+			return element_.node === node;
+		});
+		parent = isParent ? element : findParent(element.children, node);
+		return parent;
+	});
+	return parent;
+};
+
+var iterate = function (elementTree, callback) {
+	elementTree.forEach(function (element) {
+		callback(element);
+		iterate(element.children, callback);
+	});
+};
+
 var evaluate = function (syntax, scopes) {
-	var value, set, scope,
+	var value, set,
 		type = syntax.type,
 		operator = syntax.operator;
 
@@ -34,7 +58,7 @@ var evaluate = function (syntax, scopes) {
 	} else
 
 	if (type === 'Identifier') {
-		scope = scopes.find(function (scope_) { return typeof scope_[syntax.name] !== 'undefined'; }) || scopes[0]; // is data in parent scopes? no? then just use current scope
+		var scope = scopes.find(function (scope_) { return typeof scope_[syntax.name] !== 'undefined'; }) || scopes[0]; // is data in parent scopes? no? then just use current scope
 		value = scope[syntax.name];
 		set = function (val) {
 			scope[syntax.name] = val;
@@ -69,7 +93,7 @@ var evaluate = function (syntax, scopes) {
 		if (type === 'Update') {
 			set = arg.set;
 			if (set) { value = set(value); }
-			if (syntax.prefix) { value += operator === '++' ? -1 : 1; }
+			if (!syntax.prefix) { value += operator === '++' ? -1 : 1; }
 		}
 	} else 
 
@@ -104,14 +128,16 @@ var evaluate = function (syntax, scopes) {
 		}
 	} else 
 
-	if (type === 'Call') {
+	if (type === 'Call' || type === 'NewExpression') {
 		var caller = syntax.callee.object ? evaluate(syntax.callee.object, scopes).value : scopes[0],
 			callee = evaluate(syntax.callee, scopes).value,
 			args = syntax.arguments.map(function (arg_) {
 				return evaluate(arg_, scopes).value;
 			});
-		value = callee ? callee.apply(caller, args) : undefined;
-	} 
+		value = callee ? 
+			type === 'Call' ? callee.apply(caller, args) : new (callee.bind.apply(callee, args))() :
+			undefined;
+	}
 
 	return {
 		value: value,
@@ -119,85 +145,110 @@ var evaluate = function (syntax, scopes) {
 	};
 };
 
-var tack = function (el, parentComponent) {
+var directiveFactories = [];
+
+var tack = function (el, parent) {
 	el = typeof el === 'string' ? document.querySelector(el) : el[0] || el; // convert from string or jquery
-
+	parent = parent || el.taComponent;
+	
 	var component = {},
-		nodes = [];
+		elements = [];
 
-	component.$ = function () {
-		//console.log('updating', nodes.length, 'nodes');
-		nodes.forEach(function (node) {
-			node.taBindings.forEach(function (binding) {
+	//component.$id = Math.floor(Math.random() * 100);
+	component.$scopes =  [component].concat(parent ? parent.$scopes : [tack.root, global_]); // inherit parental scopes
+	component.$elements = elements;
+
+	var updateElements = function (elements_) {
+		elements_.forEach(function (element) {
+			element.bindings.forEach(function (binding) {
 				binding.update();
 			});
+			updateElements(element.children);
 		});
 	};
 
-	var bindDirective = function (directive, node, attrMatch, syntax) {
+	component.$ = function () {
+		//console.log('updating', elements.length, 'nodes');
+		updateElements(elements);
+	};
 
-		if (typeof directive === 'function') { directive = { update: directive }; }
+	var bindDirective = function (factory, node, attrMatch, syntax) {
+		
+		var args = [node].concat(attrMatch);
 
 		var binding = {
 			component: component,
-			block: directive.block,
 			syntax: syntax,
 			eval: function (syntax_) { // evaluate expression (expression in attribute value by default)
-				var scopes = [component];
-				if (parentComponent) { scopes.push(parentComponent); } // TODO: all parents
-				scopes.push(tack.root, global_);
-				return evaluate(syntax_ || syntax, scopes).value;
+				return evaluate(syntax_ || syntax, binding.component.$scopes).value;
 			},
 			update: function () {
-				if (directive.update) { directive.update.apply(binding, [node].concat(attrMatch)); }
+				if (factory.update) { factory.update.apply(binding, args); }
 			},
-			remove: function () {
-				var i = node.taBindings.indexOf(binding);
-				if (i > -1) { node.taBindings.splice(i, 1); }
+			destroy: function () {
+				//arrayRemove(node.taBindings, binding);
+				if (factory.destroy) { factory.destroy.apply(binding, args); }
 			}
 		};
 		
-		if (directive.create) {
-			directive.create.apply(binding, [node].concat(attrMatch));
-		}
-
-		node.taBindings.push(binding);
+		if (factory.create) { factory.create.apply(binding, args); }
 
 		return binding;
 	};
 
-	var createBindings = function (node) {
+	var initBindings = function (node, elementTree) {
 		// nodeType: 1 = ELEMENT_NODE, 3 = TEXT_NODE
-		if ([1, 3].indexOf(node.nodeType) === -1 ||
-		    node.taComponent && el.contains(node.taEl)) { return; } // skip nodes which are children of another component
-		if (node.taComponent) { // remove bindings of existing parent components
-			node.taBindings.forEach(function (binding) { binding.remove(); });
+		if ([1, 3].indexOf(node.nodeType) === -1) { return; }
+
+		if (node.taComponent) {
+			//console.log('controlled')
+			if (node.taComponent === component.$scopes[1]) { // is this controlled by the parent?				
+				let parentElement = findParent(component.$scopes[1].$elements, node),
+					element = parentElement.children.find(function (element_) {
+						return element_.node === node;
+					});
+				arrayRemove(parentElement.children, element); // move the element and its children to this component
+				elementTree.push(element);
+				iterate(element.children, function (child) {
+					child.bindings.forEach(function (binding) {
+						binding.component = component; // set each binding in each element to this component
+					});
+				});
+			} else { // otherwise it's a child component
+				node.taComponent.$scopes.splice(1, 0, component); // add this as a parent to the child
+			}
+			return; // skip because it's already bound
 		}
+		
 		node.taComponent = component;
-		node.taEl = el;
-		node.taBindings = [];
+		var element = { node: node, children: [], bindings: [] };
+		elementTree.push(element);
+		elementTree = element.children;
 
 		if (node.nodeType === 1) {
-			var attrs = toArray(node.attributes);
-
-			var blocked = Object.keys(tack.directives).sort(function (a, b) {
-				return (tack.directives[a].order || 100) - (tack.directives[b].order || 100);
-			}).find(function (key) {
-				var match;
-				var attr = attrs.find(function (attr_) {
-					match = attr_.name.match(new RegExp('^' + tack.prefix + '(?:' + key + ')$'));
-					return match;
+			let attrs = toArray(node.attributes),
+				bindings = [],
+				blocked;
+			if (attrs.length > 0) {
+				blocked = directiveFactories.find(function (factory) {
+					var match;
+					var attr = attrs.find(function (attr_) {
+						match = attr_.name.match(factory.attribute);
+						return match;
+					});
+					if (match) {
+						var syntax = parse(attr.value || 'undefined', { startRule: 'Expression' });
+						node.removeAttribute(attr.name);
+						bindings.push(bindDirective(factory, node, match, syntax));
+						return factory.block; // stop looking for more attributes
+					}
 				});
-				if (match) {
-					var syntax = parse(attr.value || 'undefined', { startRule: 'Expression' });
-					node.removeAttribute(attr.name);
-					var binding = bindDirective(tack.directives[key], node, match, syntax);
-					if (nodes.indexOf(node) === -1) { nodes.push(node); }
-					return binding.block; // stop looking for more attributes
-				}
-			});
+			}
+			element.bindings = bindings;
 			if (!blocked) {
-				toArray(node.childNodes).forEach(createBindings);
+				toArray(node.childNodes).forEach(function (childNode) {
+					initBindings(childNode, elementTree);
+				});
 			}
 		} else
 
@@ -210,9 +261,8 @@ var tack = function (el, parentComponent) {
 				} else {
 					newNode = part.html ? document.createElement('span') : document.createTextNode('');
 					newNode.taComponent = component;
-					newNode.taBindings = [];
-					bindDirective(inlineParser, newNode, ['', part.html ? 'html' : 'text'], part.expression);
-					nodes.push(newNode);
+					var binding = bindDirective(inlineParser, newNode, ['', part.html ? 'html' : 'text'], part.expression);
+					elementTree.push({ node: node, children: [], bindings: [binding] });
 				}
 				node.parentNode.insertBefore(newNode, node);
 			});
@@ -221,7 +271,7 @@ var tack = function (el, parentComponent) {
 
 	};
 
-	createBindings(el, 0); // traverse the dom
+	initBindings(el, elements); // traverse the dom
 
 	return component;
 };
@@ -229,10 +279,15 @@ var tack = function (el, parentComponent) {
 tack.version = version;
 tack.prefix = 'ta-';
 tack.root = {};
-tack.directives = {};
-tack.currency = '£';
 tack.parse = parse;
 tack.evaluate = evaluate;
+tack.directive = function (factory) {
+	factory.match = new RegExp('^' + tack.prefix + factory.match + '$');
+	directiveFactories = directiveFactories.concat([factory]).sort(function (a, b) {
+		return (a.order || 100) - (b.order || 100);
+	});
+	return factory;
+};
 
 tack.root.number = function (number, decimals) {
 	return Number(number).toFixed(decimals || 2);
@@ -242,7 +297,8 @@ tack.root.percent = function (number, decimals) {
 };
 
 
-var inlineParser = tack.directives['(text|html)'] = {
+var inlineParser = tack.directive({
+	attribute: '(text|html)',
 	block: true,
 	create: function (el) {
 		el.innerHTML = '';
@@ -258,17 +314,21 @@ var inlineParser = tack.directives['(text|html)'] = {
 			this.prevValue = value;
 		}
 	}
-};
+});
 
-tack.directives.show = function (el) {
-	var value = !!this.eval();
-	if (value !== this.prevValue) {
-		el.style.display = value ? '' : 'none';
-		this.prevValue = value;
+tack.directive({
+	attribute: 'show',
+	update: function (el) {
+		var value = !!this.eval();
+		if (value !== this.prevValue) {
+			el.style.display = value ? '' : 'none';
+			this.prevValue = value;
+		}
 	}
-};
+});
 
-tack.directives.exist = {
+tack.directive({
+	attribute: 'exist',
 	order: 3,
 	block: true, // this prevents wasting effort when element does not exist
 	create: function (el, attr) {
@@ -293,9 +353,10 @@ tack.directives.exist = {
 			this.childComponent.$();
 		}
 	}
-};
+});
 
-tack.directives['each-(.+)'] = {
+tack.directive({
+	attribute: 'each-(.+)',
 	order: 2,
 	block: true, // do not continue traversing through this dom element (separate tack will be created)
 	create: function (el, attr) {
@@ -312,7 +373,7 @@ tack.directives['each-(.+)'] = {
 			if (array.indexOf(item.data) === -1) {
 				that.marker.parentNode.removeChild(item.el);
 				// TODO: destroy tack
-				that.items.splice(that.items.indexOf(item), 1);
+				arrayRemove(that.items, item);
 			}
 		});
 		
@@ -323,7 +384,7 @@ tack.directives['each-(.+)'] = {
 			});
 			if (!item) {
 				var clone = el.cloneNode(true);
-				item = { el: clone, tack: tack(clone), data: data };
+				item = { el: clone, tack: tack(clone, that.component), data: data };
 				item.tack[varname] = data;
 				that.items.push(item);
 			}
@@ -331,40 +392,50 @@ tack.directives['each-(.+)'] = {
 			that.marker.parentNode.insertBefore(item.el, that.marker);
 		});
 	}
-};
+});
 
 var booleanAttributes = ['selected', 'checked', 'disabled', 'readonly', 'multiple', 'ismap', 'defer', 'noresize'];
-tack.directives['attr-(.+)'] = function (el, attr, attribute) {
-	var value = this.eval();
-	if (booleanAttributes.indexOf(attribute) > -1) {
-		value = value ? attribute : undefined;
+tack.directive({
+	attribute: 'attr-(.+)',
+	update: function (el, attr, attribute) {
+		var value = this.eval();
+		if (booleanAttributes.indexOf(attribute) > -1) {
+			value = value ? attribute : undefined;
+		}
+		if (typeof value === 'undefined') {
+			el.removeAttribute(attribute);
+		} else {
+			el.setAttribute(attribute, value);
+		}
 	}
-	if (typeof value === 'undefined') {
-		el.removeAttribute(attribute);
-	} else {
-		el.setAttribute(attribute, value);
+});
+
+tack.directive({
+	attribute: 'class-(.+)',
+	update: function (el, attr, classname) {
+		el.classList.toggle(classname, !!this.eval());
 	}
-};
+});
 
-tack.directives['class-(.+)'] = function (el, attr, classname) {
-	el.classList.toggle(classname, !!this.eval());
-};
+tack.directive({
+	attribute: 'style-(.+)',
+	update: function (el, attr, style) {
+		el.style[style] = this.eval();
+	}
+});
 
-tack.directives['style-(.+)'] = function (el, attr, style) {
-	el.style[style] = this.eval();
-};
-
-tack.directives.model = {
+tack.directive({
+	attribute: 'model',
 	create: function (el) {
 		var that = this;
-		var onchange = function () {
+		this.handler = function () {
 			if (el.value !== that.prevValue) {
 				that.prevValue = el.value;
 				that.eval({ type: 'Assignment', operator: '=', left: that.syntax, right: { type: 'Literal', value: el.value } }); // evaluate "<expression> = <value>"
 				that.component.$();
 			}
 		};
-		el.addEventListener('input', onchange);
+		el.addEventListener('input', this.handler);
 	},
 	update: function (el) { // update dom
 		var value = stringify(this.eval());
@@ -372,24 +443,33 @@ tack.directives.model = {
 			el.value = value;
 			this.prevValue = value;
 		}
+	},
+	destroy: function (el) {
+		el.removeEventListener('input', this.handler);
 	}
-};
+});
 
-tack.directives['on-(.+)'] = {
+tack.directive({
+	attribute: 'on-(.+)',
 	create: function (el, attr, event) {
 		var that = this;
-		el.addEventListener(event, function (e) {
+		this.handler = function (e) {
 			that.component.$event = e;
 			that.eval();
 			delete that.component.$event;
 			that.component.$();
-		});
+		};
+		el.addEventListener(event, this.handler);
+	},
+	destroy: function (el, attr, event) {
+		el.removeEventListener(event, this.handler);
 	}
-};
+});
 
-tack.directives.skip = {
+tack.directive({
+	attribute: 'skip',
 	order: 1,
 	block: true
-};
+});
 
 export default tack;

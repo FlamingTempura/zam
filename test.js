@@ -38,9 +38,10 @@ test('component creation', function (t) {
 });
 
 test('text interpolation', function (t) {
-	t.plan(6);
+	t.plan(7);
 	up(`<div id="a">{{ name }}</div>
-		<div id="b">{{ name + 'y' }}</div>`);
+		<div id="b">{{ name + 'y' }}</div>
+		<div id="c">{{ something }}</div>`);
 	var view = tack(document.body);
 	view.name = 'dave';
 	t.equal($('#a').textContent, '');
@@ -48,6 +49,7 @@ test('text interpolation', function (t) {
 	view.$();
 	t.equal($('#a').textContent, 'dave');
 	t.equal($('#b').textContent, 'davey');
+	t.equal($('#c').textContent, '');
 	later(function () {
 		view.name = 'bob';
 		view.$();
@@ -124,13 +126,17 @@ test('ta-html', function (t) { // Set HTML content
 });
 
 test('ta-show', function (t) { // Conditionally display the element. Equivelant to attr-display="thing ? "" : 'none'".
-	t.plan(6);
+	t.plan(8);
 	up(`<div ta-show="showMe">Hello</div>
 		<span ta-show="!showMe">Boo</span>`);
 	var view = tack(document.body);
-	view.showMe = true;
 	t.equal($('div').style.display, '');
 	t.equal($('span').style.display, '');
+	view.showMe = true;
+	view.$();
+	t.equal($('div').style.display, '');
+	t.equal($('span').style.display, 'none');
+	view.showMe = 1;
 	view.$();
 	t.equal($('div').style.display, '');
 	t.equal($('span').style.display, 'none');
@@ -201,7 +207,7 @@ test('ta-style-*', function (t) { // Style value
 });
 
 test('ta-model', function (t) { // Two way binding with element value
-	t.plan(6);
+	t.plan(8);
 	up(`<input type="text" ta-model="blah">
 		<div>such {{ blah }}</div>`);
 	var view = tack(document.body);
@@ -216,6 +222,9 @@ test('ta-model', function (t) { // Two way binding with element value
 	later(function () {
 		view.blah = 'amaze';
 		view.$();
+		t.equal($('input').value, 'amaze');
+		t.equal($('div').textContent, 'such amaze');
+		trigger($('input'), 'input');
 		t.equal($('input').value, 'amaze');
 		t.equal($('div').textContent, 'such amaze');
 	});
@@ -243,14 +252,20 @@ test('ta-on-*', function (t) { // Event handler
 
 
 test('ta-exist', function (t) { // Conditional existance
-	t.plan(3);
+	t.plan(5);
 	up(`<div ta-exist="showMe">My name is {{ me.name }}</div>`);
 	var view = tack(document.body);
 	view.me = { name: 'moi' };
+	view.showMe = false;
+	view.$();
+	t.equal($('div'), null);
 	view.showMe = true;
 	view.$();
 	t.equal($('div').textContent, 'My name is moi');
-	view.showMe = false;
+	view.showMe = 1;
+	view.$();
+	t.equal($('div').textContent, 'My name is moi');
+	view.showMe = 0;
 	view.$();
 	t.equal($('div'), null);
 	view.showMe = 1;
@@ -261,8 +276,9 @@ test('ta-exist', function (t) { // Conditional existance
 
 
 test('ta-each-*', function (t) { // Iterate through an array
-	t.plan(13);
-	up(`<div ta-each-todo="todos">{{ todo.message }}</div>`);
+	t.plan(14);
+	up(`<div ta-each-todo="todos">{{ todo.message }}</div>
+		<span ta-each-todo="plob"></span>`);
 	var view = tack(document.body);
 	view.todos = [
 		{ message: 'Buy food' },
@@ -289,8 +305,8 @@ test('ta-each-*', function (t) { // Iterate through an array
 	view.todos.forEach(function (todo, i) {
 		t.equal(els[i].textContent, todo.message);
 	});
+	t.equal($('span'), null);
 });
-
 
 test('root scope', function (t) {
 	t.plan(2);
@@ -314,6 +330,44 @@ test('root scope', function (t) {
 	};
 	view.$();
 	t.equals(document.body.textContent, 'chips beer cake. 17 enero');
+});
+
+test('parent then child inheritence', function (t) {
+	t.plan(4);
+	up(`<div id="container">{{ name }}<div id="thing">{{ food }}</div></div>`);
+	var container = tack($('#container')),
+		thing = tack($('#thing'));
+	container.name = 'joe';
+	container.food = 'pop';
+	container.$();
+	thing.$();
+	t.equals($('#container').textContent, 'joepop');
+	t.equals($('#thing').textContent, 'pop');
+	thing.name = 'jane';
+	thing.food = 'mess';
+	container.$();
+	thing.$();
+	t.equals($('#container').textContent, 'joemess');
+	t.equals($('#thing').textContent, 'mess');
+});
+
+test('child then parent inheritence', function (t) {
+	t.plan(4);
+	up(`<div id="container">{{ name }}<div id="thing">{{ food }}</div></div>`);
+	var thing = tack($('#thing')),
+		container = tack($('#container'));
+	container.name = 'joe';
+	container.food = 'pop';
+	container.$();
+	thing.$();
+	t.equals($('#container').textContent, 'joepop');
+	t.equals($('#thing').textContent, 'pop');
+	thing.name = 'jane';
+	thing.food = 'mess';
+	container.$();
+	thing.$();
+	t.equals($('#container').textContent, 'joemess');
+	t.equals($('#thing').textContent, 'mess');
 });
 
 test('utility functions', function (t) {
@@ -350,12 +404,10 @@ test('Expressions', function (t) { // The expressions used in a directive mostly
 	assert('1 +    2', 1 + 2);
 	assert('1 + 2 + 3', 1 + 2 + 3);
 	assert('1 + +2',  1 + 2);
-	assert('1 + ++2', 1 + 2);
 	assert('1 + -2', 1 + -2);
 	assert('1 - 2', 1 - 2);
 	assert('1 - 2 - 3', 1 - 2 - 3);
 	assert('10 % 2', 10 % 2);
-    assert('--9', 9);
     assert('9 + 3 + 6', 9 + 3 + 6);
     assert('9 + 3 / 11', 9 + 3 / 11);
     assert('(9 + 3)', 9 + 3);
@@ -382,12 +434,18 @@ test('Expressions', function (t) { // The expressions used in a directive mostly
 	assert('Math.pow(Math.pow(2, 3), 2)', Math.pow(Math.pow(2, 3), 2));
 	assert('Math.pow(2, 3)+(2)', Math.pow(2, 3)+2);
 	assert('Math.pow(2,(9))', Math.pow(2, 9));
+	assert('1++', 1);
+	assert('++1', 2);
+	assert('1--', 1);
+	assert('--1', 0);
 
 	// String
 	assert('String(10)', '10');
 	assert('"a"', 'a');
 	assert('\'a\'', 'a');
 	assert('"a" + \'b\'', 'ab');
+	assert('"\\""', '"');
+	assert('\'\\\'\'', '\'');
 
 	// Array literals
 	assert('[]', []);
@@ -415,6 +473,10 @@ test('Expressions', function (t) { // The expressions used in a directive mostly
 
 	// Assignment and update
 	assert('thing = 1', 1);
+	assert('thing++', 1);
+	assert('++thing', 3);
+	assert('thing--', 3);
+	assert('--thing', 1);
 	assert('thing += 1', 2);
 	assert('thing -= 1', 1);
 	assert('thing += 3', 4);
@@ -482,7 +544,7 @@ test('Expressions', function (t) { // The expressions used in a directive mostly
 	assert('a().a', undefined);
 
 	// Native methods
-	assert('Math.ceil(Date.now() / 1000)', Math.ceil(Date.now() / 1000));
+	assert('(new Date()).getFullYear()', new Date().getFullYear());
 	assert('JSON.stringify({ a: 1, b: 2 })', '{"a":1,"b":2}');
 
 	try {
