@@ -5,6 +5,8 @@ import { version } from '../package.json';
 
 var parse = parser.parse;
 
+var global_ = typeof global !== 'undefined' ? global : window;
+
 var toArray = function (nonarray) {
 	return Array.prototype.slice.call(nonarray);
 };
@@ -143,7 +145,7 @@ var tack = function (el, parentComponent) {
 				var scopes = [component],
 					value;
 				if (parentComponent) { scopes.push(parentComponent); } // TODO: all parents
-				scopes.push(tack.root, window);
+				scopes.push(tack.root, global_);
 				scopes.find(function (component_) {
 					value = evaluate(syntax_ || syntax, component_).value;
 					return value;
@@ -169,7 +171,8 @@ var tack = function (el, parentComponent) {
 	};
 
 	var createBindings = function (node) {
-		if ([Node.ELEMENT_NODE, Node.TEXT_NODE].indexOf(node.nodeType) === -1 ||
+		// nodeType: 1 = ELEMENT_NODE, 3 = TEXT_NODE
+		if ([1, 3].indexOf(node.nodeType) === -1 ||
 		    node.taComponent && el.contains(node.taEl)) { return; } // skip nodes which are children of another component
 		if (node.taComponent) { // remove bindings of existing parent components
 			node.taBindings.forEach(function (binding) { binding.remove(); });
@@ -178,7 +181,7 @@ var tack = function (el, parentComponent) {
 		node.taEl = el;
 		node.taBindings = [];
 
-		if (node.nodeType === Node.ELEMENT_NODE) {
+		if (node.nodeType === 1) {
 			var attrs = toArray(node.attributes);
 
 			var blocked = Object.keys(tack.directives).sort(function (a, b) {
@@ -202,7 +205,7 @@ var tack = function (el, parentComponent) {
 			}
 		} else
 
-		if (node.nodeType === Node.TEXT_NODE && node.nodeValue.indexOf('{{') > -1) {
+		if (node.nodeType === 3 && node.nodeValue.indexOf('{{') > -1) {
 			var text = node.nodeValue;
 			parse(text, { startRule: 'Text' }).forEach(function (part) {
 				var newNode;
@@ -241,15 +244,21 @@ tack.root.percent = function (number, decimals) {
 };
 
 
-var inlineParser = tack.directives['(text|html)'] = function (el, attr, type) {
-	var value = stringify(this.eval());
-	if (value !== this.prevValue) {
-		if (type === 'html') {
-			el.innerHTML = value;
-		} else {
-			el.textContent = value;
+var inlineParser = tack.directives['(text|html)'] = {
+	block: true,
+	create: function (el) {
+		el.innerHTML = '';
+	},
+	update: function (el, attr, type) {
+		var value = stringify(this.eval());
+		if (value !== this.prevValue) {
+			if (type === 'html') {
+				el.innerHTML = value;
+			} else {
+				el.textContent = value;
+			}
+			this.prevValue = value;
 		}
-		this.prevValue = value;
 	}
 };
 
@@ -371,8 +380,10 @@ tack.directives.model = {
 tack.directives['on-(.+)'] = {
 	create: function (el, attr, event) {
 		var that = this;
-		el.addEventListener(event, function () {
+		el.addEventListener(event, function (e) {
+			that.component.$event = e;
 			that.eval();
+			delete that.component.$event;
 			that.component.$();
 		});
 	}
