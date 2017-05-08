@@ -26,11 +26,11 @@ Note: HTML is not parsed for directives.
 <div>Even more HTML: <span ta-html="italicName"></span></div>
 <script>
 var view = tacks(document.body);
-view.data.me = { name: 'Bob' };
-view.data.alice = { name: 'Alice' };
-view.data.boldName = '<strong>Bob</strong>';
-view.data.italicName = '<em>Bob</em>';
-view.update();
+view.me = { name: 'Bob' };
+view.alice = { name: 'Alice' };
+view.boldName = '<strong>Bob</strong>';
+view.italicName = '<em>Bob</em>';
+view.$();
 </script>
 ```
 
@@ -46,12 +46,12 @@ Conditionally display the element. Equivelant to `attr-display="thing ? "" : 'no
 <button ta-on-click="hide()">Hide</button>
 <script>
 var view = tacks(document.body);
-view.data.me = { name: 'Bob' };
-view.data.showMe = true;
-view.data.hide = function () {
-	view.data.showMe = false;
+view.me = { name: 'Bob' };
+view.showMe = true;
+view.hide = function () {
+	view.showMe = false;
 };
-view.update();
+view.$();
 </script>
 ```
 
@@ -66,12 +66,12 @@ Note: this is equivelant to ng-if in angular.
 <button ta-on-click="hide()">Hide</button>
 <script>
 var view = tacks(document.body);
-view.data.me = { name: 'Bob' };
-view.data.showMe = true;
-view.data.hide = function () {
-	view.data.showMe = false;
+view.me = { name: 'Bob' };
+view.showMe = true;
+view.hide = function () {
+	view.showMe = false;
 };
-view.update();
+view.$();
 </script>
 ```
 
@@ -85,12 +85,12 @@ Note: this is roughly equivelant to ng-repeat.
 <div ta-each-todo="todos">{{ todo.message }}</div>
 <script>
 var view = tacks(document.body);
-view.data.todos = [
+view.todos = [
 	{ message: 'Buy food' },
 	{ message: 'Fix code' },
 	{ message: 'Wash clothes' }
 ];
-view.update();
+view.$();
 </script>
 ```
 

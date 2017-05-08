@@ -9,7 +9,7 @@ var toArray = function (nonarray) {
 };
 
 var stringify = function (value) {
-	return String(value !== null ? value : '');
+	return String(value !== null && typeof value !== 'undefined' ? value : '');
 };
 
 var evaluate = function (syntax, data) {
@@ -115,13 +115,20 @@ var evaluate = function (syntax, data) {
 	};
 };
 
-var tack = function (el, data) {
+var tack = function (el, parentComponent) {
 	el = el[0] || el; // convert from jquery
 
-	var component = { el: el },
+	var component = {},
 		nodes = [];
 
-	component.data = data || {};
+	component.$ = function () {
+		//console.log('updating', nodes.length, 'nodes');
+		nodes.forEach(function (node) {
+			node.taBindings.forEach(function (binding) {
+				binding.update();
+			});
+		});
+	};
 
 	var bindDirective = function (directive, node, attrMatch, syntax) {
 
@@ -132,7 +139,11 @@ var tack = function (el, data) {
 			block: directive.block,
 			syntax: syntax,
 			eval: function (syntax_) { // evaluate expression (expression in attribute value by default)
-				return evaluate(syntax_ || syntax, component.data).value;
+				var value = evaluate(syntax_ || syntax, component).value;
+				if (typeof value === 'undefined' && parentComponent) {
+					value = evaluate(syntax_ || syntax, parentComponent).value; // TODO: all parents
+				}
+				return value;
 			},
 			update: function () {
 				if (directive.update) { directive.update.apply(binding, [node].concat(attrMatch)); }
@@ -154,11 +165,12 @@ var tack = function (el, data) {
 
 	var createBindings = function (node) {
 		if ([Node.ELEMENT_NODE, Node.TEXT_NODE].indexOf(node.nodeType) === -1 ||
-		    node.taComponent && el.contains(node.taComponent.el)) { return; } // skip nodes which are children of another component
+		    node.taComponent && el.contains(node.taEl)) { return; } // skip nodes which are children of another component
 		if (node.taComponent) { // remove bindings of existing parent components
 			node.taBindings.forEach(function (binding) { binding.remove(); });
 		}
 		node.taComponent = component;
+		node.taEl = el;
 		node.taBindings = [];
 
 		if (node.nodeType === Node.ELEMENT_NODE) {
@@ -207,15 +219,6 @@ var tack = function (el, data) {
 
 	createBindings(el, 0); // traverse the dom
 
-	component.update = function () {
-		//console.log('updating', nodes.length, 'nodes');
-		nodes.forEach(function (node) {
-			node.taBindings.forEach(function (binding) {
-				binding.update();
-			});
-		});
-	};
-
 	return component;
 };
 
@@ -256,7 +259,7 @@ tack.directives.exist = {
 		if (value !== this.prevValue) {
 			if (value) {
 				this.clone = el.cloneNode(true);
-				this.tack = tack(this.clone, this.component.data);
+				this.childComponent = tack(this.clone, this.component);
 				this.marker.parentNode.insertBefore(this.clone, this.marker);
 			} else if (this.clone) {
 				this.marker.parentNode.removeChild(this.clone);
@@ -265,7 +268,7 @@ tack.directives.exist = {
 			this.prevValue = value;
 		}
 		if (this.clone) {
-			this.tack.update();
+			this.childComponent.$();
 		}
 	}
 };
@@ -299,10 +302,10 @@ tack.directives['each-(.+)'] = {
 			if (!item) {
 				var clone = el.cloneNode(true);
 				item = { el: clone, tack: tack(clone), data: data };
-				item.tack.data[varname] = data;
+				item.tack[varname] = data;
 				that.items.push(item);
 			}
-			item.tack.update();
+			item.tack.$();
 			that.marker.parentNode.insertBefore(item.el, that.marker);
 		});
 	}
@@ -336,7 +339,7 @@ tack.directives.model = {
 			if (el.value !== that.prevValue) {
 				that.prevValue = el.value;
 				that.eval({ type: 'Assignment', operator: '=', left: that.syntax, right: { type: 'Literal', value: el.value } }); // evaluate "<expression> = <value>"
-				that.component.update();
+				that.component.$();
 			}
 		};
 		el.addEventListener('input', onchange);
@@ -355,7 +358,7 @@ tack.directives['on-(.+)'] = {
 		var that = this;
 		el.addEventListener(event, function () {
 			that.eval();
-			that.component.update();
+			that.component.$();
 		});
 	}
 };
