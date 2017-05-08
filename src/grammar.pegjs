@@ -1,34 +1,16 @@
-
+/* Grammar to parse javascript-like expressions for tack */
 {
-  /*var TYPES_TO_PROPERTY_NAMES = {
-    Call:   "callee",
-    Member: "object",
-  };*/
-
- /* var buildTree = function (type, head, tail) {
-    if (tail.length === 0) {
-      return head;
-    } else {
-      return {
-        type: type,
-        operator: tail[0].operator,
-        left: head,
-        right: buildTree(type, tail[0].arg, tail.slice(1))
-      };
-    }
-  };*/
-
   var buildTree = function (type, head, tail) {
     if (tail.length === 0) {
       return head;
     } else {
       return tail.reduce(function (head, tail) {
-          return {
-              type: type,
-              operator: tail.operator,
-              left: head,
-              right: tail.arg
-             };
+        return {
+          type: type,
+          operator: tail.operator,
+          left: head,
+          right: tail.arg
+        };
       }, head);
     }
   }

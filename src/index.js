@@ -3,7 +3,7 @@
 import parser from './grammar.pegjs';
 import { version } from '../package.json';
 
-var parse = parser.parse;
+var parse = parser.parse; // generates the abstract syntax tree
 
 var global_ = typeof global !== 'undefined' ? global : window;
 

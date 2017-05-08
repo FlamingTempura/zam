@@ -15,8 +15,8 @@ rollup.rollup({
 			allowedStartRules: ['Text', 'Expression'],
 			optimize: 'speed' // 'speed'
 		}),
-		json(),
-		/*uglify({
+		json(),/*
+		uglify({
 			compress: {
         		dead_code: true,
         		unused: true,

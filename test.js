@@ -384,7 +384,7 @@ test('version', function (t) { // Gets the version of tacks (e.g. "0.1.0").
 });
 
 test('Expressions', function (t) { // The expressions used in a directive mostly include the JavaScript language.
-	var assertions = 0;
+	var assertions = 1;
 	var assert = function (expr, val) {
 		assertions++;
 		var result = tack.evaluate(tack.parse(expr, { startRule: 'Expression' }), [global]);
@@ -394,6 +394,9 @@ test('Expressions', function (t) { // The expressions used in a directive mostly
 			t.equal(result.value, val);
 		}
 	};
+
+	var result = tack.evaluate(tack.parse('blah', { startRule: 'Text' }), [global]);
+	t.equal(result.value, 'blah');
 
 	// Arithmatic
 	assert('1', 1);
@@ -451,6 +454,7 @@ test('Expressions', function (t) { // The expressions used in a directive mostly
 	assert('[]', []);
 	assert('[1, "a"]', [1, 'a']);
 	assert('[[2]]', [[2]]);
+	assert('[[2]][0][0]', 2);
 	assert('([1 ])', [1]);
 	assert('[1, [[2]], 1]', [1, [[2]], 1]);
 
@@ -545,6 +549,7 @@ test('Expressions', function (t) { // The expressions used in a directive mostly
 
 	// Native methods
 	assert('(new Date()).getFullYear()', new Date().getFullYear());
+	assert('(new Date).getFullYear()', new Date().getFullYear());
 	assert('JSON.stringify({ a: 1, b: 2 })', '{"a":1,"b":2}');
 
 	try {

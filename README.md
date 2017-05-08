@@ -35,7 +35,7 @@ Note: HTML is not parsed for directives.
 <div>Some HTML: {{{ boldName }}}</div>
 <div>Even more HTML: <span ta-html="italicName"></span></div>
 <script>
-var view = tacks(document.body);
+var view = tack(document.body);
 view.me = { name: 'Bob' };
 view.alice = { name: 'Alice' };
 view.boldName = '<strong>Bob</strong>';
@@ -44,7 +44,7 @@ view.$();
 </script>
 ```
 
-Warning: Be aware that binding HTML can cause [XSS attacks](https://en.wikipedia.org/wiki/Cross-site_scripting). You should not use user-entered content without sanitisation.
+Warning: Be aware that binding HTML can cause [XSS attack](https://en.wikipedia.org/wiki/Cross-site_scripting). You should not use user-entered content without sanitisation.
 
 
 #### `ta-show` - Conditional visibility
@@ -55,7 +55,7 @@ Conditionally display the element. Equivelant to `attr-display="thing ? "" : 'no
 <div ta-show="showMe">My name is {{ me.name }}</div>
 <button ta-on-click="hide()">Hide</button>
 <script>
-var view = tacks(document.body);
+var view = tack(document.body);
 view.me = { name: 'Bob' };
 view.showMe = true;
 view.hide = function () {
@@ -75,7 +75,7 @@ Note: this is equivelant to ng-if in angular.
 <div ta-exist="showMe">My name is {{ me.name }}</div>
 <button ta-on-click="hide()">Hide</button>
 <script>
-var view = tacks(document.body);
+var view = tack(document.body);
 view.me = { name: 'Bob' };
 view.showMe = true;
 view.hide = function () {
@@ -94,7 +94,7 @@ Note: this is roughly equivelant to ng-repeat.
 ```html
 <div ta-each-todo="todos">{{ todo.message }}</div>
 <script>
-var view = tacks(document.body);
+var view = tack(document.body);
 view.todos = [
 	{ message: 'Buy food' },
 	{ message: 'Fix code' },
@@ -109,7 +109,7 @@ view.$();
 ```html
 <button attr-disabled="showMe"></button>
 <script>
-var view = tacks(document.body);
+var view = tack(document.body);
 </script>	
 ```
 
@@ -118,15 +118,15 @@ var view = tacks(document.body);
 ```html
 <h4 class-red="warning"></h4>
 <script>
-var view = tacks(document.body);
+var view = tack(document.body);
 </script>
 ```
 
 #### `ta-style-*` - Style value
 ```html
-<h1 style-font-weight="big ? 'bold' : 'normal'"></h1>
+<h1 ta-style-font-weight="big ? 'bold' : 'normal'"></h1>
 <script>
-var view = tacks(document.body);
+var view = tack(document.body);
 </script>
 ```
 
@@ -135,9 +135,9 @@ var view = tacks(document.body);
 Two way binding with element value
 
 ```html
-<input type="text" model="blah">
+<input type="text" ta-model="blah">
 <script>
-var view = tacks(document.body);
+var view = tack(document.body);
 </script>
 ```
 
@@ -148,7 +148,7 @@ Execute an expression when an event happens. Event data is available in `$event`
 ```html
 <input type="button" ta-on-click="doSomething($event)">
 <script>
-var view = tacks(document.body);
+var view = tack(document.body);
 view.doSomething = function (e) {
 	console.log('click!', e.clientX, e.clientY);
 }
@@ -165,20 +165,26 @@ view.doSomething = function (e) {
 ## Custom directives
 
 ```js
-tacks.directive.hide = function (el) {
-	$(el).toggle(!this.eval());
-};
+tack.directive({
+	attribute: 'hide',
+	update: function (el) {
+		$(el).toggle(!this.eval());
+	}
+});
 
-tacks.directive['on-scroll-[xy]'] = {
+tack.directive({
+	attribute: 'on-scroll-([xy])',
 	create: function () {},
-	update: function (el) {}
-}
+	update: function (el) {},
+	destroy: function (el) {}
+});
 ```
-
-* `block`
-* `order`
-* `create`
+* `attribute` - pattern to match the attribute. This can contain regular expressions. Results from capture groups will be provided to create, update, and remove methods.
+* `block` - whether to stop further directives in this element and it's children.
+* `order` - when to run this directive; lower numbers run first.
+* `create` - function called when directive is created.
 * `update`
+* `destroy`
 
 ## Expressions
 
@@ -206,11 +212,11 @@ The root object is provided to all components and can be used to provide methods
 ```html
 {{ food }}, {{ drink }}, {{ sweet }} <!-- chips, beer, cake -->
 <script>
-tacks.root.food = 'chips';
-tacks.root.drink = 'water';
-var view = tacks(document.body);
+tack.root.food = 'chips';
+tack.root.drink = 'water';
+var view = tack(document.body);
 view.drink = 'beer';
-tacks.root.sweet = 'cake';
+tack.root.sweet = 'cake';
 view.$();
 </script>
 ```
@@ -226,7 +232,7 @@ You may wish to define other utility functions in root:
 {{ percent(0.17) }} <!-- 17.00% -->
 {{ date(d, 'DD MMM' }} <!-- 17 Jan -->
 <script>
-var view = tacks(document.body);
+var view = tack(document.body);
 view.d = new Date(2017, 0, 17);
 tack.root.date = function (date, format) {
 	return moment(format).format(format);
@@ -237,4 +243,4 @@ view.$();
 
 #### `tack.version`
 
-Gets the version of tacks (e.g. `"0.1.0"`).
+Gets the version of tack (e.g. `"0.1.0"`).
