@@ -15,32 +15,32 @@ rollup.rollup({
 			allowedStartRules: ['Text', 'Expression'],
 			optimize: 'speed' // 'speed'
 		}),
-		json(),/*
+		json(),
 		uglify({
 			compress: {
-        		dead_code: true,
-        		unused: true,
-        		negate_iife: true,
-        		reduce_vars: true,
-        		cascade: true,
-        		collapse_vars: true,
-        		//drop_console: true,
-        		passes: 3,
-        		properties: true
-        	},
-        	output: {
-        		beautify: true
-        	}
-		}, harmony.minify)*/
+				dead_code: true,
+				unused: true,
+				negate_iife: true,
+				reduce_vars: true,
+				cascade: true,
+				collapse_vars: true,
+				//drop_console: true,
+				passes: 3,
+				properties: true
+			},
+			output: {
+				beautify: true
+			}
+		}, harmony.minify)
 	]
 }).then(function (bundle) {
 	var browser = bundle.generate({
 		//sourceMap: true,
-		moduleName: 'tack',
+		moduleName: 'zam',
 		format: 'umd',
 		indent: false
 	});
-	fs.writeFileSync('tack.js', browser.code, 'utf8');
+	fs.writeFileSync('zam.js', browser.code, 'utf8');
 }).catch(function (err) {
-	console.error(err.stack);
+	console.error(err.szam);
 });

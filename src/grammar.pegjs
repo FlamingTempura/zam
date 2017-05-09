@@ -1,4 +1,4 @@
-/* Grammar to parse javascript-like expressions for tack */
+/* Grammar to parse javascript-like expressions for zam */
 {
   var buildTree = function (type, head, tail) {
     if (tail.length === 0) {
@@ -117,7 +117,7 @@ MembershipExpression
     )*
 
 NewExpression
-  = "new" _ callee:MemberExpression args:(_ args:Arguments { return args; })? {
+  = "new" __ callee:MemberExpression args:(_ args:Arguments { return args; })? {
       return { type: "NewExpression", callee: callee, arguments: args || [] };
     }
 
@@ -191,8 +191,8 @@ StringLiteral "string"
   / "'" chars:( ( "\\'" { return "'"; } ) / [^''] )* "'"
     { return { type: "Literal", value: chars.join("") }; }
 
-WhiteSpace "whitespace"
-  = "\t"
-  / " "
 _
-  = (WhiteSpace)* 
+  = __?
+
+__
+  = [\t ]+ 

@@ -147,7 +147,7 @@ var evaluate = function (syntax, scopes) {
 
 var directiveFactories = [];
 
-var tack = function (el, parent) {
+var zam = function (el, parent) {
 	el = typeof el === 'string' ? document.querySelector(el) : el[0] || el; // convert from string or jquery
 	parent = parent || el.taComponent;
 	
@@ -155,7 +155,7 @@ var tack = function (el, parent) {
 		elements = [];
 
 	//component.$id = Math.floor(Math.random() * 100);
-	component.$scopes =  [component].concat(parent ? parent.$scopes : [tack.root, global_]); // inherit parental scopes
+	component.$scopes =  [component].concat(parent ? parent.$scopes : [zam.root, global_]); // inherit parental scopes
 	component.$elements = elements;
 
 	var updateElements = function (elements_) {
@@ -233,7 +233,7 @@ var tack = function (el, parent) {
 				blocked = directiveFactories.find(function (factory) {
 					var match;
 					var attr = attrs.find(function (attr_) {
-						match = attr_.name.match(factory.attribute);
+						match = attr_.name.match(factory.match);
 						return match;
 					});
 					if (match) {
@@ -276,28 +276,28 @@ var tack = function (el, parent) {
 	return component;
 };
 
-tack.version = version;
-tack.prefix = 'ta-';
-tack.root = {};
-tack.parse = parse;
-tack.evaluate = evaluate;
-tack.directive = function (factory) {
-	factory.match = new RegExp('^' + tack.prefix + factory.match + '$');
+zam.version = version;
+zam.prefix = 'z-';
+zam.root = {};
+zam.parse = parse;
+zam.evaluate = evaluate;
+zam.directive = function (factory) {
+	factory.match = new RegExp('^' + zam.prefix + factory.attribute + '$');
 	directiveFactories = directiveFactories.concat([factory]).sort(function (a, b) {
 		return (a.order || 100) - (b.order || 100);
 	});
 	return factory;
 };
 
-tack.root.number = function (number, decimals) {
+zam.root.number = function (number, decimals) {
 	return Number(number).toFixed(decimals || 2);
 };
-tack.root.percent = function (number, decimals) {
+zam.root.percent = function (number, decimals) {
 	return Number(number * 100).toFixed(decimals || 2) + '%';
 };
 
 
-var inlineParser = tack.directive({
+var inlineParser = zam.directive({
 	attribute: '(text|html)',
 	block: true,
 	create: function (el) {
@@ -316,7 +316,7 @@ var inlineParser = tack.directive({
 	}
 });
 
-tack.directive({
+zam.directive({
 	attribute: 'show',
 	update: function (el) {
 		var value = !!this.eval();
@@ -327,7 +327,7 @@ tack.directive({
 	}
 });
 
-tack.directive({
+zam.directive({
 	attribute: 'exist',
 	order: 3,
 	block: true, // this prevents wasting effort when element does not exist
@@ -341,11 +341,11 @@ tack.directive({
 		if (value !== this.prevValue) {
 			if (value) {
 				this.clone = el.cloneNode(true);
-				this.childComponent = tack(this.clone, this.component);
+				this.childComponent = zam(this.clone, this.component);
 				this.marker.parentNode.insertBefore(this.clone, this.marker);
 			} else if (this.clone) {
 				this.marker.parentNode.removeChild(this.clone);
-				// TODO: tack.destroy();
+				// TODO: zam.destroy();
 			}
 			this.prevValue = value;
 		}
@@ -355,10 +355,10 @@ tack.directive({
 	}
 });
 
-tack.directive({
-	attribute: 'each-(.+)',
+zam.directive({
+	attribute: '(.+)-in',
 	order: 2,
-	block: true, // do not continue traversing through this dom element (separate tack will be created)
+	block: true, // do not continue traversing through this dom element (separate zam will be created)
 	create: function (el, attr) {
 		this.items = [];
 		this.marker = document.createComment(attr);
@@ -372,7 +372,7 @@ tack.directive({
 		that.items.forEach(function (item) {
 			if (array.indexOf(item.data) === -1) {
 				that.marker.parentNode.removeChild(item.el);
-				// TODO: destroy tack
+				// TODO: destroy zam
 				arrayRemove(that.items, item);
 			}
 		});
@@ -384,18 +384,18 @@ tack.directive({
 			});
 			if (!item) {
 				var clone = el.cloneNode(true);
-				item = { el: clone, tack: tack(clone, that.component), data: data };
-				item.tack[varname] = data;
+				item = { el: clone, zam: zam(clone, that.component), data: data };
+				item.zam[varname] = data;
 				that.items.push(item);
 			}
-			item.tack.$();
+			item.zam.$();
 			that.marker.parentNode.insertBefore(item.el, that.marker);
 		});
 	}
 });
 
 var booleanAttributes = ['selected', 'checked', 'disabled', 'readonly', 'multiple', 'ismap', 'defer', 'noresize'];
-tack.directive({
+zam.directive({
 	attribute: 'attr-(.+)',
 	update: function (el, attr, attribute) {
 		var value = this.eval();
@@ -410,21 +410,21 @@ tack.directive({
 	}
 });
 
-tack.directive({
+zam.directive({
 	attribute: 'class-(.+)',
 	update: function (el, attr, classname) {
 		el.classList.toggle(classname, !!this.eval());
 	}
 });
 
-tack.directive({
+zam.directive({
 	attribute: 'style-(.+)',
 	update: function (el, attr, style) {
 		el.style[style] = this.eval();
 	}
 });
 
-tack.directive({
+zam.directive({
 	attribute: 'model',
 	create: function (el) {
 		var that = this;
@@ -449,9 +449,13 @@ tack.directive({
 	}
 });
 
-tack.directive({
-	attribute: 'on-(.+)',
-	create: function (el, attr, event) {
+zam.directive({
+	attribute: 'on-(.+)|(' +
+		'load|error|focus|blur|click|dblclick|' +
+		'mousedown|mousemove|mouseup|mouseenter|mouseleave|mouseover|mouseout|' +
+		'keyup|keydown|keypress|input|change|submit|reset|scroll|resize|' +
+		'dragstart|dragend|dragenter|dragover|dragleave|drag|drop)',
+	create: function (el, attr, event, stdevent) {
 		var that = this;
 		this.handler = function (e) {
 			that.component.$event = e;
@@ -459,17 +463,17 @@ tack.directive({
 			delete that.component.$event;
 			that.component.$();
 		};
-		el.addEventListener(event, this.handler);
+		el.addEventListener(event || stdevent, this.handler);
 	},
 	destroy: function (el, attr, event) {
-		el.removeEventListener(event, this.handler);
+		el.removeEventListener(event || stdevent, this.handler);
 	}
 });
 
-tack.directive({
+zam.directive({
 	attribute: 'skip',
 	order: 1,
 	block: true
 });
 
-export default tack;
+export default zam;

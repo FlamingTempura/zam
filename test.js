@@ -3,7 +3,7 @@
 
 var jsdom = require('jsdom'),
 	test = require('tap').test,
-	tack = require('./');
+	zam = require('./');
 
 var up = function (html) { // set global document to new dom
 	global.window = (new jsdom.JSDOM(html)).window;
@@ -25,9 +25,9 @@ test('component creation', function (t) {
 	up(`<div id="a">{{ name }}</div>
 		<div id="b">{{ name }}</div>
 		<div id="c">{{ name }}</div>`);
-	var view1 = tack('#a'),
-		view2 = tack($('#b')),
-		view3 = tack([$('#c')]); // jquery-like
+	var view1 = zam('#a'),
+		view2 = zam($('#b')),
+		view3 = zam([$('#c')]); // jquery-like
 	view1.name = view2.name = view3.name = 'Lizzy';
 	view1.$();
 	view2.$();
@@ -42,7 +42,7 @@ test('text interpolation', function (t) {
 	up(`<div id="a">{{ name }}</div>
 		<div id="b">{{ name + 'y' }}</div>
 		<div id="c">{{ something }}</div>`);
-	var view = tack(document.body);
+	var view = zam(document.body);
 	view.name = 'dave';
 	t.equal($('#a').textContent, '');
 	t.equal($('#b').textContent, '');
@@ -62,7 +62,7 @@ test('html interpolation', function (t) {
 	t.plan(10);
 	up(`<div id="a">{{{ name }}}</div>
 		<div id="b">{{{ name + 'y' }}}</div>`);
-	var view = tack(document.body);
+	var view = zam(document.body);
 	view.name = '<strong>dave</strong>';
 	t.equal($('#a').textContent, '');
 	t.equal($('#b').textContent, '');
@@ -81,11 +81,11 @@ test('html interpolation', function (t) {
 	});
 });
 
-test('ta-text', function (t) { // set text content
+test('z-text', function (t) { // set text content
 	t.plan(6);
-	up(`<div>Name: <span ta-text="person.name">delete me</span></div>
-		<strong ta-text="'Welcome ' + person.name"></strong>`);
-	var view = tack(document.body);
+	up(`<div>Name: <span z-text="person.name">delete me</span></div>
+		<strong z-text="'Welcome ' + person.name"></strong>`);
+	var view = zam(document.body);
 	t.equal($('span').textContent, '');
 	t.equal($('strong').textContent, '');
 	view.person = { name: 'Alice' };
@@ -100,11 +100,11 @@ test('ta-text', function (t) { // set text content
 	});
 });
 
-test('ta-html', function (t) { // Set HTML content
+test('z-html', function (t) { // Set HTML content
 	t.plan(10);
-	up(`<div ta-html="boldName">Some HTML</div>
-		Even more HTML: <span ta-html="italicName + 'boo'"></span>`);
-	var view = tack(document.body);
+	up(`<div z-html="boldName">Some HTML</div>
+		Even more HTML: <span z-html="italicName + 'boo'"></span>`);
+	var view = zam(document.body);
 	t.equal($('div').textContent, '');
 	t.equal($('span').textContent, '');
 	view.boldName = '<strong>Alice</strong>';
@@ -125,11 +125,11 @@ test('ta-html', function (t) { // Set HTML content
 	});
 });
 
-test('ta-show', function (t) { // Conditionally display the element. Equivelant to attr-display="thing ? "" : 'none'".
+test('z-show', function (t) { // Conditionally display the element. Equivelant to attr-display="thing ? "" : 'none'".
 	t.plan(8);
-	up(`<div ta-show="showMe">Hello</div>
-		<span ta-show="!showMe">Boo</span>`);
-	var view = tack(document.body);
+	up(`<div z-show="showMe">Hello</div>
+		<span z-show="!showMe">Boo</span>`);
+	var view = zam(document.body);
 	t.equal($('div').style.display, '');
 	t.equal($('span').style.display, '');
 	view.showMe = true;
@@ -148,23 +148,23 @@ test('ta-show', function (t) { // Conditionally display the element. Equivelant 
 	});
 });
 
-test('ta-skip', function (t) { // Skip compilation of this element
+test('z-skip', function (t) { // Skip compilation of this element
 	t.plan(2);
-	up(`<div ta-skip>hello {{ skipme }}</div>
-		<input type="text" ta-skip ta-model="blah">`);
-	var view = tack(document.body);
+	up(`<div z-skip>hello {{ skipme }}</div>
+		<input type="text" z-skip z-model="blah">`);
+	var view = zam(document.body);
 	view.skipme = 'boo';
 	view.blah = 'blah';
 	view.$();
 	t.equal($('div').textContent, 'hello {{ skipme }}');
-	t.equal($('input').getAttribute('ta-model'), 'blah');
+	t.equal($('input').getAttribute('z-model'), 'blah');
 });
 
-test('ta-attr-*', function (t) { // Attribute value
+test('z-attr-*', function (t) { // Attribute value
 	t.plan(4);
-	up(`<button ta-attr-disabled="!showMe"></button>
-		<div ta-attr-lang="showMe ? 'english' : 'french'"></div>`);
-	var view = tack(document.body);
+	up(`<button z-attr-disabled="!showMe"></button>
+		<div z-attr-lang="showMe ? 'english' : 'french'"></div>`);
+	var view = zam(document.body);
 	view.showMe = false;
 	view.$();
 	t.equal($('button').getAttribute('disabled'), 'disabled');
@@ -177,10 +177,10 @@ test('ta-attr-*', function (t) { // Attribute value
 	});
 });
 
-test('ta-class-*', function (t) { // Conditional class name
+test('z-class-*', function (t) { // Conditional class name
 	t.plan(2);
-	up(`<h4 class="thing" ta-class-red="warning"></h4>`);
-	var view = tack(document.body);
+	up(`<h4 class="thing" z-class-red="warning"></h4>`);
+	var view = zam(document.body);
 	view.warning = false;
 	view.$();
 	t.equal($('h4').getAttribute('class'), 'thing');
@@ -192,10 +192,10 @@ test('ta-class-*', function (t) { // Conditional class name
 });
 
 
-test('ta-style-*', function (t) { // Style value
+test('z-style-*', function (t) { // Style value
 	t.plan(2);
-	up(`<h1 ta-style-font-weight="big ? 'bold' : 'normal'"></h1>`);
-	var view = tack(document.body);
+	up(`<h1 z-style-font-weight="big ? 'bold' : 'normal'"></h1>`);
+	var view = zam(document.body);
 	view.big = false;
 	view.$();
 	t.equal($('h1').style.fontWeight, 'normal');
@@ -206,35 +206,41 @@ test('ta-style-*', function (t) { // Style value
 	});
 });
 
-test('ta-model', function (t) { // Two way binding with element value
-	t.plan(8);
-	up(`<input type="text" ta-model="blah">
+test('z-model', function (t) { // Two way binding with element value
+	t.plan(10);
+	up(`<input id="a" type="text" z-model="blah">
+		<input id="b" type="text" z-model="thing.blah">
 		<div>such {{ blah }}</div>`);
-	var view = tack(document.body);
+	var view = zam(document.body);
 	view.blah = 'boo';
+	view.thing = { blah: 'foo' };
 	view.$();
-	t.equal($('input').value, 'boo');
+	t.equal($('#a').value, 'boo');
+	t.equal($('#b').value, 'foo');
 	t.equal($('div').textContent, 'such boo');
-	$('input').value = 'wow';
-	trigger($('input'), 'input');
+	$('#a').value = 'wow';
+	trigger($('#a'), 'input');
 	t.equal(view.blah, 'wow');
 	t.equal($('div').textContent, 'such wow');
+	$('#b').value = 'boo';
+	trigger($('#b'), 'input');
+	t.equal(view.thing.blah, 'boo');
 	later(function () {
 		view.blah = 'amaze';
 		view.$();
-		t.equal($('input').value, 'amaze');
+		t.equal($('#a').value, 'amaze');
 		t.equal($('div').textContent, 'such amaze');
-		trigger($('input'), 'input');
-		t.equal($('input').value, 'amaze');
+		trigger($('#a'), 'input');
+		t.equal($('#a').value, 'amaze');
 		t.equal($('div').textContent, 'such amaze');
 	});
 });
 
-test('ta-on-*', function (t) { // Event handler
+test('z-on-*', function (t) { // Event handler
 	t.plan(5);
-	up(`<input type="button" ta-on-click="doSomething($event)">
-		<div ta-on-mousemove="q = 'hello'">{{ i }}</div>`);
-	var view = tack(document.body);
+	up(`<input type="button" z-on-click="doSomething($event)">
+		<div z-on-mousemove="q = 'hello'">{{ i }}</div>`);
+	var view = zam(document.body);
 	view.i = 0;
 	view.q = 'boo';
 	view.doSomething = function (e) {
@@ -250,11 +256,30 @@ test('ta-on-*', function (t) { // Event handler
 	t.equal($('div').textContent, '1');
 });
 
-
-test('ta-exist', function (t) { // Conditional existance
+test('z-on-* shorthand', function (t) { // Event handler
 	t.plan(5);
-	up(`<div ta-exist="showMe">My name is {{ me.name }}</div>`);
-	var view = tack(document.body);
+	up(`<input type="button" z-click="doSomething($event)">
+		<div z-mousemove="q = 'hello'">{{ i }}</div>`);
+	var view = zam(document.body);
+	view.i = 0;
+	view.q = 'boo';
+	view.doSomething = function (e) {
+		t.equal(typeof e, 'object');
+		view.i = 1;
+	};
+	view.$();
+	t.equal($('div').textContent, '0');
+	trigger($('input'), 'click');
+	trigger($('div'), 'mousemove');
+	t.equal(view.i, 1);
+	t.equal(view.q, 'hello');
+	t.equal($('div').textContent, '1');
+});
+
+test('z-exist', function (t) { // Conditional existance
+	t.plan(5);
+	up(`<div z-exist="showMe">My name is {{ me.name }}</div>`);
+	var view = zam(document.body);
 	view.me = { name: 'moi' };
 	view.showMe = false;
 	view.$();
@@ -275,11 +300,11 @@ test('ta-exist', function (t) { // Conditional existance
 });
 
 
-test('ta-each-*', function (t) { // Iterate through an array
+test('z-*-in', function (t) { // Iterate through an array
 	t.plan(14);
-	up(`<div ta-each-todo="todos">{{ todo.message }}</div>
-		<span ta-each-todo="plob"></span>`);
-	var view = tack(document.body);
+	up(`<div z-todo-in="todos">{{ todo.message }}</div>
+		<span z-todo-in="plob"></span>`);
+	var view = zam(document.body);
 	view.todos = [
 		{ message: 'Buy food' },
 		{ message: 'Fix code' },
@@ -312,19 +337,19 @@ test('root scope', function (t) {
 	t.plan(2);
 	// The root object is provided to all components and can be used to provide methods and data which should be available to all components.
 	up(`{{ food }} {{ drink }} {{ sweet }}. {{ date(d) }}`); // chips, beer, cake
-	var view = tack(document.body);
+	var view = zam(document.body);
 	global.food = 'carrots';
-	tack.root.drink = 'water';
+	zam.root.drink = 'water';
 	view.sweet = 'cake';
 	view.d = new Date(2017, 0, 17);
-	tack.root.date = function (date) {
+	zam.root.date = function (date) {
 		return date.getDate() + ' Jan';
 	};
 	view.$();
 	t.equals(document.body.textContent, 'carrots water cake. 17 Jan');
-	tack.root.food = 'chips';
+	zam.root.food = 'chips';
 	view.drink = 'beer';
-	tack.root.sweet = 'chocolate';
+	zam.root.sweet = 'chocolate';
 	view.date = function (date) {
 		return date.getDate() + ' enero';
 	};
@@ -335,8 +360,8 @@ test('root scope', function (t) {
 test('parent then child inheritence', function (t) {
 	t.plan(4);
 	up(`<div id="container">{{ name }}<div id="thing">{{ food }}</div></div>`);
-	var container = tack($('#container')),
-		thing = tack($('#thing'));
+	var container = zam($('#container')),
+		thing = zam($('#thing'));
 	container.name = 'joe';
 	container.food = 'pop';
 	container.$();
@@ -354,8 +379,8 @@ test('parent then child inheritence', function (t) {
 test('child then parent inheritence', function (t) {
 	t.plan(4);
 	up(`<div id="container">{{ name }}<div id="thing">{{ food }}</div></div>`);
-	var thing = tack($('#thing')),
-		container = tack($('#container'));
+	var thing = zam($('#thing')),
+		container = zam($('#container'));
 	container.name = 'joe';
 	container.food = 'pop';
 	container.$();
@@ -373,21 +398,21 @@ test('child then parent inheritence', function (t) {
 test('utility functions', function (t) {
 	t.plan(1);
 	up(`{{ number(1.553, 1) }} {{ number(1.553) }} {{ percent(0.17) }}`);
-	var view = tack(document.body);
+	var view = zam(document.body);
 	view.$();
 	t.equals(document.body.textContent, '1.6 1.55 17.00%');
 });
 
-test('version', function (t) { // Gets the version of tacks (e.g. "0.1.0").
+test('version', function (t) { // Gets the version of zam (e.g. "0.1.0").
 	t.plan(1);
-	t.ok(tack.version.match(/^[0-9]+\.[0-9]+\.[0-9]+$/));
+	t.ok(zam.version.match(/^[0-9]+\.[0-9]+\.[0-9]+$/));
 });
 
 test('Expressions', function (t) { // The expressions used in a directive mostly include the JavaScript language.
 	var assertions = 1;
 	var assert = function (expr, val) {
 		assertions++;
-		var result = tack.evaluate(tack.parse(expr, { startRule: 'Expression' }), [global]);
+		var result = zam.evaluate(zam.parse(expr, { startRule: 'Expression' }), [global]);
 		if (typeof val === 'object') {
 			t.same(result.value, val);
 		} else {
@@ -395,8 +420,8 @@ test('Expressions', function (t) { // The expressions used in a directive mostly
 		}
 	};
 
-	var result = tack.evaluate(tack.parse('blah', { startRule: 'Text' }), [global]);
-	t.equal(result.value, 'blah');
+	var syntax = zam.parse('blah', { startRule: 'Text' });
+	t.same(syntax, ['blah']);
 
 	// Arithmatic
 	assert('1', 1);

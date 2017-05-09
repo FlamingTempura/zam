@@ -8,35 +8,35 @@
 
 	<div id="thing">
 		{{ Math.E }}
-		<div ta-style-color="color === 'red' ? '#f00' : color === 'green' ? '#0f0' : '#ccc'" ta-text="color"></div>
-		<div ta-class-upper="upper" ta-html="greeting">Greetings</div>
-		<button ta-attr-disabled="disable">OK</button>
-		<button ta-show="disable">OK</button>
-		<h1 ta-exist="color !== 'green'" ta-html="greeting"></h1>
+		<div z-style-color="color === 'red' ? '#f00' : color === 'green' ? '#0f0' : '#ccc'" z-text="color"></div>
+		<div z-class-upper="upper" z-html="greeting">Greetings</div>
+		<button z-attr-disabled="disable">OK</button>
+		<button z-show="disable">OK</button>
+		<h1 z-exist="color !== 'green'" z-html="greeting"></h1>
 		Text: {{ greeting }}<br>
 		HTML: {{{ greeting }}}<br>
 		Enter red or green:
-		<input type="text" ta-model="color">
-		<button ta-on-click="color = 'green'">Set to green</button>
-		<button ta-on-click="memos.push({ title: 'boo' })">New memo</button>
-		<div ta-each-memo="memos">
+		<input type="text" z-model="color">
+		<button z-on-click="color = 'green'">Set to green</button>
+		<button z-on-click="memos.push({ title: 'boo' })">New memo</button>
+		<div z-mem-ino="memos">
 			<h3>Memo: {{ memo.title }}</h3>
 		</div>
 		Beer? {{ beer() }}
-		<div ta-skip>this {{ thing }} will appear as it is (including curly braces) </div>
+		<div z-skip>this {{ thing }} will appear as it is (including curly braces) </div>
 		{{ "my" + "name" }} <!-- shows myname -->
 		{{ Date.now() }} <!-- current unix timestamp -->
 		{{ JSON.stringify({ a: 1, b: 2 }) }} <!-- shows {a:1,b:2} -->
 	</div>
  
  	<div id="login">
-		<!-- <input type="text" placeholder="Enter 123" ta-model="password">
-		<div ta-if="password < 10">not bad</div>
-		<div ta-else-if="password < 100">close!</div>
-		<div ta-else-if="password < 1000">perfect!</div>
-		<div ta-else>terrible...</div> -->
-		<!-- <div ta-show="password !== '123'">Password incorrect</div>
-		<div ta-if="password === '123'">Password correct</div>
+		<!-- <input type="text" placeholder="Enter 123" z-model="password">
+		<div z-if="password < 10">not bad</div>
+		<div z-else-if="password < 100">close!</div>
+		<div z-else-if="password < 1000">perfect!</div>
+		<div z-else>terrible...</div> -->
+		<!-- <div z-show="password !== '123'">Password incorrect</div>
+		<div z-if="password === '123'">Password correct</div>
 		password: {{ password }} {{ password === '123' }} -->
 	</div>
 	<!-- <hr>
@@ -48,14 +48,14 @@
 		{{ date | formatDate }}
 		{{ author.name }}
 		{{ boop.doop.stroop }}
-		<div ta-show="show">Hello</div>
-		<div ta-each-tag="tags">
+		<div z-show="show">Hello</div>
+		<div z-tag-in="tags">
 			{{ tag.name }}
 		</div>
 	</div> -->
 
 	<script src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
-	<script src="../tack.js"></script>
+	<script src="../zam.js"></script>
 	<script src="test.js"></script>
 </body>
 </html>

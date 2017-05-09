@@ -1,7 +1,7 @@
-/* global tack, $ */
+/* global zam, $ */
 'use strict';
 
-/*var post = tack($('#post'));
+/*var post = zam($('#post'));
 
 post.date = new Date();
 post.author = { name: 'Me' };
@@ -18,7 +18,7 @@ setInterval(function () {
 	post.$();
 }, 1000);
 
-var author = tack($('#author'));
+var author = zam($('#author'));
 
 setInterval(function () {
 	author.name = 'John';
@@ -26,18 +26,18 @@ setInterval(function () {
 	author.$();
 }, 1500);
 
-var login = tack($('#login'));
+var login = zam($('#login'));
 login.password = '123';
 login.$();*/
 /*setInterval(function () {
 	login.$();
 }, 100)*/
 
-tack.root.beer = function () {
+zam.root.beer = function () {
 	return 'beer';
 };
 
-var view = tack($('#thing'));
+var view = zam($('#thing'));
 
 view.color = 'red';
 view.memos = [{ title: 'blah' }, { title: 'blahdeblah' }];
@@ -46,7 +46,7 @@ setInterval(function () {
 	//view.color = view.color === 'red' ? 'green' : 'red';
 	view.upper = !view.upper;
 	view.disable = !view.disable;
-	view.greeting = view.upper ? '<strong ta-style-color="\'blue\'">Hello!</strong>' : '<em>Welcome</em>';
+	view.greeting = view.upper ? '<strong z-style-color="\'blue\'">Hello!</strong>' : '<em>Welcome</em>';
 	/*view.memos.push({ title: Math.random() });
 	if (Math.random() > 0.3) {
 		view.memos.shift();
