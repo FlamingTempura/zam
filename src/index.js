@@ -426,6 +426,7 @@ zam.directive({
 
 zam.directive({
 	attribute: 'model',
+	block: true,
 	create: function (el) {
 		var that = this;
 		this.handler = function () {
