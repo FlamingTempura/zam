@@ -29,7 +29,7 @@ rollup.rollup({
 				properties: true
 			},
 			output: {
-				beautify: true
+				//beautify: true
 			}
 		}, harmony.minify)
 	]
