@@ -3194,11 +3194,9 @@ var parser = /*
   };
 })();
 
-var version = "0.1.2";
+var version = "0.1.3";
 
 var parse = parser.parse; // generates the abstract syntax tree
-
-var global_ = typeof global !== 'undefined' ? global : window;
 
 var toArray = function (nonarray) {
 	return Array.prototype.slice.call(nonarray);
@@ -3213,13 +3211,13 @@ var arrayRemove = function (array, element) {
 	if (i > -1) { array.splice(i, 1); }
 };
 
-var findParent = function (elements, node) {
+var findParentElement = function (elements, node) {
 	var parent;
 	elements.find(function (element) {
 		var isParent = element.children.find(function (element_) {
 			return element_.node === node;
 		});
-		parent = isParent ? element : findParent(element.children, node);
+		parent = isParent ? element : findParentElement(element.children, node);
 		return parent;
 	});
 	return parent;
@@ -3232,7 +3230,7 @@ var iterate = function (elementTree, callback) {
 	});
 };
 
-var evaluate = function (syntax, scopes) {
+var evaluate = function (syntax, scope) {
 	var value, set,
 		type = syntax.type,
 		operator = syntax.operator;
@@ -3241,27 +3239,32 @@ var evaluate = function (syntax, scopes) {
 
 	if (type === 'Array') {
 		value = syntax.elements.map(function (item) {
-			return evaluate(item, scopes).value;
+			return evaluate(item, scope).value;
 		});
 	} else
 	
 	if (type === 'Object') {
 		value = {};
-		syntax.properties.forEach(function (prop) { value[prop.key] = evaluate(prop.value, scopes).value; });
+		syntax.properties.forEach(function (prop) { value[prop.key] = evaluate(prop.value, scope).value; });
 	} else
 
 	if (type === 'Identifier') {
-		var scope = scopes.find(function (scope_) { return typeof scope_[syntax.name] !== 'undefined'; }) || scopes[0]; // is data in parent scopes? no? then just use current scope
-		value = scope[syntax.name];
+		var scope_ = scope;
+		while (scope_) {
+			if (typeof scope_[syntax.name] !== 'undefined') { break; }
+			scope_ = scope_.$parent; // is data in parent scopes?
+		}
+		if (!scope_) { scope_ = scope; } // no? then just use current scope
+		value = scope_[syntax.name];
 		set = function (val) {
-			scope[syntax.name] = val;
+			scope_[syntax.name] = val;
 			return val;
 		};
 	} else 
 
 	if (type === 'Member') {
-		var subject = evaluate(syntax.object, scopes).value,
-			prop = evaluate(syntax.property, scopes).value;
+		var subject = evaluate(syntax.object, scope).value,
+			prop = evaluate(syntax.property, scope).value;
 		value = typeof subject !== 'undefined' ? subject[prop] : undefined;
 		set = function (val) {
 			subject[prop] = val;
@@ -3270,13 +3273,13 @@ var evaluate = function (syntax, scopes) {
 	} else
 
 	if (type === 'Conditional') {
-		value = evaluate(syntax.test, scopes).value ?
-			evaluate(syntax.consequent, scopes).value :
-			evaluate(syntax.alternate, scopes).value;
+		value = evaluate(syntax.test, scope).value ?
+			evaluate(syntax.consequent, scope).value :
+			evaluate(syntax.alternate, scope).value;
 	} else 
 
 	if (type === 'Unary' || type === 'Update') {
-		var arg = evaluate(syntax.argument, scopes),
+		var arg = evaluate(syntax.argument, scope),
 			argv = arg.value;
 		value = operator === '!' ? !argv :
 		        operator === '+' ? +argv :
@@ -3291,9 +3294,9 @@ var evaluate = function (syntax, scopes) {
 	} else 
 
 	if (type === 'Binary' || type === 'Logical' || type === 'Assignment') {
-		var left  = evaluate(syntax.left, scopes),
+		var left  = evaluate(syntax.left, scope),
 			leftv = left.value,
-			rightv = evaluate(syntax.right, scopes).value;
+			rightv = evaluate(syntax.right, scope).value;
 		value = operator === '===' ? leftv === rightv :
 		        operator === '!==' ? leftv !== rightv :
 		        operator === '=='  ? leftv ==  rightv :
@@ -3322,10 +3325,10 @@ var evaluate = function (syntax, scopes) {
 	} else 
 
 	if (type === 'Call' || type === 'NewExpression') {
-		var caller = syntax.callee.object ? evaluate(syntax.callee.object, scopes).value : scopes[0],
-			callee = evaluate(syntax.callee, scopes).value,
+		var caller = syntax.callee.object ? evaluate(syntax.callee.object, scope).value : scope,
+			callee = evaluate(syntax.callee, scope).value,
 			args = syntax.arguments.map(function (arg_) {
-				return evaluate(arg_, scopes).value;
+				return evaluate(arg_, scope).value;
 			});
 		value = callee ? 
 			type === 'Call' ? callee.apply(caller, args) : new (callee.bind.apply(callee, args))() :
@@ -3338,18 +3341,13 @@ var evaluate = function (syntax, scopes) {
 	};
 };
 
-var directiveFactories = [];
+var directives = [];
 
 var zam = function (el, parent) {
 	el = typeof el === 'string' ? document.querySelector(el) : el[0] || el; // convert from string or jquery
-	parent = parent || el.taComponent;
 	
 	var component = {},
 		elements = [];
-
-	//component.$id = Math.floor(Math.random() * 100);
-	component.$scopes =  [component].concat(parent ? parent.$scopes : [zam.root, global_]); // inherit parental scopes
-	component.$elements = elements;
 
 	var updateElements = function (elements_) {
 		elements_.forEach(function (element) {
@@ -3360,31 +3358,29 @@ var zam = function (el, parent) {
 		});
 	};
 
+	component.$parent = parent || el.zam || zam.root;
+	component.$elements = elements;
 	component.$ = function () {
-		//console.log('updating', elements.length, 'nodes');
 		updateElements(elements);
 	};
 
-	var bindDirective = function (factory, node, attrMatch, syntax) {
-		
+	var bindDirective = function (directive, node, attrMatch, syntax) {
 		var args = [node].concat(attrMatch);
-
 		var binding = {
 			component: component,
 			syntax: syntax,
 			eval: function (syntax_) { // evaluate expression (expression in attribute value by default)
-				return evaluate(syntax_ || syntax, binding.component.$scopes).value;
+				return evaluate(syntax_ || syntax, binding.component).value;
 			},
 			update: function () {
-				if (factory.update) { factory.update.apply(binding, args); }
+				if (directive.update) { directive.update.apply(binding, args); }
 			},
 			destroy: function () {
-				//arrayRemove(node.taBindings, binding);
-				if (factory.destroy) { factory.destroy.apply(binding, args); }
+				if (directive.destroy) { directive.destroy.apply(binding, args); }
 			}
 		};
 		
-		if (factory.create) { factory.create.apply(binding, args); }
+		if (directive.create) { directive.create.apply(binding, args); }
 
 		return binding;
 	};
@@ -3393,10 +3389,10 @@ var zam = function (el, parent) {
 		// nodeType: 1 = ELEMENT_NODE, 3 = TEXT_NODE
 		if ([1, 3].indexOf(node.nodeType) === -1) { return; }
 
-		if (node.taComponent) {
+		if (node.zam) {
 			//console.log('controlled')
-			if (node.taComponent === component.$scopes[1]) { // is this controlled by the parent?				
-				let parentElement = findParent(component.$scopes[1].$elements, node),
+			if (node.zam === component.$parent) { // is this controlled by the parent?				
+				let parentElement = findParentElement(component.$parent.$elements, node),
 					element = parentElement.children.find(function (element_) {
 						return element_.node === node;
 					});
@@ -3404,16 +3400,16 @@ var zam = function (el, parent) {
 				elementTree.push(element);
 				iterate(element.children, function (child) {
 					child.bindings.forEach(function (binding) {
-						binding.component = component; // set each binding in each element to this component
+						binding.component = component; // transfer each binding in each element to this component
 					});
 				});
 			} else { // otherwise it's a child component
-				node.taComponent.$scopes.splice(1, 0, component); // add this as a parent to the child
+				node.zam.$parent = component; // set child's parent to this component
 			}
 			return; // skip because it's already bound
 		}
 		
-		node.taComponent = component;
+		node.zam = component;
 		var element = { node: node, children: [], bindings: [] };
 		elementTree.push(element);
 		elementTree = element.children;
@@ -3423,17 +3419,24 @@ var zam = function (el, parent) {
 				bindings = [],
 				blocked;
 			if (attrs.length > 0) {
-				directiveFactories.forEach(function (factory) {
-					attrs = attrs.filter(function (attr) {
-						var match = !blocked && attr.name.match(factory.match);
-						if (match) {
-							var syntax = parse(attr.value || 'undefined', { startRule: 'Expression' });
-							node.removeAttribute(attr.name);
-							bindings.push(bindDirective(factory, node, match, syntax));
-							blocked = factory.block; // stop looking for more attributes
-						}
-						return !blocked && !match;
-					});
+				directives.forEach(function (directive) {
+					if (directive.tag) {
+						var match = node.tagName.match(new RegExp('^'+ directive.tag.replace('{prefix}', zam.prefix) + '$'));
+						bindings.push(bindDirective(directive, node, match));
+						blocked = directive.block;
+					} else if (directive.attribute) {
+						attrs = attrs.filter(function (attr) {
+							if (blocked) { return; }
+							var match = attr.name.match(new RegExp('^'+ directive.attribute.replace('{prefix}', zam.prefix) + '$'));
+							if (match) {
+								var syntax = parse(attr.value || 'undefined', { startRule: 'Expression' });
+								node.removeAttribute(attr.name);
+								bindings.push(bindDirective(directive, node, match, syntax));
+								blocked = directive.block; // stop looking for more attributes
+							}
+							return !match;
+						});
+					}
 				});
 			}
 			element.bindings = bindings;
@@ -3452,7 +3455,7 @@ var zam = function (el, parent) {
 					newNode = document.createTextNode(part);
 				} else {
 					newNode = part.html ? document.createElement('span') : document.createTextNode('');
-					newNode.taComponent = component;
+					newNode.zam = component;
 					var binding = bindDirective(inlineParser, newNode, ['', part.html ? 'html' : 'text'], part.expression);
 					elementTree.push({ node: node, children: [], bindings: [binding] });
 				}
@@ -3470,17 +3473,18 @@ var zam = function (el, parent) {
 
 zam.version = version;
 zam.prefix = 'z-';
-zam.root = {};
 zam.parse = parse;
 zam.evaluate = evaluate;
-zam.directive = function (factory) {
-	factory.match = new RegExp('^'+ zam.prefix + '(?:' + factory.attribute + ')$');
-	directiveFactories = directiveFactories.concat([factory]).sort(function (a, b) {
+zam.directive = function (directive) {
+	directives.push(directive);
+	directives = directives.concat([directive]).sort(function (a, b) {
 		return (a.order || 100) - (b.order || 100);
 	});
-	return factory;
+	return directive;
 };
 
+zam.root = {};
+zam.root.$parent = typeof global !== 'undefined' ? global : window;
 zam.root.number = function (number, decimals) {
 	return Number(number).toFixed(decimals || 2);
 };
@@ -3490,7 +3494,7 @@ zam.root.percent = function (number, decimals) {
 
 
 var inlineParser = zam.directive({
-	attribute: '(text|html)',
+	attribute: '{prefix}(text|html)',
 	block: true,
 	create: function (el) {
 		el.innerHTML = '';
@@ -3509,7 +3513,7 @@ var inlineParser = zam.directive({
 });
 
 zam.directive({
-	attribute: 'show',
+	attribute: '{prefix}show',
 	update: function (el) {
 		var value = !!this.eval();
 		if (value !== this.prevValue) {
@@ -3520,7 +3524,7 @@ zam.directive({
 });
 
 zam.directive({
-	attribute: 'exist',
+	attribute: '{prefix}exist',
 	order: 3,
 	block: true, // this prevents wasting effort when element does not exist
 	create: function (el, attr) {
@@ -3548,7 +3552,7 @@ zam.directive({
 });
 
 zam.directive({
-	attribute: '(.+)-in',
+	attribute: '{prefix}(.+)-in',
 	order: 2,
 	block: true, // do not continue traversing through this dom element (separate zam will be created)
 	create: function (el, attr) {
@@ -3604,9 +3608,11 @@ var standardAttributes = [
 	'size', 'sizes', 'slot', 'span', 'spellcheck', 'src', 'srcdoc', 'srclang',
 	'srcset', 'start', 'step', 'style', 'summary', 'tabindex', 'target', 'title',
 	'type', 'usemap', 'value', 'wrap'];
-var booleanAttributes = ['selected', 'checked', 'disabled', 'readonly', 'multiple', 'ismap', 'defer', 'noresize'];
+var booleanAttributes = [
+	'selected', 'checked', 'disabled', 'readonly', 'multiple', 'ismap', 'defer', 
+	'noresize'];
 zam.directive({
-	attribute: 'attr-(.+)|(' + standardAttributes.join('|') + ')',
+	attribute: '{prefix}(?:attr-(.+)|(' + standardAttributes.join('|') + '))',
 	update: function (el, attr, attribute, stdattribute) {
 		attribute = attribute || stdattribute;
 		var value = this.eval();
@@ -3622,7 +3628,7 @@ zam.directive({
 });
 
 zam.directive({
-	attribute: 'class-(.+)',
+	attribute: '{prefix}class-(.+)',
 	update: function (el, attr, classname) {
 		el.classList.toggle(classname, !!this.eval());
 	}
@@ -3647,14 +3653,14 @@ var standardStyles = [
 	'unset', 'vertical-align', 'visibility', 'white-space', 'widows', 'width',
 	'will-change', 'word-.*', 'writing-mode', 'z-index'];
 zam.directive({
-	attribute: 'style-(.+)|(' + standardStyles.join('|') + ')',
+	attribute: '{prefix}(?:style-(.+)|(' + standardStyles.join('|') + '))',
 	update: function (el, attr, style, stdstyle) {
 		el.style[style || stdstyle] = this.eval();
 	}
 });
 
 zam.directive({
-	attribute: 'model',
+	attribute: '{prefix}model',
 	block: true,
 	create: function (el) {
 		var that = this;
@@ -3687,7 +3693,7 @@ var standardEvents = [
 	'dragleave', 'drag', 'drop'];
 
 zam.directive({
-	attribute: 'on-(.+)|(' + standardEvents.join('|') + ')',
+	attribute: '{prefix}(?:on-(.+)|(' + standardEvents.join('|') + '))',
 	create: function (el, attr, event, stdevent) {
 		var that = this;
 		this.handler = function (e) {
@@ -3704,7 +3710,7 @@ zam.directive({
 });
 
 zam.directive({
-	attribute: 'skip',
+	attribute: '{prefix}skip',
 	order: 1,
 	block: true
 });

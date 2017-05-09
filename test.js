@@ -366,40 +366,41 @@ test('root scope', function (t) {
 
 test('parent then child inheritence', function (t) {
 	t.plan(4);
-	up(`<div id="container">{{ name }}<div id="thing">{{ food }}</div></div>`);
+	up(`<div id="container">{{ name }}<div id="thing">{{ food }}{{ $parent.food }}</div></div>`);
 	var container = zam($('#container')),
 		thing = zam($('#thing'));
 	container.name = 'joe';
 	container.food = 'pop';
+	console.log(thing.$parent.food);
 	container.$();
 	thing.$();
-	t.equals($('#container').textContent, 'joepop');
-	t.equals($('#thing').textContent, 'pop');
+	t.equals($('#container').textContent, 'joepoppop');
+	t.equals($('#thing').textContent, 'poppop');
 	thing.name = 'jane';
 	thing.food = 'mess';
 	container.$();
 	thing.$();
-	t.equals($('#container').textContent, 'joemess');
-	t.equals($('#thing').textContent, 'mess');
+	t.equals($('#container').textContent, 'joemesspop');
+	t.equals($('#thing').textContent, 'messpop');
 });
 
 test('child then parent inheritence', function (t) {
 	t.plan(4);
-	up(`<div id="container">{{ name }}<div id="thing">{{ food }}</div></div>`);
+	up(`<div id="container">{{ name }}<div id="thing">{{ food }}{{ $parent.food }}</div></div>`);
 	var thing = zam($('#thing')),
 		container = zam($('#container'));
 	container.name = 'joe';
 	container.food = 'pop';
 	container.$();
 	thing.$();
-	t.equals($('#container').textContent, 'joepop');
-	t.equals($('#thing').textContent, 'pop');
+	t.equals($('#container').textContent, 'joepoppop');
+	t.equals($('#thing').textContent, 'poppop');
 	thing.name = 'jane';
 	thing.food = 'mess';
 	container.$();
 	thing.$();
-	t.equals($('#container').textContent, 'joemess');
-	t.equals($('#thing').textContent, 'mess');
+	t.equals($('#container').textContent, 'joemesspop');
+	t.equals($('#thing').textContent, 'messpop');
 });
 
 test('utility functions', function (t) {
@@ -419,7 +420,7 @@ test('Expressions', function (t) { // The expressions used in a directive mostly
 	var assertions = 1;
 	var assert = function (expr, val) {
 		assertions++;
-		var result = zam.evaluate(zam.parse(expr, { startRule: 'Expression' }), [global]);
+		var result = zam.evaluate(zam.parse(expr, { startRule: 'Expression' }), global);
 		if (typeof val === 'object') {
 			t.same(result.value, val);
 		} else {
@@ -592,3 +593,24 @@ test('Expressions', function (t) { // The expressions used in a directive mostly
 
 	t.plan(assertions);
 });
+
+// TODO zam.prefix
+/*
+
+test('', function () {
+	up(`<todo-item z-todo-in="todos"></todo-item>
+		<div thing></div>`);
+	view.$directive({
+		tag: 'todoitem'
+	});
+	view.$directive({
+		tag: 'thing',
+		template
+		templateUrl
+	});
+	view.$directive({
+		class
+	})
+})*/
+
+// todo: examples
