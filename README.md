@@ -138,6 +138,8 @@ view.$();
 <button z-attr-disabled="showMe"></button>
 <script>
 var view = zam(document.body);
+view.showMe = false;
+view.$();
 </script>	
 ```
 
@@ -147,6 +149,8 @@ var view = zam(document.body);
 <h4 z-class-red="warning"></h4>
 <script>
 var view = zam(document.body);
+view.warning = true;
+view.$();
 </script>
 ```
 
@@ -155,6 +159,8 @@ var view = zam(document.body);
 <h1 z-style-font-weight="big ? 'bold' : 'normal'"></h1>
 <script>
 var view = zam(document.body);
+view.big = true;
+view.$();
 </script>
 ```
 
@@ -164,8 +170,14 @@ Two way binding with element value
 
 ```html
 <input type="text" z-model="blah">
+<input type="button" z-click="thing()">
 <script>
 var view = zam(document.body);
+view.blah = 'foo';
+view.$(); // will set the value of the input to blah
+view.thing = function () {
+	console.log(view.blah); // will print whatever the user entered into the input
+}
 </script>
 ```
 
@@ -266,23 +278,23 @@ You may wish to define other utility functions in root:
 {{ percent(0.17) }} <!-- 17.00% -->
 {{ date(d, 'DD MMM' }} <!-- 17 Jan -->
 <script>
-var view = zam(document.body);
-view.d = new Date(2017, 0, 17);
 zam.root.date = function (date, format) {
 	return moment(format).format(format);
 };
+var view = zam(document.body);
+view.d = new Date(2017, 0, 17);
 view.$();
 </script>
 ```
 
-#### `zam.prefix`
+#### `zam.prefix` - Directive attribute prefix
 
-Set the prefix (be default `k-`).
+Set the prefix (by default `z-`).
 ```html
 <div foo-text="blah"></div>
 <script>zam.prefix = 'foo-';</script>
 ```
 
-#### `zam.version`
+#### `zam.version` - Version
 
 Gets the version of zam (e.g. `"0.1.0"`).
