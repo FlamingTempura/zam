@@ -75,7 +75,7 @@ view.$();
 </script>
 ```
 
-Warning: Be aware that binding HTML can cause [XSS atzam](https://en.wikipedia.org/wiki/Cross-site_scripting). You should not use user-entered content without sanitisation.
+Warning: Be aware that binding HTML can cause [XSS](https://en.wikipedia.org/wiki/Cross-site_scripting). You should not use user-entered content without sanitisation.
 
 
 #### `z-show` - Conditional visibility
