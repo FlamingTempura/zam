@@ -3,25 +3,27 @@
 Lightweight DOM data binding.
 
 ```html
-<div id="todolist">
-	<div z-todo-in="todos" z-show="!todo.done">
-		{{ todo.message }}
-		<button z-click="todo.done = true">Done</button>
+<html>
+	<div id="todolist">
+		<div z-todo-in="todos" z-show="!todo.done">
+			{{ todo.message }}
+			<button z-click="todo.done = true">Done</button>
+		</div>
+		<input type="text" z-model="newTodo.message">
+		<button z-click="create()">Create</button>
 	</div>
-	<input type="text" z-model="newTodo.message">
-	<button z-click="create()">Create</button>
-</div>
-<script src="../zam.js"></script>
-<script>
-	var view = zam('#todolist');
-	view.todos = [];
-	view.newTodo = {};
-	view.$(); // update the view
-	view.create = function () {
-		view.todos.push(view.newTodo);
+	<script src="../zam.js"></script>
+	<script>
+		var view = zam('#todolist');
+		view.todos = [];
 		view.newTodo = {};
-	};
-</script>
+		view.$(); // update the view
+		view.create = function () {
+			view.todos.push(view.newTodo);
+			view.newTodo = {};
+		};
+	</script>
+</html>
 ```
 
 ## Installation
@@ -80,7 +82,7 @@ Warning: Be aware that binding HTML can cause [XSS](https://en.wikipedia.org/wik
 
 #### `z-show` - Conditional visibility
 
-Conditionally display the element. Equivelant to `attr-display="thing ? "" : 'none'"`.
+Conditionally display the element. Equivelant to `z-attr-display="thing ? '' : 'none'"`.
 
 ```html
 <div z-show="showMe">My name is {{ me.name }}</div>
@@ -185,12 +187,12 @@ Two way binding with element value
 <input type="text" z-model="blah">
 <input type="button" z-click="thing()">
 <script>
-var view = zam(document.body);
-view.blah = 'foo';
-view.$(); // will set the value of the input to blah
-view.thing = function () {
-	console.log(view.blah); // will print whatever the user entered into the input
-}
+	var view = zam(document.body);
+	view.blah = 'foo';
+	view.$(); // will set the value of the input to blah
+	view.thing = function () {
+		console.log(view.blah); // will print whatever the user entered into the input
+	}
 </script>
 ```
 
@@ -201,10 +203,10 @@ Execute an expression when an event happens. Event data is available in `$event`
 ```html
 <input type="button" z-on-click="doSomething($event)">
 <script>
-var view = zam(document.body);
-view.doSomething = function (e) {
-	console.log('click!', e.clientX, e.clientY);
-}
+	var view = zam(document.body);
+	view.doSomething = function (e) {
+		console.log('click!', e.clientX, e.clientY);
+	}
 </script>
 ```
 
@@ -220,6 +222,30 @@ _Shorthand:_ `on-` may be omitted for standard DOM events, such as `click`, `mou
 <div z-skip>{{ this will appear as it is (including curly braces) }}</div>
 ```
 
+## Scope
+
+Directives have access to their parent scopes:
+
+```html
+<div class="foo">
+	{{ food }} <!-- chips -->
+	{{ drink }} <!-- tea -->
+	<div class="bar">
+		{{ food }} <!-- chips -->
+		{{ drink }} <!-- coffee -->
+		{{ $parent.drink }} <!-- tea -->
+	</div>
+</div>
+<script>
+	var foo = zam('.foo'),
+		bar = zam('.bar');
+	foo.food = 'chips';
+	foo.drink = 'tea';
+	bar.drink = 'coffee';
+	foo.$();
+	bar.$();
+</script>
+```
 
 ## Custom directives
 
@@ -238,12 +264,14 @@ zam.directive({
 	destroy: function (el) {}
 });
 ```
-* `attribute` - pattern to match the attribute. This can contain regular expressions. Results from capture groups will be provided to create, update, and remove methods.
+* `attribute` - elements with an attribute matching this pattern will use this directive.. This can contain regular expressions. Results from capture groups will be provided to create, update, and remove methods.
+* `tag` - elements with tag names matching this pattern will use this directive.
+* `template` - HTML to insert to replace the element with
 * `block` - whether to stop further directives in this element and it's children.
 * `order` - when to run this directive; lower numbers run first.
 * `create` - function called when directive is created.
-* `update`
-* `destroy`
+* `update` - function called when directive is updating.
+* `destroy` - function called when directive is destorying.
 
 ## Expressions
 
@@ -271,12 +299,12 @@ The root object is provided to all components and can be used to provide methods
 ```html
 {{ food }}, {{ drink }}, {{ sweet }} <!-- chips, beer, cake -->
 <script>
-zam.root.food = 'chips';
-zam.root.drink = 'water';
-var view = zam(document.body);
-view.drink = 'beer';
-zam.root.sweet = 'cake';
-view.$();
+	zam.root.food = 'chips';
+	zam.root.drink = 'water';
+	var view = zam(document.body);
+	view.drink = 'beer';
+	zam.root.sweet = 'cake';
+	view.$();
 </script>
 ```
 
@@ -291,12 +319,12 @@ You may wish to define other utility functions in root:
 {{ percent(0.17) }} <!-- 17.00% -->
 {{ date(d, 'DD MMM' }} <!-- 17 Jan -->
 <script>
-zam.root.date = function (date, format) {
-	return moment(format).format(format);
-};
-var view = zam(document.body);
-view.d = new Date(2017, 0, 17);
-view.$();
+	zam.root.date = function (date, format) {
+		return moment(format).format(format);
+	};
+	var view = zam(document.body);
+	view.d = new Date(2017, 0, 17);
+	view.$();
 </script>
 ```
 

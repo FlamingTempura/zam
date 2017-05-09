@@ -7,8 +7,8 @@
   "module": "src/index.js",
   "name": "zam",
   "scripts": {
-    "test": "tap test.js",
-    "cover": "tap test.js --cov --coverage-report=lcov",
+    "test": "tap test/*.js",
+    "cover": "tap test/*.js --cov --coverage-report=lcov",
     "build": "rollup -c"
   },
   "version": "0.1.3",

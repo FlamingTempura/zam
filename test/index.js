@@ -3,7 +3,7 @@
 
 var jsdom = require('jsdom'),
 	test = require('tap').test,
-	zam = require('./');
+	zam = require('../');
 
 var up = function (html) { // set global document to new dom
 	global.window = (new jsdom.JSDOM(html)).window;
@@ -11,6 +11,9 @@ var up = function (html) { // set global document to new dom
 };
 var $ = function (selector) {
 	return document.querySelector(selector);
+};
+var $$ = function (selector) {
+	return document.querySelectorAll(selector);
 };
 var later = function (cb) { // simulate a change happening later
 	setTimeout(cb, 5);
@@ -318,21 +321,21 @@ test('z-*-in', function (t) { // Iterate through an array
 		{ message: 'Wash clothes' }
 	];
 	view.$();
-	var els = document.querySelectorAll('div');
+	var els = $$('div');
 	t.equal(els.length, 3);
 	view.todos.forEach(function (todo, i) {
 		t.equal(els[i].textContent, todo.message);
 	});
 	view.todos.push({ message: 'Wash car' });
 	view.$();
-	els = document.querySelectorAll('div');
+	els = $$('div');
 	t.equal(els.length, 4);
 	view.todos.forEach(function (todo, i) {
 		t.equal(els[i].textContent, todo.message);
 	});
 	view.todos.splice(2, 1);
 	view.$();
-	els = document.querySelectorAll('div');
+	els = $$('div');
 	t.equal(els.length, 3);
 	view.todos.forEach(function (todo, i) {
 		t.equal(els[i].textContent, todo.message);
@@ -371,7 +374,6 @@ test('parent then child inheritence', function (t) {
 		thing = zam($('#thing'));
 	container.name = 'joe';
 	container.food = 'pop';
-	console.log(thing.$parent.food);
 	container.$();
 	thing.$();
 	t.equals($('#container').textContent, 'joepoppop');
@@ -595,22 +597,74 @@ test('Expressions', function (t) { // The expressions used in a directive mostly
 });
 
 // TODO zam.prefix
-/*
 
-test('', function () {
-	up(`<todo-item z-todo-in="todos"></todo-item>
-		<div thing></div>`);
-	view.$directive({
-		tag: 'todoitem'
+test('custom directives', function (t) {
+	t.plan(2);
+	up(`<div z-todo-in="todos"><todo-item></todo-item></div>
+		<span thing></span>`);
+
+	zam.directive({
+		tag: 'todo-item',
+		create: function () {
+			//console.log('aaa')
+		},
+		update: function (scope, el) {
+			el.textContent = scope.todo.message;
+		}
 	});
-	view.$directive({
-		tag: 'thing',
-		template
-		templateUrl
+
+	zam.directive({
+		attribute: 'thing',
+		update: function (scope, el) {
+			el.textContent = scope.boo;
+		}
 	});
-	view.$directive({
-		class
-	})
-})*/
+
+	var view = zam(document.body);
+	view.todos = [{ message: 'buy cake' }];
+	view.boo = 'foo';
+	view.$();
+	t.equal($('todo-item').textContent, 'buy cake');
+	t.equal($('span').textContent, 'foo');
+});
+
+test('multiple directives', function (t) {
+	t.plan(7);
+	up(`<div z-thing-in="things" z-exist="thing.show">{{ thing.foo }}</div>`);
+	var view = zam(document.body);
+	view.things = [{ show: true, foo: 'blah'}, { show: false, foo: 'hello' }];
+	view.$();
+	t.equal($$('div').length, 1);
+	t.equal($$('div')[0].textContent, 'blah');
+	view.things[1].show = true;
+	view.$();
+	t.equal($$('div').length, 2);
+	t.equal($$('div')[0].textContent, 'blah');
+	t.equal($$('div')[1].textContent, 'hello');
+	view.things[0].show = false;
+	view.$();
+	t.equal($$('div').length, 1);
+	t.equal($$('div')[0].textContent, 'hello');
+});
+
+
+test('template', function (t) {
+	t.plan(3);
+	up(`<section>
+			<memo z-memo-in="memos"></memo>
+		</section>`);
+
+	zam.directive({
+		tag: 'memo',
+		template: '<p>{{ memo.who }}: {{ memo.message }}</p>'
+	});
+	var view = zam(document.body);
+	view.memos = [{ who: 'me', message: 'thing' }, { who: 'joe', message: 'blah' }];
+	view.$();
+	t.equal($$('p').length, 2);
+	t.equal($$('p')[0].textContent, 'me: thing');
+	t.equal($$('p')[1].textContent, 'joe: blah');
+});
+
 
 // todo: examples
