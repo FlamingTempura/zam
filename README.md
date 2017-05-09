@@ -3,9 +3,25 @@
 Lightweight DOM data binding.
 
 ```html
-<div z-each-todo="todos">
-	<div 
+<div id="todolist">
+	<div z-todo-in="todos" z-show="!todo.done">
+		{{ todo.message }}
+		<button z-click="todo.done = true">Done</button>
+	</div>
+	<input type="text" z-model="newTodo.message">
+	<button z-click="create()">Create</button>
 </div>
+<script src="../zam.js"></script>
+<script>
+	var view = zam('#todolist');
+	view.todos = [];
+	view.newTodo = {};
+	view.$(); // update the view
+	view.create = function () {
+		view.todos.push(view.newTodo);
+		view.newTodo = {};
+	};
+</script>
 ```
 
 ## Installation
@@ -64,24 +80,16 @@ Warning: Be aware that binding HTML can cause [XSS atzam](https://en.wikipedia.o
 Conditionally display the element. Equivelant to `attr-display="thing ? "" : 'none'"`.
 
 ```html
-<div id="todolist">
-	<div z-todo-in="todos" z-show="!todo.done">
-		{{ todo.message }}
-		<button z-click="todo.done = true">Done</button>
-	</div>
-	<input type="text" z-model="newTodo.message">
-	<button z-click="create()">Create</button>
-</div>
-<script src="../zam.js"></script>
+<div z-show="showMe">My name is {{ me.name }}</div>
+<button z-on-click="hide()">Hide</button>
 <script>
-	var view = zam('#todolist');
-	view.todos = [];
-	view.newTodo = {};
-	view.$(); // update the view
-	view.create = function () {
-		view.todos.push(view.newTodo);
-		view.newTodo = {};
-	};
+var view = zam(document.body);
+view.me = { name: 'Bob' };
+view.showMe = true;
+view.hide = function () {
+	view.showMe = false;
+};
+view.$();
 </script>
 ```
 
