@@ -146,7 +146,7 @@ view.$();
 </script>
 ```
 
-_Shorthand:_ `attr-` may be omitted for standard CSS properties, such as such as `disabled`, `title`, and `src`:
+_Shorthand:_ `attr-` may be omitted for standard HTML attributes, such as such as `disabled`, `title`, and `src`:
 ```html
 <button z-disabled="showMe"></button>
 ```
