@@ -8,7 +8,8 @@
   "name": "zam",
   "scripts": {
     "test": "tap test.js",
-    "cover": "tap test.js --cov --coverage-report=lcov"
+    "cover": "tap test.js --cov --coverage-report=lcov",
+    "build": "rollup -c"
   },
   "version": "0.1.3",
   "license": "MIT",

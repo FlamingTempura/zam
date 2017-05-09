@@ -1,14 +1,12 @@
 /* jshint node: true */
 'use strict';
 
-var fs = require('fs'),
-	rollup = require('rollup'),
-	pegjs = require('rollup-plugin-pegjs'),
+var pegjs = require('rollup-plugin-pegjs'),
 	uglify = require('rollup-plugin-uglify'),
 	harmony = require('uglify-js-harmony'),
 	json = require('rollup-plugin-json');
 
-rollup.rollup({
+export default {
 	entry: 'src/index.js',
 	plugins: [
 		pegjs({
@@ -16,7 +14,7 @@ rollup.rollup({
 			optimize: 'speed' // 'speed'
 		}),
 		json(),
-		uglify({
+		/*uglify({
 			compress: {
 				dead_code: true,
 				unused: true,
@@ -31,16 +29,11 @@ rollup.rollup({
 			output: {
 				//beautify: true
 			}
-		}, harmony.minify)
-	]
-}).then(function (bundle) {
-	var browser = bundle.generate({
-		//sourceMap: true,
-		moduleName: 'zam',
-		format: 'umd',
-		indent: false
-	});
-	fs.writeFileSync('zam.js', browser.code, 'utf8');
-}).catch(function (err) {
-	console.error(err.szam);
-});
+		}, harmony.minify)*/
+	],
+	//sourceMap: true,
+	moduleName: 'zam',
+	format: 'umd',
+	//indent: false,
+	dest: 'zam.js'
+};
