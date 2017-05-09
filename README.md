@@ -143,7 +143,12 @@ view.$();
 var view = zam(document.body);
 view.showMe = false;
 view.$();
-</script>	
+</script>
+```
+
+__Shorthand:__ For standard DOM attributes, such as `disabled`, `title`, and `src`, the `attr-` may be omitted:
+```html
+<button z-disabled="showMe"></button>
 ```
 
 #### `z-class-*` - Conditional class name
@@ -165,6 +170,11 @@ var view = zam(document.body);
 view.big = true;
 view.$();
 </script>
+```
+
+__Shorthand:__ For standard CSS properties, such as `font-weight`, `top`, and `background`, the `style-` may be omitted:
+```html
+<h1 z-font-weight="big ? 'bold' : 'normal'"></h1>
 ```
 
 #### `z-model` - Bind input
@@ -198,7 +208,7 @@ view.doSomething = function (e) {
 </script>
 ```
 
-For standard DOM events, such as `click`, `mousemove`, and `mousedown`, the `on-` may be omitted:
+__Shorthand:__ For standard DOM events, such as `click`, `mousemove`, and `mousedown`, the `on-` may be omitted:
 ```html
 <input type="button" z-click="doSomething($event)">
 <form type="button" z-submit="doSomething($event)"></form>

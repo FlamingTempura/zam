@@ -281,7 +281,7 @@ zam.root = {};
 zam.parse = parse;
 zam.evaluate = evaluate;
 zam.directive = function (factory) {
-	factory.match = new RegExp('^' + zam.prefix + factory.attribute + '$');
+	factory.match = new RegExp('^'+ zam.prefix + '(?:' + factory.attribute + ')$');
 	directiveFactories = directiveFactories.concat([factory]).sort(function (a, b) {
 		return (a.order || 100) - (b.order || 100);
 	});
@@ -393,10 +393,31 @@ zam.directive({
 	}
 });
 
-var booleanAttributes = ['selected', 'checked', 'disabled', 'readonly', 'multiple', 'ismap', 'defer', 'noresize'];
+var standardAttributes = [
+	'accept', 'accept-charset', 'accesskey', 'action', 'align', 'alt',
+	'async', 'autocomplete', 'autofocus', 'autoplay', 'autosave',
+	'buffered', 'challenge', 'charset', 'checked', 'cite', 'class',
+	'code', 'codebase', 'cols', 'colspan', 'content', 'contenteditable',
+	'contextmenu', 'controls', 'coords', 'crossorigin', 'data', 'data-*',
+	'datetime', 'default', 'defer', 'dir', 'dirname', 'disabled', 'download',
+	'draggable', 'dropzone', 'enctype', 'for', 'form', 'formaction', 'headers',
+	'hidden', 'high', 'href', 'hreflang', 'http-equiv', 'icon', 'id',
+	'integrity', 'ismap' ,'itemprop', 'keytype', 'kind', 'label', 'lang',
+	'language', 'list', 'loop', 'low', 'manifest', 'max', 'maxlength',
+	'minlength', 'media', 'method', 'min', 'multiple', 'muted', 'name',
+	'novalidate', 'open', 'optimum', 'pattern', 'ping', 'placeholder', 'poster',
+	'preload', 'radiogroup', 'readonly', 'rel', 'required', 'reversed', 'rows',
+	'rowspan', 'sandbox', 'scope', 'scoped', 'seamless', 'selected', 'shape',
+	'size', 'sizes', 'slot', 'span', 'spellcheck', 'src', 'srcdoc', 'srclang',
+	'srcset', 'start', 'step', 'style', 'summary', 'tabindex', 'target', 'title',
+	'type', 'usemap', 'value', 'wrap'];
+var booleanAttributes = [
+	'selected', 'checked', 'disabled', 'readonly', 'multiple', 'ismap', 'defer', 
+	'noresize'];
 zam.directive({
-	attribute: 'attr-(.+)',
-	update: function (el, attr, attribute) {
+	attribute: 'attr-(.+)|(' + standardAttributes.join('|') + ')',
+	update: function (el, attr, attribute, stdattribute) {
+		attribute = attribute || stdattribute;
 		var value = this.eval();
 		if (booleanAttributes.indexOf(attribute) > -1) {
 			value = value ? attribute : undefined;
@@ -416,10 +437,28 @@ zam.directive({
 	}
 });
 
+var standardStyles = [
+	'align-.*', 'all', 'animation', 'animation-.*', 'backface-visibility',
+	'background', 'background-.*', 'border', 'border-.*', 'bottom', 'box-.*',
+	'break-.*', 'caption-side', 'caret-color', 'clear', 'clip', 'clip-path',
+	'color', 'column-.*', 'columns', 'content', 'counter-.*', 'cursor',
+	'direction', 'display', 'empty-cells', 'filter', 'flex-.*', 'float', 'font',
+	'font-.*', 'grid', 'grid-.*', 'height', 'hyphens', 'image-.*', 'ime-mode',
+	'inline-size', 'isolation', 'justify-content', 'left', 'letter-spacing',
+	'line-.*', 'list-.*', 'margin', 'margin-.*', 'mask', 'mask-.*', 'max-height',
+	'max-width', 'min-block-size', 'min-height', 'min-inline-size', 'min-width',
+	'mix-blend-mode', 'object-fit', 'object-position', 'offset-.*', 'opacity',
+	'order', 'orphans', 'outline', 'outline-.*', 'overflow', 'overflow-.*',
+	'padding', 'padding-.*', 'page-break-.*', 'perspective', 'perspective-origin',
+	'pointer-events', 'position', 'quotes', 'resize', 'right', 'scroll-.*',
+	'shape-.*', 'tab-size', 'table-layout', 'text-.*', 'top', 'touch-action',
+	'transform', 'transform-.*', 'transition', 'transition-.*', 'unicode-bidi',
+	'unset', 'vertical-align', 'visibility', 'white-space', 'widows', 'width',
+	'will-change', 'word-.*', 'writing-mode', 'z-index'];
 zam.directive({
-	attribute: 'style-(.+)',
-	update: function (el, attr, style) {
-		el.style[style] = this.eval();
+	attribute: 'style-(.+)|(' + standardStyles.join('|') + ')',
+	update: function (el, attr, style, stdstyle) {
+		el.style[style || stdstyle] = this.eval();
 	}
 });
 
@@ -449,12 +488,15 @@ zam.directive({
 	}
 });
 
+var standardEvents = [
+	'load', 'error', 'focus', 'blur', 'click', 'dblclick',   'mousedown',
+	'mousemove', 'mouseup', 'mouseenter', 'mouseleave', 'mouseover', 'mouseout',
+	'keyup', 'keydown', 'keypress', 'input', 'change', 'submit', 'reset',
+	'scroll', 'resize',  'dragstart', 'dragend', 'dragenter', 'dragover',
+	'dragleave', 'drag', 'drop'];
+
 zam.directive({
-	attribute: 'on-(.+)|(' +
-		'load|error|focus|blur|click|dblclick|' +
-		'mousedown|mousemove|mouseup|mouseenter|mouseleave|mouseover|mouseout|' +
-		'keyup|keydown|keypress|input|change|submit|reset|scroll|resize|' +
-		'dragstart|dragend|dragenter|dragover|dragleave|drag|drop)',
+	attribute: 'on-(.+)|(' + standardEvents.join('|') + ')',
 	create: function (el, attr, event, stdevent) {
 		var that = this;
 		this.handler = function (e) {

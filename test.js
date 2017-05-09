@@ -162,19 +162,19 @@ test('z-skip', function (t) { // Skip compilation of this element
 
 test('z-attr-*', function (t) { // Attribute value
 	t.plan(6);
-	up(`<button z-attr-disabled="!showMe" z-attr-blah="!showMe"></button>
+	up(`<input type="text" z-attr-disabled="!showMe" z-value="!showMe"></input>
 		<div z-attr-lang="showMe ? 'english' : 'french'"></div>`);
 	var view = zam(document.body);
 	view.showMe = false;
 	view.$();
-	t.equal($('button').getAttribute('disabled'), 'disabled');
-	t.equal($('button').getAttribute('blah'), 'true');
+	t.equal($('input').getAttribute('disabled'), 'disabled');
+	t.equal($('input').getAttribute('value'), 'true');
 	t.equal($('div').getAttribute('lang'), 'french');
 	later(function () {
 		view.showMe = true;
 		view.$();
-		t.equal($('button').getAttribute('disabled'), null);
-		t.equal($('button').getAttribute('blah'), 'false');
+		t.equal($('input').getAttribute('disabled'), null);
+		t.equal($('input').getAttribute('value'), 'false');
 		t.equal($('div').getAttribute('lang'), 'english');
 	});
 });
@@ -196,7 +196,7 @@ test('z-class-*', function (t) { // Conditional class name
 
 test('z-style-*', function (t) { // Style value
 	t.plan(4);
-	up(`<h1 z-style-font-weight="big ? 'bold' : 'normal'" z-style-text-transform="big ? 'uppercase' : 'lowercase'"></h1>`);
+	up(`<h1 z-style-font-weight="big ? 'bold' : 'normal'" z-text-transform="big ? 'uppercase' : 'lowercase'"></h1>`);
 	var view = zam(document.body);
 	view.big = false;
 	view.$();
@@ -241,8 +241,8 @@ test('z-model', function (t) { // Two way binding with element value
 });
 
 test('z-on-*', function (t) { // Event handler
-	t.plan(5);
-	up(`<input type="button" z-on-click="doSomething($event)">
+	t.plan(6);
+	up(`<input type="button" z-on-click="doSomething($event)" z-click="doSomething2($event)">
 		<div z-on-mousemove="q = 'hello'">{{ i }}</div>`);
 	var view = zam(document.body);
 	view.i = 0;
@@ -250,6 +250,9 @@ test('z-on-*', function (t) { // Event handler
 	view.doSomething = function (e) {
 		t.equal(typeof e, 'object');
 		view.i = 1;
+	};
+	view.doSomething2 = function (e) {
+		t.equal(typeof e, 'object');
 	};
 	view.$();
 	t.equal($('div').textContent, '0');
