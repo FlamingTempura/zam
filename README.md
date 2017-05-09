@@ -27,6 +27,9 @@ Lightweight DOM data binding.
 ## Installation
 
 ### script
+```bash
+bower install zam
+```
 
 ```html
 <script type="text/javascript" src="zam.js"></script>

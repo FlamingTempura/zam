@@ -1,0 +1,17 @@
+{
+  "name": "zam",
+  "description": "Lightweight data binding",
+  "main": "zam.js",
+  "authors": [
+    "FlamingTempura"
+  ],
+  "license": "ISC",
+  "homepage": "https://github.com/FlamingTempura/zam",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ]
+}
