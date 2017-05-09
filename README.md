@@ -146,7 +146,7 @@ view.$();
 </script>
 ```
 
-__Shorthand:__ For standard DOM attributes, such as `disabled`, `title`, and `src`, the `attr-` may be omitted:
+_Shorthand:_ `attr-` may be omitted for standard CSS properties, such as such as `disabled`, `title`, and `src`:
 ```html
 <button z-disabled="showMe"></button>
 ```
@@ -172,7 +172,7 @@ view.$();
 </script>
 ```
 
-__Shorthand:__ For standard CSS properties, such as `font-weight`, `top`, and `background`, the `style-` may be omitted:
+_Shorthand:_ `style-` may be omitted for standard CSS properties, such as such as `font-weight`, `top`, and `background`:
 ```html
 <h1 z-font-weight="big ? 'bold' : 'normal'"></h1>
 ```
@@ -208,10 +208,10 @@ view.doSomething = function (e) {
 </script>
 ```
 
-__Shorthand:__ For standard DOM events, such as `click`, `mousemove`, and `mousedown`, the `on-` may be omitted:
+_Shorthand:_ `on-` may be omitted for standard DOM events, such as `click`, `mousemove`, and `mousedown`:
 ```html
 <input type="button" z-click="doSomething($event)">
-<form type="button" z-submit="doSomething($event)"></form>
+<form z-submit="doSomething($event)"></form>
 ```
 
 #### `z-skip` - Skip compilation of this element
