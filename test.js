@@ -161,29 +161,31 @@ test('z-skip', function (t) { // Skip compilation of this element
 });
 
 test('z-attr-*', function (t) { // Attribute value
-	t.plan(4);
-	up(`<button z-attr-disabled="!showMe"></button>
+	t.plan(6);
+	up(`<button z-attr-disabled="!showMe" z-attr-blah="!showMe"></button>
 		<div z-attr-lang="showMe ? 'english' : 'french'"></div>`);
 	var view = zam(document.body);
 	view.showMe = false;
 	view.$();
 	t.equal($('button').getAttribute('disabled'), 'disabled');
+	t.equal($('button').getAttribute('blah'), 'true');
 	t.equal($('div').getAttribute('lang'), 'french');
 	later(function () {
 		view.showMe = true;
 		view.$();
 		t.equal($('button').getAttribute('disabled'), null);
+		t.equal($('button').getAttribute('blah'), 'false');
 		t.equal($('div').getAttribute('lang'), 'english');
 	});
 });
 
 test('z-class-*', function (t) { // Conditional class name
 	t.plan(2);
-	up(`<h4 class="thing" z-class-red="warning"></h4>`);
+	up(`<h4 class="thing" z-class-red="warning" z-class-blue="!warning"></h4>`);
 	var view = zam(document.body);
 	view.warning = false;
 	view.$();
-	t.equal($('h4').getAttribute('class'), 'thing');
+	t.equal($('h4').getAttribute('class'), 'thing blue');
 	later(function () {
 		view.warning = true;
 		view.$();
@@ -193,16 +195,18 @@ test('z-class-*', function (t) { // Conditional class name
 
 
 test('z-style-*', function (t) { // Style value
-	t.plan(2);
-	up(`<h1 z-style-font-weight="big ? 'bold' : 'normal'"></h1>`);
+	t.plan(4);
+	up(`<h1 z-style-font-weight="big ? 'bold' : 'normal'" z-style-text-transform="big ? 'uppercase' : 'lowercase'"></h1>`);
 	var view = zam(document.body);
 	view.big = false;
 	view.$();
 	t.equal($('h1').style.fontWeight, 'normal');
+	t.equal($('h1').style.textTransform, 'lowercase');
 	later(function () {
 		view.big = true;
 		view.$();
 		t.equal($('h1').style.fontWeight, 'bold');
+		t.equal($('h1').style.textTransform, 'uppercase');
 	});
 });
 

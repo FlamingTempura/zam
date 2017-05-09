@@ -230,18 +230,17 @@ var zam = function (el, parent) {
 				bindings = [],
 				blocked;
 			if (attrs.length > 0) {
-				blocked = directiveFactories.find(function (factory) {
-					var match;
-					var attr = attrs.find(function (attr_) {
-						match = attr_.name.match(factory.match);
-						return match;
+				directiveFactories.forEach(function (factory) {
+					attrs = attrs.filter(function (attr) {
+						var match = !blocked && attr.name.match(factory.match);
+						if (match) {
+							var syntax = parse(attr.value || 'undefined', { startRule: 'Expression' });
+							node.removeAttribute(attr.name);
+							bindings.push(bindDirective(factory, node, match, syntax));
+							blocked = factory.block; // stop looking for more attributes
+						}
+						return !blocked && !match;
 					});
-					if (match) {
-						var syntax = parse(attr.value || 'undefined', { startRule: 'Expression' });
-						node.removeAttribute(attr.name);
-						bindings.push(bindDirective(factory, node, match, syntax));
-						return factory.block; // stop looking for more attributes
-					}
 				});
 			}
 			element.bindings = bindings;
