@@ -1,4 +1,4 @@
-# Zam.js - Lightweight DOM data binding.
+# Zam.js - Lightweight DOM data binding
 
 Zam is a fast and minimal library for rendering HTML views and keeping them up-to-date. Zam focuses only on the view, and does not require any particular data structures to be used. It is designed to be easy to use, yet powerful enough to handle large-scale web pages. [Try it out on JSFiddle](https://jsfiddle.net/1ta0eada/).
 
