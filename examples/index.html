@@ -7,6 +7,10 @@
 <body>
 
 	<div id="thing">
+		<select z-model="q">
+			<option z-value="'a'">A</option>
+			<option value="b">B</option>
+		</select>
 		{{ Math.E }}
 		<div z-style-color="color === 'red' ? '#f00' : color === 'green' ? '#0f0' : '#ccc'" z-text="color"></div>
 		<div z-class-upper="upper" z-html="greeting">Greetings</div>

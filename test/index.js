@@ -596,8 +596,6 @@ test('Expressions', function (t) { // The expressions used in a directive mostly
 	t.plan(assertions);
 });
 
-// TODO zam.prefix
-
 test('custom directives', function (t) {
 	t.plan(2);
 	up(`<div z-todo-in="todos"><todo-item></todo-item></div>
@@ -667,4 +665,12 @@ test('template', function (t) {
 });
 
 
-// todo: examples
+/* 
+todo: 
+- prefix
+- examples folder
+- value of checkboxes, radioboxes, selects
+- $watch and $unwatch
+- $off
+- other events (create, destroy)
+*/

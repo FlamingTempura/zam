@@ -109,14 +109,14 @@ Conditionally display the element. Equivelant to `z-attr-display="thing ? '' : '
 <div z-show="showMe">My name is {{ me.name }}</div>
 <button z-on-click="hide()">Hide</button>
 <script>
-var view = zam(document.body);
-view.me = { name: 'Bob' };
-view.showMe = true;
-view.$();
-view.hide = function () {
-	view.showMe = false;
-};
-view.$();
+	var view = zam(document.body);
+	view.me = { name: 'Bob' };
+	view.showMe = true;
+	view.$();
+	view.hide = function () {
+		view.showMe = false;
+	};
+	view.$();
 </script>
 ```
 
@@ -130,13 +130,13 @@ Note: this is equivelant to ng-if in angular.
 <div z-exist="showMe">My name is {{ me.name }}</div>
 <button z-on-click="hide()">Hide</button>
 <script>
-var view = zam(document.body);
-view.me = { name: 'Bob' };
-view.showMe = true;
-view.hide = function () {
-	view.showMe = false;
-};
-view.$();
+	var view = zam(document.body);
+	view.me = { name: 'Bob' };
+	view.showMe = true;
+	view.hide = function () {
+		view.showMe = false;
+	};
+	view.$();
 </script>
 ```
 
@@ -149,13 +149,13 @@ Note: this is roughly equivelant to ng-repeat.
 ```html
 <div z-todo-in="todos">{{ todo.message }}</div>
 <script>
-var view = zam(document.body);
-view.todos = [
-	{ message: 'Buy food' },
-	{ message: 'Fix code' },
-	{ message: 'Wash clothes' }
-];
-view.$();
+	var view = zam(document.body);
+	view.todos = [
+		{ message: 'Buy food' },
+		{ message: 'Fix code' },
+		{ message: 'Wash clothes' }
+	];
+	view.$();
 </script>
 ```
 
@@ -164,9 +164,9 @@ view.$();
 ```html
 <button z-attr-disabled="showMe"></button>
 <script>
-var view = zam(document.body);
-view.showMe = false;
-view.$();
+	var view = zam(document.body);
+	view.showMe = false;
+	view.$();
 </script>
 ```
 
@@ -180,9 +180,9 @@ _Shorthand:_ `attr-` may be omitted for standard HTML attributes, such as such a
 ```html
 <h4 z-class-red="warning"></h4>
 <script>
-var view = zam(document.body);
-view.warning = true;
-view.$();
+	var view = zam(document.body);
+	view.warning = true;
+	view.$();
 </script>
 ```
 
@@ -190,9 +190,9 @@ view.$();
 ```html
 <h1 z-style-font-weight="big ? 'bold' : 'normal'"></h1>
 <script>
-var view = zam(document.body);
-view.big = true;
-view.$();
+	var view = zam(document.body);
+	view.big = true;
+	view.$();
 </script>
 ```
 
@@ -311,6 +311,21 @@ The expressions used in a directive mostly include the JavaScript language.
 <div z-on-mousemove="b().c = d"></div>
 <div z-on-mousemove="thing++"></div>
 <div z-on-click="thing /= 7"></div>
+```
+
+## Events and watchers
+
+```js
+var view = zam(document.body);
+var oncreate = function () { console.log('hello world!'); }
+view.$on('create', oncreate); // listen for creation event (happens when view is created)
+view.$off('create', oncreate); // remove event handler
+view.$on('update', function () {}); // gets called whenever the view is updated
+view.$on('destroy', function () {}); // view destroyed
+
+var change = function (starsign) { console.log('star sign is', starsign); } 
+view.$watch('starsign', change); // watch view.starsign for changes
+view.$unwatch('starsign', change); / stop watching view.starsign
 ```
 
 ## Other things

@@ -53,3 +53,7 @@ setInterval(function () {
 	}*/
 	view.$();
 }, 1000);
+
+view.$watch('q', function (q) {
+	console.log('watch', q);
+});

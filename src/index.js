@@ -156,7 +156,8 @@ var zam = function (el, data, parent) {
 	
 	var view = Object.assign({}, data),
 		elements = [],
-		events = {};
+		events = {},
+		watchers = [];
 
 	var bindDirective = function (directive, node, attrMatch, syntax) {
 		
@@ -317,6 +318,22 @@ var zam = function (el, data, parent) {
 	view.$emit = function (event) {
 		(events[event] || []).forEach(function (cb) { cb(); });
 	};
+	view.$watch = function (expr, cb) {
+		watchers.push({ expr: expr, syntax: parse(expr, { startRule: 'Expression' }), cb: cb });
+	};
+	view.$unwatch = function (expr, cb) {
+		var watcher = watchers.find(function (w) { return w.expr === expr && w.cb === cb; });
+		if (watcher) { arrayRemove(watchers, watcher); }
+	};
+	view.$on('update', function () {
+		watchers.forEach(function (watcher) {
+			var val = evaluate(watcher.syntax, view).value;
+			if (val !== watcher.val) {
+				watcher.val = val;
+				watcher.cb(val);
+			}
+		});
+	});
 	view.$setParent = function (parent_) {
 		if (view.$parent && view.$parent.$off) {
 			view.$parent.$off('update', view.$);
