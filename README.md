@@ -54,9 +54,10 @@ A view binds data to the page.
 * `data` is the initial data to use within the view (defaults to `{}`). This must be an object.
 
 ```js
-var todoList = zam($('#todolist'), { todos: ['thing', 'another thing'] });
-var memo = zam(document.getElementBy('memo'));
-var navbar = zam('.navbar');
+var todoList = { todos: ['thing', 'another thing'] };
+var view1 = zam('#todolist', todoList);
+var view2 = zam($('.navbar'));
+var view3 = zam(document.getElementBy('memo'));
 ```
 
 #### `view.$()` - Render/update the view
