@@ -325,7 +325,8 @@ view.$on('destroy', function () {}); // view destroyed
 
 var change = function (starsign) { console.log('star sign is', starsign); } 
 view.$watch('starsign', change); // watch view.starsign for changes
-view.$unwatch('starsign', change); / stop watching view.starsign
+view.$unwatch('starsign', change); // stop watching view.starsign
+view.$watch('thing.a + 1', change); // you can watch any expression for changes
 ```
 
 ## Other things
