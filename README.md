@@ -1,20 +1,19 @@
-# Zam.js
+# Zam.js - Lightweight DOM data binding.
 
-Lightweight DOM data binding.
+Zam is a fast and minimal library for rendering HTML views and keeping them up-to-date. Zam focuses only on the view, and does not require any particular data structures to be used. It is designed to be easy to use, yet powerful enough to handle large-scale web pages. [Try it out on JSFiddle](https://jsfiddle.net/1ta0eada/).
 
 ```html
 <html>
-	<div id="todolist">
-		<div z-todo-in="todos" z-show="!todo.done">
-			{{ todo.message }}
-			<button z-click="todo.done = true">Done</button>
-		</div>
-		<input type="text" z-model="newTodo.message">
-		<button z-click="create()">Create</button>
+<body>
+	<div z-todo-in="todos" z-show="!todo.done">
+		{{ todo.message }}
+		<button z-click="todo.done = true">Done</button>
 	</div>
-	<script src="../zam.js"></script>
+	<input type="text" z-model="newTodo.message">
+	<button z-click="create()">Create</button>
+	<script src="zam.js"></script>
 	<script>
-		var view = zam('#todolist');
+		var view = zam(document.body);
 		view.todos = [];
 		view.newTodo = {};
 		view.$(); // update the view
@@ -23,32 +22,36 @@ Lightweight DOM data binding.
 			view.newTodo = {};
 		};
 	</script>
+</body>
 </html>
 ```
 
 ## Installation
 
-### script
+Via CDN:
+```html
+<script src="https://unpkg.com/zam"></script>
+```
+
+Or, install with bower:
 ```bash
 bower install zam
 ```
 
-```html
-<script type="text/javascript" src="zam.js"></script>
-```
-
-### npm
+Or, using npm:
 
 ```bash
 npm install zam
 ```
 
-## Components
+## Views
 
-#### `zam(el[, data])` - Create a component
+A view binds data to the page.
 
-* `el` is the element to create the component from. It can be an HTMLElement, jQuery object, or selector.
-* `data` is the initial data to use within the component (defaults to `{}`).
+#### `zam(el[, data])` - Create a view
+
+* `el` is the element to create the view from. It can be an HTMLElement, jQuery object, or selector.
+* `data` is the initial data to use within the view (defaults to `{}`). This must be an object.
 
 ```js
 var todoList = zam($('#todolist'), { todos: ['thing', 'another thing'] });
@@ -56,7 +59,24 @@ var memo = zam(document.getElementBy('memo'));
 var navbar = zam('.navbar');
 ```
 
+#### `view.$()` - Render/update the view
+
+After any changes to the data, call `view.$()` to update the view:
+
+```html
+<div class="contact">Name: {{ name }}</div>
+<script>
+	var view = zam('.contact');
+	view.name = 'Joe';
+	view.$(); // will update view to Joe
+	view.name = 'Jane';
+	view.$(); // will update view to Jane
+</script>
+```
+
 ## Directives
+
+Directives are specific instructions on how to display the view.
 
 #### `z-text` and `z-html`	- Set text or HTML content
 
@@ -68,12 +88,12 @@ Note: HTML is not parsed for directives.
 <div>Some HTML: {{{ boldName }}}</div>
 <div>Even more HTML: <span z-html="italicName"></span></div>
 <script>
-var view = zam(document.body);
-view.me = { name: 'Bob' };
-view.alice = { name: 'Alice' };
-view.boldName = '<strong>Bob</strong>';
-view.italicName = '<em>Bob</em>';
-view.$();
+	var view = zam(document.body);
+	view.me = { name: 'Bob' };
+	view.alice = { name: 'Alice' };
+	view.boldName = '<strong>Bob</strong>';
+	view.italicName = '<em>Bob</em>';
+	view.$();
 </script>
 ```
 
@@ -294,7 +314,7 @@ The expressions used in a directive mostly include the JavaScript language.
 
 #### `zam.root`
 
-The root object is provided to all components and can be used to provide methods and data which should be available to all components.
+The root object is provided to all views and can be used to provide methods and data which should be available to all views.
 
 ```html
 {{ food }}, {{ drink }}, {{ sweet }} <!-- chips, beer, cake -->

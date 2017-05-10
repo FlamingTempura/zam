@@ -30,14 +30,6 @@ var findParentElement = function (elements, node) {
 	});
 	return parent;
 };
-var findElement = function (elements, node) {
-	var element;
-	elements.find(function (element_) {
-		element = element_.node === node ? element_ : findElement(element_.children, node);
-		return element;
-	});
-	return element;
-};
 
 var iterate = function (elementTree, callback) {
 	elementTree.forEach(function (element) {
@@ -159,25 +151,25 @@ var evaluate = function (syntax, scope) {
 
 var directives = [];
 
-var zam = function (el, parent) {
+var zam = function (el, data, parent) {
 	el = typeof el === 'string' ? document.querySelector(el) : el[0] || el; // convert from string or jquery
 	
-	var component = {},
+	var view = Object.assign({}, data),
 		elements = [],
 		events = {};
 
 	var bindDirective = function (directive, node, attrMatch, syntax) {
 		
 		var args = function () {
-			return [binding.component, binding.node].concat(attrMatch);
+			return [binding.view, binding.node].concat(attrMatch);
 		};
 
 		var binding = {
-			component: component, // this can be changed to move binding to another component
+			view: view, // this can be changed to move binding to another view
 			node: node, // this can be changed
 			syntax: syntax,
 			eval: function (syntax_) { // evaluate expression (expression in attribute value by default)
-				return evaluate(syntax_ || syntax, binding.component).value;
+				return evaluate(syntax_ || syntax, binding.view).value;
 			},
 			create: function () {
 				if (directive.create) { directive.create.apply(binding, args()); }
@@ -209,25 +201,25 @@ var zam = function (el, parent) {
 		if ([1, 3].indexOf(node.nodeType) === -1) { return; }
 
 		if (node.zam) {
-			if (node.zam === component.$parent) { // is this controlled by the parent?				
-				let parentElement = findParentElement(component.$parent.$elements, node),
+			if (node.zam === view.$parent) { // is this controlled by the parent?				
+				let parentElement = findParentElement(view.$parent.$elements, node),
 					element = parentElement.children.find(function (element_) {
 						return element_.node === node;
 					});
-				arrayRemove(parentElement.children, element); // move the element and its children to this component
+				arrayRemove(parentElement.children, element); // move the element and its children to this view
 				elementTree.push(element);
 				iterate(element.children, function (child) {
 					child.bindings.forEach(function (binding) {
-						binding.component = component; // transfer each binding in each element to this component
+						binding.view = view; // transfer each binding in each element to this view
 					});
 				});
-			} else { // otherwise it's a child component
-				node.zam.$setParent(component); // set child's parent to this component
+			} else { // otherwise it's a child view
+				node.zam.$setParent(view); // set child's parent to this view
 			}
 			return; // skip because it's already bound
 		}
 		
-		node.zam = component;
+		node.zam = view;
 		var element = { node: node, children: [], bindings: [] };
 		elementTree.push(element);
 		elementTree = element.children;
@@ -281,7 +273,7 @@ var zam = function (el, parent) {
 					newNode = document.createTextNode(part);
 				} else {
 					newNode = part.html ? document.createElement('span') : document.createTextNode('');
-					newNode.zam = component;
+					newNode.zam = view;
 					var binding = bindDirective(inlineParser, newNode, ['', part.html ? 'html' : 'text'], part.expression);
 					elementTree.push({ node: node, children: [], bindings: [binding] });
 				}
@@ -310,36 +302,36 @@ var zam = function (el, parent) {
 		});
 	};
 
-	component.$elements = elements;
-	component.$ = function () {
+	view.$elements = elements;
+	view.$ = function () {
 		updateBindings(elements);
-		component.$trigger('update');
+		view.$emit('update');
 	};
-	component.$on = function (event, cb) {
+	view.$on = function (event, cb) {
 		if (!events[event]) { events[event] = []; }
 		events[event].push(cb);
 	};
-	component.$off = function (event, cb) {
+	view.$off = function (event, cb) {
 		arrayRemove(events[event], cb);
 	};
-	component.$trigger = function (event) {
+	view.$emit = function (event) {
 		(events[event] || []).forEach(function (cb) { cb(); });
 	};
-	component.$setParent = function (parent_) {
-		if (component.$parent && component.$parent.$off) {
-			component.$parent.$off('update', component.$);
+	view.$setParent = function (parent_) {
+		if (view.$parent && view.$parent.$off) {
+			view.$parent.$off('update', view.$);
 		}
-		component.$parent = parent_;
-		if (component.$parent.$on) {
-			component.$parent.$on('update', component.$);
+		view.$parent = parent_;
+		if (view.$parent.$on) {
+			view.$parent.$on('update', view.$);
 		}
 	};
-	component.$setParent(parent || el.zam || zam.root);
+	view.$setParent(parent || el.zam || zam.root);
 
 	initBindings(el, elements); // traverse the dom
 	createBindings(elements);
 
-	return component;
+	return view;
 };
 
 zam.version = version;
@@ -409,7 +401,7 @@ zam.directive({
 		if (value !== this.prevValue) {
 			if (value) {
 				this.clone = el.cloneNode(true);
-				this.childComponent = zam(this.clone, scope);
+				this.childView = zam(this.clone, undefined, scope);
 				this.marker.parentNode.insertBefore(this.clone, this.marker);
 			} else if (this.clone) {
 				this.marker.parentNode.removeChild(this.clone);
@@ -418,7 +410,7 @@ zam.directive({
 			this.prevValue = value;
 		}
 		if (this.clone) {
-			this.childComponent.$();
+			this.childView.$();
 		}
 	}
 });
@@ -452,7 +444,7 @@ zam.directive({
 			if (!item) {
 				var clone = el.cloneNode(true);
 				that.marker.parentNode.insertBefore(clone, that.marker);
-				item = { el: clone, zam: zam(clone, scope), data: data };
+				item = { el: clone, zam: zam(clone, undefined, scope), data: data };
 				item.zam[varname] = data;
 				that.items.push(item);
 			}
