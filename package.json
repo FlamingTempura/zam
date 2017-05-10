@@ -11,7 +11,7 @@
     "cover": "tap test/*.js --cov --coverage-report=lcov",
     "build": "rollup -c"
   },
-  "version": "0.1.3",
+  "version": "0.1.4",
   "license": "MIT",
   "devDependencies": {
     "jsdom": "^10.1.0",

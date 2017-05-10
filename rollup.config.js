@@ -14,7 +14,7 @@ export default {
 			optimize: 'speed' // 'speed'
 		}),
 		json(),
-		/*uglify({
+		uglify({
 			compress: {
 				dead_code: true,
 				unused: true,
@@ -29,7 +29,7 @@ export default {
 			output: {
 				//beautify: true
 			}
-		}, harmony.minify)*/
+		}, harmony.minify)
 	],
 	//sourceMap: true,
 	moduleName: 'zam',
