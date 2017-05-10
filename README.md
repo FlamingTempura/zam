@@ -111,6 +111,7 @@ Conditionally display the element. Equivelant to `z-attr-display="thing ? '' : '
 var view = zam(document.body);
 view.me = { name: 'Bob' };
 view.showMe = true;
+view.$();
 view.hide = function () {
 	view.showMe = false;
 };
@@ -201,10 +202,11 @@ _Shorthand:_ `style-` may be omitted for standard CSS properties, such as such a
 
 #### `z-model` - Bind input
 
-Two way binding with element value
+Two way binding with input element value. The input value will be set to the value of z-model. When the input value is changed by the user, the data will also change, and the view will be kept up to date.
 
 ```html
 <input type="text" z-model="blah">
+{{ blah }} <!-- this will always display the value entered in the text input -->
 <input type="button" z-click="thing()">
 <script>
 	var view = zam(document.body);
@@ -218,7 +220,7 @@ Two way binding with element value
 
 #### `z-on-*` - Event handler
 
-Execute an expression when an event happens. Event data is available in `$event`.
+Execute an expression when an event happens. Event data is available in `$event`. View will automatically update after the event (so `view.$()` is not necessary in an event handler).
 
 ```html
 <input type="button" z-on-click="doSomething($event)">
@@ -244,7 +246,7 @@ _Shorthand:_ `on-` may be omitted for standard DOM events, such as `click`, `mou
 
 ## Scope
 
-Directives have access to their parent scopes:
+Directives have access to their parent scopes through `$parent`:
 
 ```html
 <div class="foo">
@@ -329,8 +331,8 @@ The root object is provided to all views and can be used to provide methods and 
 ```
 
 A couple of utility functions are included in root:
-* number(number, decimals) (decimals defaults to 2)
-* percent(number, decimals) (decimals defaults to 2)
+* `number(number, decimals)` (decimals defaults to 2)
+* `percent(number, decimals)` (decimals defaults to 2)
 
 You may wish to define other utility functions in root:
 
