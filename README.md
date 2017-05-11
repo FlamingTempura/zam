@@ -57,7 +57,7 @@ A view binds data to the page.
 var todoList = { todos: ['thing', 'another thing'] };
 var view1 = zam('#todolist', todoList);
 var view2 = zam($('.navbar'));
-var view3 = zam(document.getElementBy('memo'));
+var view3 = zam(document.getElementById('memo'));
 ```
 
 #### `view.$()` - Render/update the view

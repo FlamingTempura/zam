@@ -2,39 +2,14 @@
 
 import parser from './grammar.pegjs';
 import { version } from '../package.json';
+import { toArray, stringify, arrayRemove } from './utils';
 
 var parse = parser.parse; // generates the abstract syntax tree
 
-var toArray = function (nonarray) {
-	return Array.prototype.slice.call(nonarray);
-};
-
-var stringify = function (value) {
-	return String(value !== null && typeof value !== 'undefined' ? value : '');
-};
-
-var arrayRemove = function (array, element) {
-	if (!array) { return; }
-	var i = array.indexOf(element);
-	if (i > -1) { array.splice(i, 1); }
-};
-
-var findParentElement = function (elements, node) {
-	var parent;
-	elements.find(function (element) {
-		var isParent = element.children.find(function (element_) {
-			return element_.node === node;
-		});
-		parent = isParent ? element : findParentElement(element.children, node);
-		return parent;
-	});
-	return parent;
-};
-
-var iterate = function (elementTree, callback) {
-	elementTree.forEach(function (element) {
+var traverseVDOM = function (vDOM, callback) {
+	vDOM.forEach(function (element) {
 		callback(element);
-		iterate(element.children, callback);
+		traverseVDOM(element.children, callback);
 	});
 };
 
@@ -151,162 +126,177 @@ var evaluate = function (syntax, scope) {
 
 var directives = [];
 
+var bindDirective = function (directive, view, node, attrMatch, syntax) {
+		
+	var args = function () {
+		return [binding.view, binding.node].concat(attrMatch);
+	};
+
+	var binding = {
+		view: view, // this can be changed to move binding to another view
+		node: node, // this can be changed
+		syntax: syntax,
+		eval: function (syntax_) { // evaluate expression (expression in attribute value by default)
+			return evaluate(syntax_ || syntax, binding.view).value;
+		},
+		create: function () {
+			if (directive.create) { directive.create.apply(binding, args()); }
+		},
+		update: function () {
+			if (directive.update) { directive.update.apply(binding, args()); }
+		},
+		destroy: function () {
+			if (directive.destroy) { directive.destroy.apply(binding, args()); }
+		}
+	};
+
+	if (directive.template) {
+		var node_ = document.createElement('span');
+		node_.innerHTML = directive.template;
+		node_ = node_.childNodes[0];
+		toArray(node.attributes).forEach(function (attr) {
+			node_.setAttribute(attr.name, attr.value);
+		});
+		node.parentNode.replaceChild(node_, node);
+		binding.node = node_;
+	}
+
+	return binding;
+};
+
+var initBindings = function (view, node, vDOM, parent) {
+	// nodeType: 1 = ELEMENT_NODE, 3 = TEXT_NODE
+	if ([1, 3].indexOf(node.nodeType) === -1) { return; }
+
+	if (node.vElement) { // this node already belongs to a view!
+		if (!parent || node.vElement.view === view.$parent) { // does this node belong to a parent view, or is it the root?
+			vDOM.push(node.vElement); // move the element and its children to this view
+			traverseVDOM(node.vElement.children, function (child) {
+				child.bindings.forEach(function (binding) {
+					binding.view = view; // transfer all bindings to this view
+				});
+			});
+			if (node.vElement.parent) {
+				arrayRemove(node.vElement.parent.children, node.vElement); // remove from parent
+			} else { // if this node the root of a view then destroy the view
+				//node.vElement.view.$destroy();
+			}
+		} else { // otherwise this node belongs to a child view
+			node.vElement.view.$setParent(view); // set child's parent to this view
+		}
+		return; // skip because it's already bound
+	}
+	
+	var vElement = { view: view, parent: parent, node: node, children: [], bindings: [], removedAttrs: [] };
+	node.vElement = vElement;
+	vDOM.push(vElement);
+
+	if (node.nodeType === 1) {
+		let attrs = toArray(node.attributes),
+			blocked;
+		vElement.bindings = [];
+		directives.forEach(function (directive) {
+			if (directive.tag) {
+				let match = node.tagName.match(new RegExp('^'+ directive.tag.replace('{prefix}', zam.prefix) + '$', 'i'));
+				if (match) {
+					var binding = bindDirective(directive, view, node, match);
+					vElement.bindings.push(binding);
+					blocked = directive.block || directive.template;
+					if (directive.template) {
+						initBindings(view, binding.node, vElement.children);
+					}
+				}
+			} else if (directive.attribute) {
+				attrs = attrs.filter(function (attr) {
+					if (blocked) { return; }
+					let match = attr.name.match(new RegExp('^'+ directive.attribute.replace('{prefix}', zam.prefix) + '$', 'i'));
+					if (match) {
+						//console.log('****MMMMATTTCH', attr.name);
+						var syntax = parse(attr.value || 'undefined', { startRule: 'Expression' });
+						vElement.removedAttrs.push({ name: attr.name, value: attr.value });
+						node.removeAttribute(attr.name);
+						var binding_ = bindDirective(directive, view, node, match, syntax);
+						vElement.bindings.push(binding_);
+						blocked = directive.block || directive.template; // stop looking for more attributes
+						if (directive.template) {
+							initBindings(view, binding_.node, vElement.children);
+						}
+					}
+					return !match;
+				});
+			}
+		});
+		
+		if (!blocked) {
+			toArray(node.childNodes).forEach(function (childNode) {
+				initBindings(view, childNode, vElement.children, vElement);
+			});
+		}
+	} else
+
+	if (node.nodeType === 3 && node.nodeValue.indexOf('{{') > -1) {
+		var text = node.nodeValue;
+		parse(text, { startRule: 'Text' }).forEach(function (part) {
+			var newNode;
+			if (typeof part === 'string') {
+				newNode = document.createTextNode(part);
+			} else {
+				newNode = part.html ? document.createElement('span') : document.createTextNode('');
+				var binding = bindDirective(inlineParser, view, newNode, ['', part.html ? 'html' : 'text'], part.expression),
+					vElement__ = Object.assign({}, vElement, { bindings: [binding] });
+				vDOM.push(vElement__);
+				newNode.vElement = vElement__;
+			}
+			node.parentNode.insertBefore(newNode, node);
+		});
+		node.parentNode.removeChild(node);
+	}
+};
+
+var createBindings = function (vDOM) {
+	traverseVDOM(vDOM, function (element) {
+		element.bindings.forEach(function (binding) {
+			binding.create();
+		});
+	});
+};
+
+var updateBindings = function (vDOM) {
+	traverseVDOM(vDOM, function (element) {
+		element.bindings.forEach(function (binding) {
+			binding.update();
+		});
+	});
+};
+
+var destroyBindings = function (vDOM) {
+	traverseVDOM(vDOM, function (element) {
+		element.bindings.forEach(function (binding) {
+			binding.destroy();
+		});
+		delete element.node.vElement;
+		element.removedAttrs.forEach(function (attr) {
+			element.node.setAttribute(attr.name, attr.value); // restore attributes
+		});
+	});
+};
+
 var zam = function (el, data, parent) {
 	el = typeof el === 'string' ? document.querySelector(el) : el[0] || el; // convert from string or jquery
-	
+	//console.log('NEW ZAM');
 	var view = Object.assign({}, data),
-		elements = [],
+		vDOM = [], // virtual DOM
 		events = {},
 		watchers = [];
 
-	var bindDirective = function (directive, node, attrMatch, syntax) {
-		
-		var args = function () {
-			return [binding.view, binding.node].concat(attrMatch);
-		};
-
-		var binding = {
-			view: view, // this can be changed to move binding to another view
-			node: node, // this can be changed
-			syntax: syntax,
-			eval: function (syntax_) { // evaluate expression (expression in attribute value by default)
-				return evaluate(syntax_ || syntax, binding.view).value;
-			},
-			create: function () {
-				if (directive.create) { directive.create.apply(binding, args()); }
-			},
-			update: function () {
-				if (directive.update) { directive.update.apply(binding, args()); }
-			},
-			destroy: function () {
-				if (directive.destroy) { directive.destroy.apply(binding, args()); }
-			}
-		};
-
-		if (directive.template) {
-			var node_ = document.createElement('span');
-			node_.innerHTML = directive.template;
-			node_ = node_.childNodes[0];
-			toArray(node.attributes).forEach(function (attr) {
-				node_.setAttribute(attr.name, attr.value);
-			});
-			node.parentNode.replaceChild(node_, node);
-			binding.node = node_;
-		}
-
-		return binding;
-	};
-
-	var initBindings = function (node, elementTree) {
-		// nodeType: 1 = ELEMENT_NODE, 3 = TEXT_NODE
-		if ([1, 3].indexOf(node.nodeType) === -1) { return; }
-
-		if (node.zam) {
-			if (node.zam === view.$parent) { // is this controlled by the parent?				
-				let parentElement = findParentElement(view.$parent.$elements, node),
-					element = parentElement.children.find(function (element_) {
-						return element_.node === node;
-					});
-				arrayRemove(parentElement.children, element); // move the element and its children to this view
-				elementTree.push(element);
-				iterate(element.children, function (child) {
-					child.bindings.forEach(function (binding) {
-						binding.view = view; // transfer each binding in each element to this view
-					});
-				});
-			} else { // otherwise it's a child view
-				node.zam.$setParent(view); // set child's parent to this view
-			}
-			return; // skip because it's already bound
-		}
-		
-		node.zam = view;
-		var element = { node: node, children: [], bindings: [] };
-		elementTree.push(element);
-		elementTree = element.children;
-
-		if (node.nodeType === 1) {
-			let attrs = toArray(node.attributes),
-				blocked;
-			element.bindings = [];
-			directives.forEach(function (directive) {
-				if (directive.tag) {
-					let match = node.tagName.match(new RegExp('^'+ directive.tag.replace('{prefix}', zam.prefix) + '$', 'i'));
-					if (match) {
-						var binding = bindDirective(directive, node, match);
-						element.bindings.push(binding);
-						blocked = directive.block || directive.template;
-						if (directive.template) {
-							initBindings(binding.node, elementTree);
-						}
-					}
-				} else if (directive.attribute) {
-					attrs = attrs.filter(function (attr) {
-						if (blocked) { return; }
-						let match = attr.name.match(new RegExp('^'+ directive.attribute.replace('{prefix}', zam.prefix) + '$', 'i'));
-						if (match) {
-							var syntax = parse(attr.value || 'undefined', { startRule: 'Expression' });
-							node.removeAttribute(attr.name);
-							var binding_ = bindDirective(directive, node, match, syntax);
-							element.bindings.push(binding_);
-							blocked = directive.block || directive.template; // stop looking for more attributes
-							if (directive.template) {
-								initBindings(binding_.node, elementTree);
-							}
-						}
-						return !match;
-					});
-				}
-			});
-			
-			if (!blocked) {
-				toArray(node.childNodes).forEach(function (childNode) {
-					initBindings(childNode, elementTree);
-				});
-			}
-		} else
-
-		if (node.nodeType === 3 && node.nodeValue.indexOf('{{') > -1) {
-			var text = node.nodeValue;
-			parse(text, { startRule: 'Text' }).forEach(function (part) {
-				var newNode;
-				if (typeof part === 'string') {
-					newNode = document.createTextNode(part);
-				} else {
-					newNode = part.html ? document.createElement('span') : document.createTextNode('');
-					newNode.zam = view;
-					var binding = bindDirective(inlineParser, newNode, ['', part.html ? 'html' : 'text'], part.expression);
-					elementTree.push({ node: node, children: [], bindings: [binding] });
-				}
-				node.parentNode.insertBefore(newNode, node);
-			});
-			node.parentNode.removeChild(node);
-		}
-
-	};
-
-	var createBindings = function (elements_) {
-		elements_.forEach(function (element) {
-			element.bindings.forEach(function (binding) {
-				binding.create();
-			});
-			createBindings(element.children);
-		});
-	};
-
-	var updateBindings = function (elements_) {
-		elements_.forEach(function (element) {
-			element.bindings.forEach(function (binding) {
-				binding.update();
-			});
-			updateBindings(element.children);
-		});
-	};
-
-	view.$elements = elements;
+	view.$vDOM = vDOM;
 	view.$ = function () {
-		updateBindings(elements);
+		updateBindings(vDOM);
 		view.$emit('update');
+	};
+	view.$destroy = function () {
+		destroyBindings(vDOM);
+		view.$emit('destroy');
 	};
 	view.$on = function (event, cb) {
 		if (!events[event]) { events[event] = []; }
@@ -334,19 +324,16 @@ var zam = function (el, data, parent) {
 			}
 		});
 	});
-	view.$setParent = function (parent_) {
-		if (view.$parent && view.$parent.$off) {
-			view.$parent.$off('update', view.$);
-		}
-		view.$parent = parent_;
-		if (view.$parent.$on) {
-			view.$parent.$on('update', view.$);
-		}
+	view.$setParent = function (newParent) {
+		var oldParent = view.$parent;
+		view.$parent = newParent;
+		if (oldParent && oldParent.$off) { oldParent.$off('update', view.$); }
+		if (newParent.$on)               { newParent.$on ('update', view.$); }
 	};
-	view.$setParent(parent || el.zam || zam.root);
+	view.$setParent(parent || (el.vElement && el.vElement.view) || zam.root);
 
-	initBindings(el, elements); // traverse the dom
-	createBindings(elements);
+	initBindings(view, el, vDOM); // traverse the dom
+	createBindings(vDOM);
 
 	return view;
 };
@@ -378,7 +365,6 @@ var inlineParser = zam.directive({
 	attribute: '{prefix}(text|html)',
 	block: true,
 	create: function (scope, el) {
-		//console.log('text', scope, el);
 		el.innerHTML = '';
 	},
 	update: function (scope, el, attr, type) {
@@ -439,11 +425,15 @@ zam.directive({
 	create: function (scope, el, attr) {
 		this.items = [];
 		this.marker = document.createComment(attr);
+		//console.log('LLLLLL', el.attributes[0])
+		//this.itemView = zam(el, undefined, scope);
 		el.parentNode.replaceChild(this.marker, el);
 	},	
 	update: function (scope, el, attr, varname) {
+		//console.log('**************update***********');
 		var that = this,
 			array = this.eval() || [];
+		var fragment = document.createDocumentFragment();
 		// remove old nodes
 		that.items.forEach(function (item) {
 			if (array.indexOf(item.data) === -1) {
@@ -452,7 +442,7 @@ zam.directive({
 				arrayRemove(that.items, item);
 			}
 		});
-		
+		//console.log('**************gsgfate***********');
 		// create new nodes / update existing nodes
 		array.forEach(function (data) {
 			var item = that.items.find(function (item_) {
@@ -460,13 +450,22 @@ zam.directive({
 			});
 			if (!item) {
 				var clone = el.cloneNode(true);
-				that.marker.parentNode.insertBefore(clone, that.marker);
-				item = { el: clone, zam: zam(clone, undefined, scope), data: data };
-				item.zam[varname] = data;
-				that.items.push(item);
+				//console.log('***********************', clone.vElement);
+				that.items.push({ el: clone, data: data });
+				fragment.appendChild(clone);
+				//that.marker.parentNode.insertBefore(clone, that.marker);
 			}
-			item.zam.$();
 			// todo: sorting (this mean that markers of child directives (e.g. exist) fall out of place)
+		});
+		that.marker.parentNode.insertBefore(fragment, this.marker);
+
+		// create any views (this needs to happen after dom insertion)
+		that.items.forEach(function (item) {
+			if (!item.view) {
+				item.view = zam(item.el, undefined, scope);
+				item.view[varname] = item.data;
+			}
+			item.view.$();
 		});
 	}
 });
@@ -545,24 +544,32 @@ zam.directive({
 	block: true,
 	create: function (scope, el) {
 		var that = this;
+		this.type = el.getAttribute('type');
 		this.handler = function () {
-			if (el.value !== that.prevValue) {
-				that.prevValue = el.value;
-				that.eval({ type: 'Assignment', operator: '=', left: that.syntax, right: { type: 'Literal', value: el.value } }); // evaluate "<expression> = <value>"
+			var value = that.type === 'checkbox' ? !!el.checked : el.value;
+			if (value !== that.prevValue) {
+				that.prevValue = value;
+				that.eval({ type: 'Assignment', operator: '=', left: that.syntax, right: { type: 'Literal', value: value } }); // evaluate "<expression> = <value>"
 				scope.$();
 			}
 		};
 		el.addEventListener('input', this.handler);
+		el.addEventListener('change', this.handler);
 	},
 	update: function (scope, el) { // update dom
-		var value = stringify(this.eval());
+		var value = this.eval();
 		if (value !== this.prevValue) {
-			el.value = value;
+			if (this.type === 'checkbox') {
+				el.checked = !!value;
+			} else {
+				el.value = stringify(value);
+			}
 			this.prevValue = value;
 		}
 	},
 	destroy: function (scope, el) {
 		el.removeEventListener('input', this.handler);
+		el.removeEventListener('change', this.handler);
 	}
 });
 

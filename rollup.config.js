@@ -11,7 +11,8 @@ export default {
 	plugins: [
 		pegjs({
 			allowedStartRules: ['Text', 'Expression'],
-			optimize: 'speed' // 'speed'
+			optimize: 'speed', // 'speed'
+			cache: 'true'
 		}),
 		json(),
 		uglify({

@@ -23,6 +23,8 @@ var trigger = function (element, eventname) {
 	element.dispatchEvent(event);
 };
 
+
+
 test('component creation', function (t) {
 	t.plan(3);
 	up(`<div id="a">{{ name }}</div>
@@ -342,6 +344,7 @@ test('z-*-in', function (t) { // Iterate through an array
 	});
 	t.equal($('span'), null);
 });
+
 
 test('root scope', function (t) {
 	t.plan(2);
@@ -664,13 +667,110 @@ test('template', function (t) {
 	t.equal($$('p')[1].textContent, 'joe: blah');
 });
 
+test('checkbox', function (t) {
+	t.plan(4);
+	up(`<input type="checkbox" z-model="blah">`);
+	var view = zam(document.body);
+	view.blah = true;
+	view.$();
+	t.equal($('input').checked, true);
+	$('input').checked = false;
+	trigger($('input'), 'change');
+	t.equal(view.blah, false);
+	$('input').checked = true;
+	trigger($('input'), 'change');
+	t.equal(view.blah, true);
+	view.blah = false;
+	view.$();
+	t.equal($('input').checked, false);
+});
 
+test('$watch', function (t) {
+	t.plan(2);
+	up(`<input type="text" z-model="foo">`);
+	var view = zam(document.body),
+		count = 0,
+		handler = function (foo) { count++; };
+	view.$watch('foo', handler);
+	view.foo = 1;
+	view.foo = 2;
+	view.$(); // should trigger watch
+	view.foo = 4;
+	$('input').value = 'bar';
+	trigger($('input'), 'input'); // should trigger watch
+	view.$();
+	view.foo = 'bar';
+	view.$();
+	view.$unwatch('foo', handler);
+	view.foo = '$$$';
+	view.$();
+	view.$watch('foo', function (foo) {
+		t.equal(foo, 'can');
+	});
+	view.foo = 'can';
+	view.$();
+	t.equal(count, 2);
+});
+
+test('prefix', function (t) {
+	t.plan(1);
+	up(`<div foo-text="bar"></div>`);
+	zam.prefix = 'foo-';
+	var view = zam(document.body);
+	view.bar = 'blah';
+	view.$();
+	t.equal($('div').textContent, 'blah');
+	zam.prefix = 'z-';
+});
+
+test('$destroy', function (t) {
+	t.plan(4);
+	up(`<div z-text="bar"></div>`);
+	var count = 0;
+	t.equal($('div').getAttribute('z-text'), 'bar');
+	var view = zam(document.body);
+	t.equal($('div').getAttribute('z-text'), null);
+	view.$on('destroy', function () { count++; });
+	view.$destroy();
+	t.equal($('div').getAttribute('z-text'), 'bar');
+	t.equal(count, 1);
+});
 /* 
 todo: 
-- prefix
 - examples folder
-- value of checkboxes, radioboxes, selects
-- $watch and $unwatch
+- value of radioboxes, selects
 - $off
 - other events (create, destroy)
+- $destroy
+- $on('destroy')
 */
+
+
+var repeats = 3,
+	count = 0,
+	time = 0;
+var n1 = 100, n2 = 100;
+new Array(repeats).fill(1).forEach(function () {
+	test('z-*-in (stress)', function (t) { // Iterate through an array
+		var t1 = Date.now();
+		t.plan(2);
+		up(`<div z-list-in="lists"><span z-itaem-in="list.items">{{ item.message }}</span></div>`);
+		var view = zam(document.body);
+		//view.lists = [1, 2, 3];
+		view.lists = new Array(n1).fill(1).map(function () {
+			return {
+				items: new Array(n2).fill(1).map(function () {
+					return { message: String(Math.round(Math.random() * 10000)) };
+				})
+			};
+		});
+		view.$();
+		t.equal($$('div').length, n1);
+		t.equal($$('span').length, n1 * n2);
+		time += Date.now() - t1;
+		count++;
+		if (count === repeats) {
+			console.log('AVG TIME TAKEN OVER', repeats, 'REPEATS:', (time / repeats / 1000).toFixed(3) + 's');
+		}
+	});
+});

@@ -51,9 +51,14 @@ setInterval(function () {
 	if (Math.random() > 0.3) {
 		view.memos.shift();
 	}*/
+	view.d = !view.d;
 	view.$();
 }, 1000);
 
 view.$watch('q', function (q) {
 	console.log('watch', q);
+});
+
+view.$watch('d', function (q) {
+	console.log('d ->', q);
 });
