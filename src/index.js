@@ -425,12 +425,10 @@ zam.directive({
 	create: function (scope, el, attr) {
 		this.items = [];
 		this.marker = document.createComment(attr);
-		//console.log('LLLLLL', el.attributes[0])
 		//this.itemView = zam(el, undefined, scope);
 		el.parentNode.replaceChild(this.marker, el);
 	},	
 	update: function (scope, el, attr, varname) {
-		//console.log('**************update***********');
 		var that = this,
 			array = this.eval() || [];
 		var fragment = document.createDocumentFragment();
@@ -442,7 +440,6 @@ zam.directive({
 				arrayRemove(that.items, item);
 			}
 		});
-		//console.log('**************gsgfate***********');
 		// create new nodes / update existing nodes
 		array.forEach(function (data) {
 			var item = that.items.find(function (item_) {
@@ -496,13 +493,16 @@ zam.directive({
 	update: function (scope, el, attr, attribute, stdattribute) {
 		attribute = attribute || stdattribute;
 		var value = this.eval();
-		if (booleanAttributes.indexOf(attribute) > -1) {
-			value = value ? attribute : undefined;
-		}
-		if (typeof value === 'undefined') {
-			el.removeAttribute(attribute);
-		} else {
-			el.setAttribute(attribute, value);
+		if (value !== this.prevValue) {
+			this.prevValue = value;
+			if (booleanAttributes.indexOf(attribute) > -1) {
+				value = value ? attribute : undefined;
+			}
+			if (typeof value === 'undefined') {
+				el.removeAttribute(attribute);
+			} else {
+				el.setAttribute(attribute, value);
+			}
 		}
 	}
 });
@@ -539,28 +539,61 @@ zam.directive({
 	}
 });
 
+
 zam.directive({
 	attribute: '{prefix}model',
 	block: true,
 	create: function (scope, el) {
 		var that = this;
-		this.type = el.getAttribute('type');
+		this.type = el.tagName.toLowerCase() === 'select' ? 'select' : el.getAttribute('type').toLowerCase();
+		this.optionValue = function (option) {
+			if (option.getAttribute('z-value')) {
+				var syntax = parse(option.getAttribute('z-value'), { startRule: 'Expression' });
+				return that.eval(syntax);
+			} else if (option.getAttribute('value')) {
+				return option.getAttribute('value');
+			} else {
+				return undefined;
+			}
+		};
 		this.handler = function () {
-			var value = that.type === 'checkbox' ? !!el.checked : el.value;
+			var value;
+			if (that.type === 'checkbox') {
+				value = !!el.checked;
+			} else if (that.type === 'select') {
+				var option = el.options[el.selectedIndex];
+				value = that.optionValue(option);
+			} else {
+				value = el.value;
+			}
 			if (value !== that.prevValue) {
 				that.prevValue = value;
-				that.eval({ type: 'Assignment', operator: '=', left: that.syntax, right: { type: 'Literal', value: value } }); // evaluate "<expression> = <value>"
+				that.eval({ // evaluate "<expression> = <value>"
+					type: 'Assignment',
+					operator: '=',
+					left: that.syntax,
+					right: { type: 'Literal', value: value }
+				});
 				scope.$();
 			}
 		};
 		el.addEventListener('input', this.handler);
 		el.addEventListener('change', this.handler);
+		if (this.type === 'select') {
+			el.selectedIndex = -1; // select empty value
+		}
 	},
 	update: function (scope, el) { // update dom
-		var value = this.eval();
+		var that = this,
+			value = this.eval();
 		if (value !== this.prevValue) {
 			if (this.type === 'checkbox') {
 				el.checked = !!value;
+			} else if (this.type === 'select') {
+				var option = Array.from(el.options).find(function (option) {
+					return that.optionValue(option) === value;
+				});
+				el.selectedIndex = Array.from(el.options).indexOf(option);
 			} else {
 				el.value = stringify(value);
 			}

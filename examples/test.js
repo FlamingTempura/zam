@@ -52,11 +52,12 @@ setInterval(function () {
 		view.memos.shift();
 	}*/
 	view.d = !view.d;
+	view.q = view.q === 1 ? 'a' : 1;
 	view.$();
 }, 1000);
 
 view.$watch('q', function (q) {
-	console.log('watch', q);
+	console.log('val!', q);
 });
 
 view.$watch('d', function (q) {

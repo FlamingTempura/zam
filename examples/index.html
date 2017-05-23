@@ -7,11 +7,16 @@
 <body>
 
 	<div id="thing">
-		<input type="checkbox" z-model="d"></div>
+		<input type="checkbox" z-model="d">
+		<img z-src="'q'">
 		<select z-model="q">
-			<option z-value="'a'">A</option>
-			<option value="b">B</option>
+			<option z-value="'a'">"a"</option>
+			<option value="b">"b"</option>
+			<option z-value="1">1</option>
+			<option z-value="{}">{}</option>
 		</select>
+		<div>Q: {{ q }}</div>
+	</div>
 		{{ Math.E }}
 		<div z-style-color="color === 'red' ? '#f00' : color === 'green' ? '#0f0' : '#ccc'" z-text="color"></div>
 		<div z-class-upper="upper" z-html="greeting">Greetings</div>
