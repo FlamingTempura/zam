@@ -550,22 +550,14 @@ zam.directive({
 			if (option.getAttribute('z-value')) {
 				var syntax = parse(option.getAttribute('z-value'), { startRule: 'Expression' });
 				return that.eval(syntax);
-			} else if (option.getAttribute('value')) {
-				return option.getAttribute('value');
 			} else {
-				return undefined;
+				return option.getAttribute('value');
 			}
 		};
 		this.handler = function () {
-			var value;
-			if (that.type === 'checkbox') {
-				value = !!el.checked;
-			} else if (that.type === 'select') {
-				var option = el.options[el.selectedIndex];
-				value = that.optionValue(option);
-			} else {
-				value = el.value;
-			}
+			var value = that.type === 'checkbox' ? !!el.checked :
+						that.type === 'select' ? that.optionValue(el.options[el.selectedIndex]) :
+						el.value;
 			if (value !== that.prevValue) {
 				that.prevValue = value;
 				that.eval({ // evaluate "<expression> = <value>"
@@ -590,10 +582,11 @@ zam.directive({
 			if (this.type === 'checkbox') {
 				el.checked = !!value;
 			} else if (this.type === 'select') {
-				var option = Array.from(el.options).find(function (option) {
-					return that.optionValue(option) === value;
-				});
-				el.selectedIndex = Array.from(el.options).indexOf(option);
+				el.selectedIndex = Array.from(el.options).reduce(function (selected, option, i) {
+					var v = that.optionValue(option);
+					option.setAttribute('value', stringify(v));
+					return v === value ? i : selected;
+				}, -1);
 			} else {
 				el.value = stringify(value);
 			}

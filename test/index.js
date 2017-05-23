@@ -667,7 +667,7 @@ test('template', function (t) {
 	t.equal($$('p')[1].textContent, 'joe: blah');
 });
 
-test('checkbox', function (t) {
+test('input checkbox', function (t) {
 	t.plan(4);
 	up(`<input type="checkbox" z-model="blah">`);
 	var view = zam(document.body);
@@ -683,6 +683,43 @@ test('checkbox', function (t) {
 	view.blah = false;
 	view.$();
 	t.equal($('input').checked, false);
+});
+
+test('input select', function (t) {
+	t.plan(22);
+	up(`<select z-model="blah">
+			<option value="hello">test1</option>
+			<option value="1">test2</option>
+			<option z-value="'boo'">test3</option>
+			<option z-value="2">test4</option>
+			<option z-value="{ a: 1 }">test5</option>
+			<option z-value="foo">test6</option>
+		</select>`);
+
+	var view = zam(document.body);
+	view.foo = 'bar';
+	view.blah = 'dsah';
+	view.$();
+
+	['hello', '1', 'boo', 2, { a: 1 }, 'bar'].forEach(function (val, i) {
+		view.blah = val;
+		view.$();
+		if (typeof val !== 'object') {
+			t.equal($('select').value, String(val));
+			t.equal($('select').selectedIndex, i);
+		}
+	});
+
+	['hello', '1', 'boo', 2, { a: 1 }, 'bar'].forEach(function (val, i) {
+		$('select').selectedIndex = i;
+		trigger($('select'), 'change');
+		t.equal($('select').value, String(val));
+		if (typeof val === 'string') {
+			t.equal(view.blah, val);
+		} else {
+			t.same(view.blah, val);
+		}
+	});
 });
 
 test('$watch', function (t) {
@@ -750,6 +787,7 @@ var repeats = 3,
 	count = 0,
 	time = 0;
 var n1 = 100, n2 = 100;
+//var n1 = 5, n2 = 5;
 new Array(repeats).fill(1).forEach(function () {
 	test('z-*-in (stress)', function (t) { // Iterate through an array
 		var t1 = Date.now();
