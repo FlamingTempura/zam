@@ -1,0 +1,10 @@
+{
+	"folders":
+	[
+		{
+			"path": ".",
+			"folder_exclude_patterns": ["node_modules", "coverage", ".nyc_output"],
+			"file_exclude_patterns": ["*.sublime-project", ".DS_Store", "npm-debug.log"]
+		}
+	]
+}
