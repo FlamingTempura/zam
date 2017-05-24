@@ -1,29 +1,57 @@
-/* jshint node: true */
+/* jshint node: true, esversion: 6 */
 'use strict';
 
+/* 
+todo: 
+- input file
+- input multiselect
+- examples folder
+- $off
+- other events (create, destroy)
+- $destroy
+- $on('destroy')
+*/
+
 var jsdom = require('jsdom'),
+	moment = require('moment'),
 	test = require('tap').test,
 	zam = require('../');
 
 var up = function (html) { // set global document to new dom
 	global.window = (new jsdom.JSDOM(html)).window;
-	global.document = window.document;
+	global.document = global.window.document;
+	// polyfill valueAsDate
+	Object.defineProperty(global.window.HTMLInputElement.prototype, 'valueAsDate', {
+		configurable: true,
+		get: function () {
+			if (this.type === 'datetime-local') { return moment(this.value, 'YYYY-MM-DD[T]HH:mm:ss.SS').toDate(); }
+			if (this.type === 'date') { return moment(this.value, 'YYYY-MM-DD').toDate(); }
+			if (this.type === 'month') { return moment(this.value, 'YYYY-MM').toDate(); }
+			if (this.type === 'week') { return moment(this.value, 'YYYY-[W]WW').toDate(); }
+			if (this.type === 'time') { return moment(this.value, 'HH:mm:ss.SS').toDate(); }
+		},
+		set: function (d) {
+			if (this.type === 'datetime-local') { this.value = moment(d).format('YYYY-MM-DD[T]HH:mm:ss.SS'); }
+			if (this.type === 'date') { this.value = moment(d).format('YYYY-MM-DD'); }
+			if (this.type === 'month') { this.value = moment(d).format('YYYY-MM'); }
+			if (this.type === 'week') { this.value = moment(d).format('YYYY-[W]WW'); }
+			if (this.type === 'time') { this.value = moment(d).format('HH:mm:ss.SS'); }
+		}
+	});
 };
 var $ = function (selector) {
-	return document.querySelector(selector);
+	return global.document.querySelector(selector);
 };
 var $$ = function (selector) {
-	return document.querySelectorAll(selector);
+	return global.document.querySelectorAll(selector);
 };
 var later = function (cb) { // simulate a change happening later
 	setTimeout(cb, 5);
 };
 var trigger = function (element, eventname) {
-	var event = new window.Event(eventname);
+	var event = new global.window.Event(eventname);
 	element.dispatchEvent(event);
 };
-
-
 
 test('component creation', function (t) {
 	t.plan(3);
@@ -667,6 +695,199 @@ test('template', function (t) {
 	t.equal($$('p')[1].textContent, 'joe: blah');
 });
 
+test('input text and textarea', function (t) {
+	t.plan(6);
+	up(`<input type="text" z-model="blah">
+		<textarea z-model="blah">`);
+	var view = zam(document.body);
+	view.blah = 'boo';
+	view.$();
+	t.equal($('input').value, 'boo');
+	t.equal($('textarea').value, 'boo');
+	$('input').value = 'wow';
+	trigger($('input'), 'input');
+	t.equal(view.blah, 'wow');
+	$('textarea').value = 'foo';
+	trigger($('textarea'), 'input');
+	t.equal(view.blah, 'foo');
+	later(function () {
+		view.blah = 'amaze';
+		view.$();
+		t.equal($('input').value, 'amaze');
+		t.equal($('textarea').value, 'amaze');
+	});
+});
+
+test('input password', function (t) {
+	t.plan(3);
+	up(`<input type="password" z-model="blah">`);
+	var view = zam(document.body);
+	view.blah = 'boo';
+	view.$();
+	t.equal($('input').value, 'boo');
+	$('input').value = 'wow';
+	trigger($('input'), 'input');
+	t.equal(view.blah, 'wow');
+	later(function () {
+		view.blah = 'amaze';
+		view.$();
+		t.equal($('input').value, 'amaze');
+	});
+});
+
+test('input search', function (t) {
+	t.plan(3);
+	up(`<input type="search" z-model="blah">`);
+	var view = zam(document.body);
+	view.blah = 'boo';
+	view.$();
+	t.equal($('input').value, 'boo');
+	$('input').value = 'wow';
+	trigger($('input'), 'input');
+	t.equal(view.blah, 'wow');
+	later(function () {
+		view.blah = 'amaze';
+		view.$();
+		t.equal($('input').value, 'amaze');
+	});
+});
+
+test('input hidden', function (t) {
+	t.plan(3);
+	up(`<input type="hidden" z-model="blah">`);
+	var view = zam(document.body);
+	view.blah = 'boo';
+	view.$();
+	t.equal($('input').value, 'boo');
+	$('input').value = 'wow';
+	trigger($('input'), 'input');
+	t.equal(view.blah, 'wow');
+	later(function () {
+		view.blah = 'amaze';
+		view.$();
+		t.equal($('input').value, 'amaze');
+	});
+});
+
+test('input url', function (t) {
+	t.plan(3);
+	up(`<input type="url" z-model="blah">`);
+	var view = zam(document.body);
+	view.blah = 'http://foo.bar';
+	view.$();
+	t.equal($('input').value, 'http://foo.bar');
+	$('input').value = 'http://foo.bar/wow';
+	trigger($('input'), 'input');
+	t.equal(view.blah, 'http://foo.bar/wow');
+	later(function () {
+		view.blah = 'http://foo.bar/amaze';
+		view.$();
+		t.equal($('input').value, 'http://foo.bar/amaze');
+	});
+});
+
+test('input email', function (t) {
+	t.plan(3);
+	up(`<input type="email" z-model="blah">`);
+	var view = zam(document.body);
+	view.blah = 'boo@foo.bar';
+	view.$();
+	t.equal($('input').value, 'boo@foo.bar');
+	$('input').value = 'wow@foo.bar';
+	trigger($('input'), 'input');
+	t.equal(view.blah, 'wow@foo.bar');
+	later(function () {
+		view.blah = 'amaze@foo.bar';
+		view.$();
+		t.equal($('input').value, 'amaze@foo.bar');
+	});
+});
+
+test('input number', function (t) {
+	t.plan(3);
+	up(`<input type="number" z-model="blah">`);
+	var view = zam(document.body);
+	view.blah = 102;
+	view.$();
+	t.equal($('input').value, '102');
+	$('input').value = 87;
+	trigger($('input'), 'input');
+	t.equal(view.blah, 87);
+	later(function () {
+		view.blah = 10;
+		view.$();
+		t.equal($('input').value, '10');
+	});
+});
+
+test('input range', function (t) {
+	t.plan(3);
+	up(`<input type="range" min="0" max="10" step="1" z-model="blah">`);
+	var view = zam(document.body);
+	view.blah = 1;
+	view.$();
+	t.equal($('input').value, '1');
+	$('input').value = 9;
+	trigger($('input'), 'input');
+	t.equal(view.blah, 9);
+	later(function () {
+		view.blah = 4;
+		view.$();
+		t.equal($('input').value, '4');
+	});
+});
+
+test('input date/month/week/time', function (t) {
+	t.plan(15);
+	up(`<input id="datetime" type="datetime-local" z-model="blah">
+		<input id="date" type="date" z-model="blah">
+		<input id="month" type="month" z-model="blah">
+		<input id="week" type="week" z-model="blah">
+		<input id="time" type="time" z-model="blah">`);
+	
+	var date = moment().toDate();
+	var view = zam(document.body);
+	view.blah = date;
+	view.$();
+	t.equal($('#datetime').value, moment(date).format('YYYY-MM-DD[T]HH:mm:ss.SS'));
+	t.equal($('#date').value, moment(date).format('YYYY-MM-DD'));
+	t.equal($('#month').value, moment(date).format('YYYY-MM'));
+	t.equal($('#week').value, moment(date).format('YYYY-[W]WW'));
+	t.equal($('#time').value, moment(date).format('HH:mm:ss.SS'));
+
+	date = moment().subtract(2, 'days').toDate();
+	$('#datetime').value = moment(date).format('YYYY-MM-DD[T]HH:mm:ss.SS');
+	trigger($('#datetime'), 'input');
+	t.equal(moment(view.blah).format('YYYY-MM-DD[T]HH:mm:ss.SS'), moment(date).format('YYYY-MM-DD[T]HH:mm:ss.SS'));
+
+	$('#date').value = moment(date).format('YYYY-MM-DD');
+	trigger($('#date'), 'input');
+	t.equal(moment(view.blah).format('YYYY-MM-DD'), moment(date).format('YYYY-MM-DD'));
+
+	$('#month').value = moment(date).format('YYYY-MM');
+	trigger($('#month'), 'input');
+	t.equal(moment(view.blah).format('YYYY-MM'), moment(date).format('YYYY-MM'));
+
+	$('#week').value = moment(date).format('YYYY-[W]WW');
+	trigger($('#week'), 'input');
+	t.equal(moment(view.blah).format('YYYY-[W]WW'), moment(date).format('YYYY-[W]WW'));
+
+	$('#time').value = moment(date).format('HH:mm:ss.SS');
+	trigger($('#time'), 'input');
+	t.equal(moment(view.blah).format('HH:mm:ss.SS'), moment(date).format('HH:mm:ss.SS'));
+
+	later(function () {
+		date = moment().subtract(1, 'minute').toDate();
+		view.blah = date;
+		view.$();
+		t.equal($('#datetime').value, moment(date).format('YYYY-MM-DD[T]HH:mm:ss.SS'));
+		t.equal($('#date').value, moment(date).format('YYYY-MM-DD'));
+		t.equal($('#month').value, moment(date).format('YYYY-MM'));
+		t.equal($('#week').value, moment(date).format('YYYY-[W]WW'));
+		t.equal($('#time').value, moment(date).format('HH:mm:ss.SS'));
+	});
+});
+
 test('input checkbox', function (t) {
 	t.plan(4);
 	up(`<input type="checkbox" z-model="blah">`);
@@ -680,9 +901,11 @@ test('input checkbox', function (t) {
 	$('input').checked = true;
 	trigger($('input'), 'change');
 	t.equal(view.blah, true);
-	view.blah = false;
-	view.$();
-	t.equal($('input').checked, false);
+	later(function () {
+		view.blah = false;
+		view.$();
+		t.equal($('input').checked, false);
+	});
 });
 
 test('input select', function (t) {
@@ -698,8 +921,6 @@ test('input select', function (t) {
 
 	var view = zam(document.body);
 	view.foo = 'bar';
-	view.blah = 'dsah';
-	view.$();
 
 	['hello', '1', 'boo', 2, { a: 1 }, 'bar'].forEach(function (val, i) {
 		view.blah = val;
@@ -714,6 +935,47 @@ test('input select', function (t) {
 		$('select').selectedIndex = i;
 		trigger($('select'), 'change');
 		t.equal($('select').value, String(val));
+		if (typeof val === 'string') {
+			t.equal(view.blah, val);
+		} else {
+			t.same(view.blah, val);
+		}
+	});
+});
+
+test('input radio', function (t) {
+	t.plan(28);
+	up(`<div class="a">
+			<input type="radio" z-model="blah" value="hello">
+			<input type="radio" z-model="blah" value="1">
+			<input type="radio" z-model="blah" z-value="'boo'">
+			<input type="radio" z-model="blah" z-value="2">
+			<input type="radio" z-model="blah" z-value="{ a: 1 }">
+			<input type="radio" z-model="blah" z-value="foo">
+		</div>
+		<div class="b">
+			<input type="radio" z-model="moo" value="x">
+			<input type="radio" z-model="moo" value="y">
+		</div>`);
+
+	var view = zam(document.body);
+	view.foo = 'bar';
+	view.moo = 'y';
+
+	['hello', '1', 'boo', 2, { a: 1 }, 'bar'].forEach(function (val, i) {
+		view.blah = val;
+		view.$();
+		if (typeof val !== 'object') {
+			t.equal($('.a input:checked').value, String(val));
+			t.equal($('.b input:checked').value, 'y');
+		}
+	});
+
+	['hello', '1', 'boo', 2, { a: 1 }, 'bar'].forEach(function (val, i) {
+		$('.a input:nth-child(' + (i + 1) + ')').checked = true;
+		trigger($('.a input:nth-child(' + (i + 1) + ')'), 'change');
+		t.equal($('.a input:checked').value, String(val));
+		t.equal($('.b input:checked').value, 'y');
 		if (typeof val === 'string') {
 			t.equal(view.blah, val);
 		} else {
@@ -772,22 +1034,12 @@ test('$destroy', function (t) {
 	t.equal($('div').getAttribute('z-text'), 'bar');
 	t.equal(count, 1);
 });
-/* 
-todo: 
-- examples folder
-- value of radioboxes, selects
-- $off
-- other events (create, destroy)
-- $destroy
-- $on('destroy')
-*/
-
 
 var repeats = 3,
 	count = 0,
 	time = 0;
-var n1 = 100, n2 = 100;
-//var n1 = 5, n2 = 5;
+//var n1 = 100, n2 = 100;
+var n1 = 5, n2 = 5;
 new Array(repeats).fill(1).forEach(function () {
 	test('z-*-in (stress)', function (t) { // Iterate through an array
 		var t1 = Date.now();

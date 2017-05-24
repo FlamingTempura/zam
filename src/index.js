@@ -2,7 +2,7 @@
 
 import parser from './grammar.pegjs';
 import { version } from '../package.json';
-import { toArray, stringify, arrayRemove } from './utils';
+import { toArray, stringify, arrayRemove, hash } from './utils';
 
 var parse = parser.parse; // generates the abstract syntax tree
 
@@ -281,6 +281,7 @@ var destroyBindings = function (vDOM) {
 	});
 };
 
+var id = 0;
 var zam = function (el, data, parent) {
 	el = typeof el === 'string' ? document.querySelector(el) : el[0] || el; // convert from string or jquery
 	//console.log('NEW ZAM');
@@ -289,6 +290,7 @@ var zam = function (el, data, parent) {
 		events = {},
 		watchers = [];
 
+	view.$id = id++;
 	view.$vDOM = vDOM;
 	view.$ = function () {
 		updateBindings(vDOM);
@@ -539,13 +541,21 @@ zam.directive({
 	}
 });
 
-
 zam.directive({
 	attribute: '{prefix}model',
 	block: true,
 	create: function (scope, el) {
-		var that = this;
-		this.type = el.tagName.toLowerCase() === 'select' ? 'select' : el.getAttribute('type').toLowerCase();
+		var that = this,
+			tag = el.tagName.toLowerCase(),
+			inputType = (el.getAttribute('type') || '').toLowerCase();
+		this.type = tag === 'select' ? 'select' :
+					tag === 'textarea' ? 'text' :
+					inputType === 'range' ? 'number' :
+					['date', 'datetime-local', 'time', 'month', 'week'].indexOf(inputType) > -1 ? 'date' :
+					inputType;
+		if (that.type === 'radio' && !el.getAttribute('name')) {
+			el.setAttribute('name', hash(scope.$id + JSON.stringify(this.syntax))); // group radios by their model and scope
+		}
 		this.optionValue = function (option) {
 			if (option.getAttribute('z-value')) {
 				var syntax = parse(option.getAttribute('z-value'), { startRule: 'Expression' });
@@ -555,8 +565,12 @@ zam.directive({
 			}
 		};
 		this.handler = function () {
+			if (that.type === 'radio' && !el.checked) { return; }
 			var value = that.type === 'checkbox' ? !!el.checked :
 						that.type === 'select' ? that.optionValue(el.options[el.selectedIndex]) :
+						that.type === 'radio' ? that.optionValue(el) :
+						that.type === 'number' ? Number(el.value) :
+						that.type === 'date' ? el.valueAsDate :
 						el.value;
 			if (value !== that.prevValue) {
 				that.prevValue = value;
@@ -587,6 +601,14 @@ zam.directive({
 					option.setAttribute('value', stringify(v));
 					return v === value ? i : selected;
 				}, -1);
+			} else if (this.type === 'radio') {
+				var v = that.optionValue(el);
+				el.checked = value === v;
+				el.setAttribute('value', stringify(v));
+			} else if (this.type === 'number') {
+				el.value = Number(value);
+			} else if (this.type === 'date') {
+				el.valueAsDate = value;
 			} else {
 				el.value = stringify(value);
 			}
