@@ -4,7 +4,8 @@
 var pegjs = require('rollup-plugin-pegjs'),
 	uglify = require('rollup-plugin-uglify'),
 	harmony = require('uglify-js-harmony'),
-	json = require('rollup-plugin-json');
+	json = require('rollup-plugin-json'),
+	babel = require('rollup-plugin-babel');
 
 export default {
 	entry: 'src/index.js',
@@ -15,20 +16,29 @@ export default {
 			cache: 'true'
 		}),
 		json(),
+		babel({
+			'presets': [
+				['es2015', { modules: false }]
+			],
+			plugins: ['external-helpers']
+		}),
 		uglify({
 			compress: {
-				dead_code: true,
+				//dead_code: true,
 				unused: true,
 				negate_iife: true,
 				reduce_vars: true,
 				cascade: true,
 				collapse_vars: true,
 				//drop_console: true,
-				passes: 3,
-				properties: true
+				//passes: 1,
+				properties: true,
+				//sequences: false
 			},
 			output: {
-				//beautify: true
+				//beautify: true,
+				//max_line_len: 80
+				//preserve_line: true
 			}
 		}, harmony.minify)
 	],

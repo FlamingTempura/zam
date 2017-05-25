@@ -1,17 +1,6 @@
 /* jshint node: true, esversion: 6 */
 'use strict';
 
-/* 
-todo: 
-- input file
-- input multiselect
-- examples folder
-- $off
-- other events (create, destroy)
-- $destroy
-- $on('destroy')
-*/
-
 var jsdom = require('jsdom'),
 	moment = require('moment'),
 	test = require('tap').test,
@@ -373,7 +362,6 @@ test('z-*-in', function (t) { // Iterate through an array
 	t.equal($('span'), null);
 });
 
-
 test('root scope', function (t) {
 	t.plan(2);
 	// The root object is provided to all components and can be used to provide methods and data which should be available to all components.
@@ -453,7 +441,7 @@ test('Expressions', function (t) { // The expressions used in a directive mostly
 	var assertions = 1;
 	var assert = function (expr, val) {
 		assertions++;
-		var result = zam.evaluate(zam.parse(expr, { startRule: 'Expression' }), global);
+		var result = zam.evaluate(zam.parse(expr), global);
 		if (typeof val === 'object') {
 			t.same(result.value, val);
 		} else {
@@ -461,7 +449,7 @@ test('Expressions', function (t) { // The expressions used in a directive mostly
 		}
 	};
 
-	var syntax = zam.parse('blah', { startRule: 'Text' });
+	var syntax = zam.parse('blah', 'Text');
 	t.same(syntax, ['blah']);
 
 	// Arithmatic
@@ -1038,8 +1026,8 @@ test('$destroy', function (t) {
 var repeats = 3,
 	count = 0,
 	time = 0;
-//var n1 = 100, n2 = 100;
-var n1 = 5, n2 = 5;
+var n1 = 100, n2 = 100;
+//var n1 = 5, n2 = 5;
 new Array(repeats).fill(1).forEach(function () {
 	test('z-*-in (stress)', function (t) { // Iterate through an array
 		var t1 = Date.now();

@@ -1,55 +1,102 @@
+/* jshint node: true, browser: true, esversion: 6 */
 'use strict';
 
 import parser from './grammar.pegjs';
 import { version } from '../package.json';
-import { toArray, stringify, arrayRemove, hash } from './utils';
+import { stringify, arrayRemove, hash } from './utils';
 
-var parse = parser.parse; // generates the abstract syntax tree
+const parse = (expr, startRule = 'Expression') => parser.parse(expr, { startRule }); // generates the abstract syntax tree
 
-var traverseVDOM = function (vDOM, callback) {
-	vDOM.forEach(function (element) {
+const standardAttributes = [
+	'accept', 'accept-charset', 'accesskey', 'action', 'align', 'alt',
+	'async', 'autocomplete', 'autofocus', 'autoplay', 'autosave',
+	'buffered', 'challenge', 'charset', 'checked', 'cite', 'class',
+	'code', 'codebase', 'cols', 'colspan', 'content', 'contenteditable',
+	'contextmenu', 'controls', 'coords', 'crossorigin', 'data', 'data-*',
+	'datetime', 'default', 'defer', 'dir', 'dirname', 'disabled', 'download',
+	'draggable', 'dropzone', 'enctype', 'for', 'form', 'formaction', 'headers',
+	'hidden', 'high', 'href', 'hreflang', 'http-equiv', 'icon', 'id',
+	'integrity', 'ismap' ,'itemprop', 'keytype', 'kind', 'label', 'lang',
+	'language', 'list', 'loop', 'low', 'manifest', 'max', 'maxlength',
+	'minlength', 'media', 'method', 'min', 'multiple', 'muted', 'name',
+	'novalidate', 'open', 'optimum', 'pattern', 'ping', 'placeholder', 'poster',
+	'preload', 'radiogroup', 'readonly', 'rel', 'required', 'reversed', 'rows',
+	'rowspan', 'sandbox', 'scope', 'scoped', 'seamless', 'selected', 'shape',
+	'size', 'sizes', 'slot', 'span', 'spellcheck', 'src', 'srcdoc', 'srclang',
+	'srcset', 'start', 'step', 'style', 'summary', 'tabindex', 'target', 'title',
+	'type', 'usemap', 'value', 'wrap'];
+
+const booleanAttributes = [
+	'selected', 'checked', 'disabled', 'readonly', 'multiple', 'ismap', 'defer', 
+	'noresize'];
+
+const standardStyles = [
+	'align-.*', 'all', 'animation', 'animation-.*', 'backface-visibility',
+	'background', 'background-.*', 'border', 'border-.*', 'bottom', 'box-.*',
+	'break-.*', 'caption-side', 'caret-color', 'clear', 'clip', 'clip-path',
+	'color', 'column-.*', 'columns', 'content', 'counter-.*', 'cursor',
+	'direction', 'display', 'empty-cells', 'filter', 'flex-.*', 'float', 'font',
+	'font-.*', 'grid', 'grid-.*', 'height', 'hyphens', 'image-.*', 'ime-mode',
+	'inline-size', 'isolation', 'justify-content', 'left', 'letter-spacing',
+	'line-.*', 'list-.*', 'margin', 'margin-.*', 'mask', 'mask-.*', 'max-height',
+	'max-width', 'min-block-size', 'min-height', 'min-inline-size', 'min-width',
+	'mix-blend-mode', 'object-fit', 'object-position', 'offset-.*', 'opacity',
+	'order', 'orphans', 'outline', 'outline-.*', 'overflow', 'overflow-.*',
+	'padding', 'padding-.*', 'page-break-.*', 'perspective', 'perspective-origin',
+	'pointer-events', 'position', 'quotes', 'resize', 'right', 'scroll-.*',
+	'shape-.*', 'tab-size', 'table-layout', 'text-.*', 'top', 'touch-action',
+	'transform', 'transform-.*', 'transition', 'transition-.*', 'unicode-bidi',
+	'unset', 'vertical-align', 'visibility', 'white-space', 'widows', 'width',
+	'will-change', 'word-.*', 'writing-mode', 'z-index'];
+
+const standardEvents = [
+	'load', 'error', 'focus', 'blur', 'click', 'dblclick',   'mouse.*',
+	'keyup', 'keydown', 'keypress', 'input', 'change', 'submit', 'reset',
+	'scroll', 'resize',  'drag.*', 'drop'];
+
+const traverseVDOM = (vDOM, callback) => {
+	vDOM.forEach(element => {
 		callback(element);
 		traverseVDOM(element.children, callback);
 	});
 };
 
-var evaluate = function (syntax, scope) {
-	var value, set,
-		type = syntax.type,
-		operator = syntax.operator;
+const evaluate = (syntax, scope) => {
+	let value, set,
+		{ type, operator } = syntax;
 
 	if (type === 'Literal') { value = syntax.value; } else 
 
 	if (type === 'Array') {
-		value = syntax.elements.map(function (item) {
-			return evaluate(item, scope).value;
-		});
+		value = syntax.elements.map(item => evaluate(item, scope).value);
 	} else
 	
 	if (type === 'Object') {
 		value = {};
-		syntax.properties.forEach(function (prop) { value[prop.key] = evaluate(prop.value, scope).value; });
+		syntax.properties.forEach(prop => {
+			value[prop.key] = evaluate(prop.value, scope).value;
+		});
 	} else
 
 	if (type === 'Identifier') {
-		var scope_ = scope;
+		let scope_ = scope;
 		while (scope_) {
 			if (typeof scope_[syntax.name] !== 'undefined') { break; }
 			scope_ = scope_.$parent; // is data in parent scopes?
 		}
 		if (!scope_) { scope_ = scope; } // no? then just use current scope
 		value = scope_[syntax.name];
-		set = function (val) {
+		set = val => {
 			scope_[syntax.name] = val;
 			return val;
 		};
 	} else 
 
 	if (type === 'Member') {
-		var subject = evaluate(syntax.object, scope).value,
+		let subject = evaluate(syntax.object, scope).value,
 			prop = evaluate(syntax.property, scope).value;
 		value = typeof subject !== 'undefined' ? subject[prop] : undefined;
-		set = function (val) {
+		set = val => {
 			subject[prop] = val;
 			return val;
 		};
@@ -62,7 +109,7 @@ var evaluate = function (syntax, scope) {
 	} else 
 
 	if (type === 'Unary' || type === 'Update') {
-		var arg = evaluate(syntax.argument, scope),
+		let arg = evaluate(syntax.argument, scope),
 			argv = arg.value;
 		value = operator === '!' ? !argv :
 		        operator === '+' ? +argv :
@@ -77,7 +124,7 @@ var evaluate = function (syntax, scope) {
 	} else 
 
 	if (type === 'Binary' || type === 'Logical' || type === 'Assignment') {
-		var left  = evaluate(syntax.left, scope),
+		let left  = evaluate(syntax.left, scope),
 			leftv = left.value,
 			rightv = evaluate(syntax.right, scope).value;
 		value = operator === '===' ? leftv === rightv :
@@ -95,12 +142,12 @@ var evaluate = function (syntax, scope) {
 		        operator === '*'   ? leftv *   rightv :
 		        operator === '/'   ? leftv /   rightv :
 		        operator === '%'   ? leftv %   rightv :
-	            operator === '*='  ? leftv *   rightv :
-	            operator === '/='  ? leftv /   rightv :
-	            operator === '%='  ? leftv %   rightv :
-	            operator === '+='  ? leftv +   rightv :
-	            operator === '-='  ? leftv -   rightv : 
-	            operator === '='   ? rightv :  null;
+		        operator === '*='  ? leftv *   rightv :
+		        operator === '/='  ? leftv /   rightv :
+		        operator === '%='  ? leftv %   rightv :
+		        operator === '+='  ? leftv +   rightv :
+		        operator === '-='  ? leftv -   rightv : 
+		        operator === '='   ? rightv :  null;
 		if (type === 'Assignment') {
 			set = left.set;
 			value = set(value);
@@ -108,118 +155,97 @@ var evaluate = function (syntax, scope) {
 	} else 
 
 	if (type === 'Call' || type === 'NewExpression') {
-		var caller = syntax.callee.object ? evaluate(syntax.callee.object, scope).value : scope,
+		let caller = syntax.callee.object ? evaluate(syntax.callee.object, scope).value : scope,
 			callee = evaluate(syntax.callee, scope).value,
-			args = syntax.arguments.map(function (arg_) {
-				return evaluate(arg_, scope).value;
-			});
+			args = syntax.arguments.map(arg_ => evaluate(arg_, scope).value);
 		value = callee ? 
 			type === 'Call' ? callee.apply(caller, args) : new (callee.bind.apply(callee, args))() :
 			undefined;
 	}
 
-	return {
-		value: value,
-		set: set
-	};
+	return { value, set };
 };
 
-var directives = [];
+let directives = [];
 
-var bindDirective = function (directive, view, node, attrMatch, syntax) {
-		
-	var args = function () {
-		return [binding.view, binding.node].concat(attrMatch);
-	};
-
-	var binding = {
-		view: view, // this can be changed to move binding to another view
-		node: node, // this can be changed
-		syntax: syntax,
-		eval: function (syntax_) { // evaluate expression (expression in attribute value by default)
-			return evaluate(syntax_ || syntax, binding.view).value;
+const bindDirective = (directive, view, node, attrMatch, syntax) => {
+	const bind = {
+		view, // changes when bind is moved to another view
+		node, // changes
+		syntax,
+		eval(syntax_ = syntax) { // evaluate expression (expression in attribute value by default)
+			return evaluate(syntax_, bind.view).value;
 		},
-		create: function () {
-			if (directive.create) { directive.create.apply(binding, args()); }
-		},
-		update: function () {
-			if (directive.update) { directive.update.apply(binding, args()); }
-		},
-		destroy: function () {
-			if (directive.destroy) { directive.destroy.apply(binding, args()); }
+		exec(method) { // create, update, or destroy
+			if (directive[method]) {
+				directive[method].call(bind, bind.view, bind.node, ...attrMatch);
+			}
 		}
 	};
 
 	if (directive.template) {
-		var node_ = document.createElement('span');
+		let node_ = document.createElement('span');
 		node_.innerHTML = directive.template;
+		// TODO warn if node_.childNodes > 0
 		node_ = node_.childNodes[0];
-		toArray(node.attributes).forEach(function (attr) {
-			node_.setAttribute(attr.name, attr.value);
-		});
+		Array.from(node.attributes).forEach(attr => node_.setAttribute(attr.name, attr.value));
 		node.parentNode.replaceChild(node_, node);
-		binding.node = node_;
+		bind.node = node_;
 	}
 
-	return binding;
+	return bind;
 };
 
-var initBindings = function (view, node, vDOM, parent) {
-	// nodeType: 1 = ELEMENT_NODE, 3 = TEXT_NODE
-	if ([1, 3].indexOf(node.nodeType) === -1) { return; }
+const initBinds = (view, node, vDOM, parent) => {
+	if ([1, 3].indexOf(node.nodeType) === -1) { return; } // 1 = ELEMENT_NODE, 3 = TEXT_NODE
 
-	if (node.vElement) { // this node already belongs to a view!
-		if (!parent || node.vElement.view === view.$parent) { // does this node belong to a parent view, or is it the root?
-			vDOM.push(node.vElement); // move the element and its children to this view
-			traverseVDOM(node.vElement.children, function (child) {
-				child.bindings.forEach(function (binding) {
-					binding.view = view; // transfer all bindings to this view
-				});
-			});
-			if (node.vElement.parent) {
-				arrayRemove(node.vElement.parent.children, node.vElement); // remove from parent
+	let vElement = node.vElement;
+	if (vElement) { // this node already belongs to a view!
+		if (!parent || vElement.view === view.$parent) { // does this node belong to a parent view, or is it the root?
+			vDOM.push(vElement); // move the element and its children to this view
+			traverseVDOM(vElement.children, child => child.binds.forEach(bind => bind.view = view)); // transfer all binds to this view
+			if (vElement.parent) {
+				arrayRemove(vElement.parent.children, vElement); // remove from parent
 			} else { // if this node the root of a view then destroy the view
-				//node.vElement.view.$destroy();
+				//vElement.view.$destroy();
 			}
 		} else { // otherwise this node belongs to a child view
-			node.vElement.view.$setParent(view); // set child's parent to this view
+			vElement.view.$setParent(view); // set child's parent to this view
 		}
 		return; // skip because it's already bound
 	}
 	
-	var vElement = { view: view, parent: parent, node: node, children: [], bindings: [], removedAttrs: [] };
-	node.vElement = vElement;
+	vElement = node.vElement = { view, parent, node, children: [], binds: [], removedAttrs: [] };
 	vDOM.push(vElement);
 
 	if (node.nodeType === 1) {
-		let attrs = toArray(node.attributes),
+		let attrs = Array.from(node.attributes),
 			blocked;
-		vElement.bindings = [];
-		directives.forEach(function (directive) {
+		vElement.binds = [];
+		directives.forEach(directive => {
 			if (directive.tag) {
 				let match = node.tagName.match(new RegExp('^'+ directive.tag.replace('{prefix}', zam.prefix) + '$', 'i'));
 				if (match) {
-					var binding = bindDirective(directive, view, node, match);
-					vElement.bindings.push(binding);
+					let bind = bindDirective(directive, view, node, match);
+					vElement.binds.push(bind);
 					blocked = directive.block || directive.template;
 					if (directive.template) {
-						initBindings(view, binding.node, vElement.children);
+						initBinds(view, bind.node, vElement.children);
 					}
 				}
 			} else if (directive.attribute) {
-				attrs = attrs.filter(function (attr) {
+				attrs = attrs.filter(attr => {
 					if (blocked) { return; }
 					let match = attr.name.match(new RegExp('^'+ directive.attribute.replace('{prefix}', zam.prefix) + '$', 'i'));
 					if (match) {
-						//console.log('****MMMMATTTCH', attr.name);
-						var syntax = parse(attr.value || 'undefined', { startRule: 'Expression' });
+						let syntax = parse(attr.value || 'undefined');
 						vElement.removedAttrs.push({ name: attr.name, value: attr.value });
 						node.removeAttribute(attr.name);
-						var binding_ = bindDirective(directive, view, node, match, syntax);
-						vElement.bindings.push(binding_);
+						let bind_ = bindDirective(directive, view, node, match, syntax);
+						vElement.binds.push(bind_);
 						blocked = directive.block || directive.template; // stop looking for more attributes
 						if (directive.template) {
-							initBindings(view, binding_.node, vElement.children);
+							initBinds(view, bind_.node, vElement.children);
 						}
 					}
 					return !match;
@@ -228,22 +254,22 @@ var initBindings = function (view, node, vDOM, parent) {
 		});
 		
 		if (!blocked) {
-			toArray(node.childNodes).forEach(function (childNode) {
-				initBindings(view, childNode, vElement.children, vElement);
+			Array.from(node.childNodes).forEach(childNode => {
+				initBinds(view, childNode, vElement.children, vElement);
 			});
 		}
 	} else
 
 	if (node.nodeType === 3 && node.nodeValue.indexOf('{{') > -1) {
-		var text = node.nodeValue;
-		parse(text, { startRule: 'Text' }).forEach(function (part) {
-			var newNode;
+		let text = node.nodeValue;
+		parse(text, 'Text').forEach(part => {
+			let newNode;
 			if (typeof part === 'string') {
 				newNode = document.createTextNode(part);
 			} else {
 				newNode = part.html ? document.createElement('span') : document.createTextNode('');
-				var binding = bindDirective(inlineParser, view, newNode, ['', part.html ? 'html' : 'text'], part.expression),
-					vElement__ = Object.assign({}, vElement, { bindings: [binding] });
+				let bind = bindDirective(inlineParser, view, newNode, ['', part.html ? 'html' : 'text'], part.expression),
+					vElement__ = Object.assign({}, vElement, { binds: [bind] });
 				vDOM.push(vElement__);
 				newNode.vElement = vElement__;
 			}
@@ -253,124 +279,98 @@ var initBindings = function (view, node, vDOM, parent) {
 	}
 };
 
-var createBindings = function (vDOM) {
-	traverseVDOM(vDOM, function (element) {
-		element.bindings.forEach(function (binding) {
-			binding.create();
-		});
-	});
-};
-
-var updateBindings = function (vDOM) {
-	traverseVDOM(vDOM, function (element) {
-		element.bindings.forEach(function (binding) {
-			binding.update();
-		});
-	});
-};
-
-var destroyBindings = function (vDOM) {
-	traverseVDOM(vDOM, function (element) {
-		element.bindings.forEach(function (binding) {
-			binding.destroy();
-		});
-		delete element.node.vElement;
-		element.removedAttrs.forEach(function (attr) {
-			element.node.setAttribute(attr.name, attr.value); // restore attributes
-		});
-	});
-};
-
-var id = 0;
-var zam = function (el, data, parent) {
+let id = 0;
+const zam = (el, data, parent) => {
 	el = typeof el === 'string' ? document.querySelector(el) : el[0] || el; // convert from string or jquery
-	//console.log('NEW ZAM');
-	var view = Object.assign({}, data),
-		vDOM = [], // virtual DOM
+	
+	let vDOM = [], // virtual DOM
 		events = {},
-		watchers = [];
-
-	view.$id = id++;
-	view.$vDOM = vDOM;
-	view.$ = function () {
-		updateBindings(vDOM);
-		view.$emit('update');
-	};
-	view.$destroy = function () {
-		destroyBindings(vDOM);
-		view.$emit('destroy');
-	};
-	view.$on = function (event, cb) {
-		if (!events[event]) { events[event] = []; }
-		events[event].push(cb);
-	};
-	view.$off = function (event, cb) {
-		arrayRemove(events[event], cb);
-	};
-	view.$emit = function (event) {
-		(events[event] || []).forEach(function (cb) { cb(); });
-	};
-	view.$watch = function (expr, cb) {
-		watchers.push({ expr: expr, syntax: parse(expr, { startRule: 'Expression' }), cb: cb });
-	};
-	view.$unwatch = function (expr, cb) {
-		var watcher = watchers.find(function (w) { return w.expr === expr && w.cb === cb; });
-		if (watcher) { arrayRemove(watchers, watcher); }
-	};
-	view.$on('update', function () {
-		watchers.forEach(function (watcher) {
-			var val = evaluate(watcher.syntax, view).value;
+		watchers = [],
+		view = {
+			$id: id++,
+			$vDOM: vDOM,
+			$() { // update binds
+				traverseVDOM(vDOM, el => el.binds.forEach(bind => bind.exec('update')));
+				view.$emit('update');
+			},
+			$destroy() {
+				traverseVDOM(vDOM, el => {
+					el.binds.forEach(bind => bind.exec('destroy'));
+					delete el.node.vElement;
+					el.removedAttrs.forEach(attr => el.node.setAttribute(attr.name, attr.value)); // restore attributes
+				});
+				view.$emit('destroy');
+			},
+			$on(event, cb) {
+				if (!events[event]) { events[event] = []; }
+				events[event].push(cb);
+			},
+			$off (event, cb) {
+				if (events[event]) { arrayRemove(events[event], cb); }
+			},
+			$emit (event) {
+				if (events[event]) { events[event].forEach(cb => cb()); }
+			},
+			$watch (expr, cb) {
+				watchers.push({ expr: expr, syntax: parse(expr), cb: cb });
+			},
+			$unwatch (expr, cb) {
+				const watcher = watchers.find(w => w.expr === expr && w.cb === cb);
+				if (watcher) { arrayRemove(watchers, watcher); }
+			},
+			$setParent (newParent) {
+				const oldParent = view.$parent;
+				view.$parent = newParent;
+				if (oldParent && oldParent.$off) { oldParent.$off('update', view.$); }
+				if (newParent.$on)               { newParent.$on ('update', view.$); }
+			}
+		};
+	Object.assign(view, data);
+	view.$on('update', () => {
+		watchers.forEach(watcher => {
+			const val = evaluate(watcher.syntax, view).value;
 			if (val !== watcher.val) {
 				watcher.val = val;
 				watcher.cb(val);
 			}
 		});
 	});
-	view.$setParent = function (newParent) {
-		var oldParent = view.$parent;
-		view.$parent = newParent;
-		if (oldParent && oldParent.$off) { oldParent.$off('update', view.$); }
-		if (newParent.$on)               { newParent.$on ('update', view.$); }
-	};
 	view.$setParent(parent || (el.vElement && el.vElement.view) || zam.root);
 
-	initBindings(view, el, vDOM); // traverse the dom
-	createBindings(vDOM);
+	initBinds(view, el, vDOM); // traverse the dom
+	traverseVDOM(vDOM, el => el.binds.forEach(bind => bind.exec('create')));
 
 	return view;
 };
 
-zam.version = version;
-zam.prefix = 'z-';
-zam.parse = parse;
-zam.evaluate = evaluate;
-zam.directive = function (directive) {
-	directive.block = directive.block;// || directive.template;
-	directive.order = directive.template ? 0.5 : directive.order || 100;
-	directives = directives.concat([directive]).sort(function (a, b) {
-		return a.order - b.order;
-	});
-	return directive;
-};
+Object.assign(zam, {
+	version, parse, evaluate,
+	prefix: 'z-',
+	directive(directive) {
+		if (directive.template) {
+			directive.block = true;
+			directive.order = 0.5;
+		}
+		if (!directive.order) { directive.order = 100; }
+		directives.push(directive);
+		directives.sort((a, b) => a.order - b.order);
+		return directive;
+	},
+	root: {
+		$parent: typeof global !== 'undefined' ? global : window,
+		number: (num, dec = 2) => Number(num).toFixed(dec),
+		percent: (num, dec = 2) => Number(num * 100).toFixed(dec) + '%'
+	}
+});
 
-zam.root = {};
-zam.root.$parent = typeof global !== 'undefined' ? global : window;
-zam.root.number = function (number, decimals) {
-	return Number(number).toFixed(decimals || 2);
-};
-zam.root.percent = function (number, decimals) {
-	return Number(number * 100).toFixed(decimals || 2) + '%';
-};
-
-
-var inlineParser = zam.directive({
+const inlineParser = zam.directive({
 	attribute: '{prefix}(text|html)',
 	block: true,
-	create: function (scope, el) {
+	create(scope, el) {
 		el.innerHTML = '';
 	},
-	update: function (scope, el, attr, type) {
-		var value = stringify(this.eval());
+	update(scope, el, attr, type) {
+		let value = stringify(this.eval());
 		if (value !== this.prevValue) {
 			if (type === 'html') {
 				el.innerHTML = value;
@@ -384,10 +384,10 @@ var inlineParser = zam.directive({
 
 zam.directive({
 	attribute: '{prefix}show',
-	update: function (scope, el) {
-		var value = !!this.eval();
+	update(scope, el) {
+		let value = this.eval() ? '' : 'none';
 		if (value !== this.prevValue) {
-			el.style.display = value ? '' : 'none';
+			el.style.display = value;
 			this.prevValue = value;
 		}
 	}
@@ -397,12 +397,12 @@ zam.directive({
 	attribute: '{prefix}exist',
 	order: 3,
 	block: true, // this prevents wasting effort when element does not exist
-	create: function (scope, el, attr) {
+	create(scope, el, attr) {
 		this.marker = document.createComment(attr);
 		el.parentNode.replaceChild(this.marker, el);
 	},	
-	update: function (scope, el) {
-		var value = !!this.eval();
+	update(scope, el) {
+		let value = !!this.eval();
 		if (value !== this.prevValue) {
 			if (value) {
 				this.clone = el.cloneNode(true);
@@ -424,42 +424,38 @@ zam.directive({
 	attribute: '{prefix}(.+)-in',
 	order: 2,
 	block: true, // do not continue traversing through this dom element (separate zam will be created)
-	create: function (scope, el, attr) {
+	create(scope, el, attr) {
 		this.items = [];
 		this.marker = document.createComment(attr);
-		//this.itemView = zam(el, undefined, scope);
 		el.parentNode.replaceChild(this.marker, el);
 	},	
-	update: function (scope, el, attr, varname) {
-		var that = this,
-			array = this.eval() || [];
-		var fragment = document.createDocumentFragment();
+	update(scope, el, attr, varname) {
+		let array = this.eval() || [],
+			fragment = document.createDocumentFragment();
 		// remove old nodes
-		that.items.forEach(function (item) {
+		this.items.forEach(item => {
 			if (array.indexOf(item.data) === -1) {
-				that.marker.parentNode.removeChild(item.el);
+				this.marker.parentNode.removeChild(item.el);
 				// TODO: destroy zam
-				arrayRemove(that.items, item);
+				arrayRemove(this.items, item);
 			}
 		});
 		// create new nodes / update existing nodes
-		array.forEach(function (data) {
-			var item = that.items.find(function (item_) {
+		array.forEach(data => {
+			let item = this.items.find(item_ => {
 				return item_.data === data;
 			});
 			if (!item) {
-				var clone = el.cloneNode(true);
-				//console.log('***********************', clone.vElement);
-				that.items.push({ el: clone, data: data });
+				let clone = el.cloneNode(true);
+				this.items.push({ el: clone, data });
 				fragment.appendChild(clone);
-				//that.marker.parentNode.insertBefore(clone, that.marker);
 			}
 			// todo: sorting (this mean that markers of child directives (e.g. exist) fall out of place)
 		});
-		that.marker.parentNode.insertBefore(fragment, this.marker);
+		this.marker.parentNode.insertBefore(fragment, this.marker);
 
 		// create any views (this needs to happen after dom insertion)
-		that.items.forEach(function (item) {
+		this.items.forEach(item => {
 			if (!item.view) {
 				item.view = zam(item.el, undefined, scope);
 				item.view[varname] = item.data;
@@ -469,32 +465,11 @@ zam.directive({
 	}
 });
 
-var standardAttributes = [
-	'accept', 'accept-charset', 'accesskey', 'action', 'align', 'alt',
-	'async', 'autocomplete', 'autofocus', 'autoplay', 'autosave',
-	'buffered', 'challenge', 'charset', 'checked', 'cite', 'class',
-	'code', 'codebase', 'cols', 'colspan', 'content', 'contenteditable',
-	'contextmenu', 'controls', 'coords', 'crossorigin', 'data', 'data-*',
-	'datetime', 'default', 'defer', 'dir', 'dirname', 'disabled', 'download',
-	'draggable', 'dropzone', 'enctype', 'for', 'form', 'formaction', 'headers',
-	'hidden', 'high', 'href', 'hreflang', 'http-equiv', 'icon', 'id',
-	'integrity', 'ismap' ,'itemprop', 'keytype', 'kind', 'label', 'lang',
-	'language', 'list', 'loop', 'low', 'manifest', 'max', 'maxlength',
-	'minlength', 'media', 'method', 'min', 'multiple', 'muted', 'name',
-	'novalidate', 'open', 'optimum', 'pattern', 'ping', 'placeholder', 'poster',
-	'preload', 'radiogroup', 'readonly', 'rel', 'required', 'reversed', 'rows',
-	'rowspan', 'sandbox', 'scope', 'scoped', 'seamless', 'selected', 'shape',
-	'size', 'sizes', 'slot', 'span', 'spellcheck', 'src', 'srcdoc', 'srclang',
-	'srcset', 'start', 'step', 'style', 'summary', 'tabindex', 'target', 'title',
-	'type', 'usemap', 'value', 'wrap'];
-var booleanAttributes = [
-	'selected', 'checked', 'disabled', 'readonly', 'multiple', 'ismap', 'defer', 
-	'noresize'];
 zam.directive({
 	attribute: '{prefix}(?:attr-(.+)|(' + standardAttributes.join('|') + '))',
-	update: function (scope, el, attr, attribute, stdattribute) {
+	update(scope, el, attr, attribute, stdattribute) {
 		attribute = attribute || stdattribute;
-		var value = this.eval();
+		let value = this.eval();
 		if (value !== this.prevValue) {
 			this.prevValue = value;
 			if (booleanAttributes.indexOf(attribute) > -1) {
@@ -511,74 +486,62 @@ zam.directive({
 
 zam.directive({
 	attribute: '{prefix}class-(.+)',
-	update: function (scope, el, attr, classname) {
-		el.classList.toggle(classname, !!this.eval());
+	update(scope, el, attr, classname) {
+		let value = !!this.eval();
+		if (value !== this.prevValue) {
+			this.prevValue = value;
+			el.classList.toggle(classname, value);
+		}
 	}
 });
 
-var standardStyles = [
-	'align-.*', 'all', 'animation', 'animation-.*', 'backface-visibility',
-	'background', 'background-.*', 'border', 'border-.*', 'bottom', 'box-.*',
-	'break-.*', 'caption-side', 'caret-color', 'clear', 'clip', 'clip-path',
-	'color', 'column-.*', 'columns', 'content', 'counter-.*', 'cursor',
-	'direction', 'display', 'empty-cells', 'filter', 'flex-.*', 'float', 'font',
-	'font-.*', 'grid', 'grid-.*', 'height', 'hyphens', 'image-.*', 'ime-mode',
-	'inline-size', 'isolation', 'justify-content', 'left', 'letter-spacing',
-	'line-.*', 'list-.*', 'margin', 'margin-.*', 'mask', 'mask-.*', 'max-height',
-	'max-width', 'min-block-size', 'min-height', 'min-inline-size', 'min-width',
-	'mix-blend-mode', 'object-fit', 'object-position', 'offset-.*', 'opacity',
-	'order', 'orphans', 'outline', 'outline-.*', 'overflow', 'overflow-.*',
-	'padding', 'padding-.*', 'page-break-.*', 'perspective', 'perspective-origin',
-	'pointer-events', 'position', 'quotes', 'resize', 'right', 'scroll-.*',
-	'shape-.*', 'tab-size', 'table-layout', 'text-.*', 'top', 'touch-action',
-	'transform', 'transform-.*', 'transition', 'transition-.*', 'unicode-bidi',
-	'unset', 'vertical-align', 'visibility', 'white-space', 'widows', 'width',
-	'will-change', 'word-.*', 'writing-mode', 'z-index'];
 zam.directive({
 	attribute: '{prefix}(?:style-(.+)|(' + standardStyles.join('|') + '))',
-	update: function (scope, el, attr, style, stdstyle) {
-		el.style[style || stdstyle] = this.eval();
+	update(scope, el, attr, style, stdstyle) {
+		let value = this.eval();
+		if (value !== this.prevValue) {
+			this.prevValue = value;
+			el.style[style || stdstyle] = value;
+		}
 	}
 });
 
 zam.directive({
 	attribute: '{prefix}model',
 	block: true,
-	create: function (scope, el) {
-		var that = this,
-			tag = el.tagName.toLowerCase(),
+	create(scope, el) {
+		let tag = el.tagName.toLowerCase(),
 			inputType = (el.getAttribute('type') || '').toLowerCase();
-		this.type = tag === 'select' ? 'select' :
-					tag === 'textarea' ? 'text' :
-					inputType === 'range' ? 'number' :
+		this.type = inputType === 'checkbox' ? 'checkbox' :
+					tag === 'select' ? 'select' :
+					inputType === 'radio' ? 'radio' :
+					['range', 'number'].indexOf(inputType) > -1 ? 'number' :
 					['date', 'datetime-local', 'time', 'month', 'week'].indexOf(inputType) > -1 ? 'date' :
-					inputType;
-		if (that.type === 'radio' && !el.getAttribute('name')) {
+					'text';
+		if (this.type === 'radio' && !el.getAttribute('name')) {
 			el.setAttribute('name', hash(scope.$id + JSON.stringify(this.syntax))); // group radios by their model and scope
 		}
-		this.optionValue = function (option) {
-			if (option.getAttribute('z-value')) {
-				var syntax = parse(option.getAttribute('z-value'), { startRule: 'Expression' });
-				return that.eval(syntax);
-			} else {
-				return option.getAttribute('value');
-			}
+		this.getValue = option => {
+			var valExpr = option.getAttribute('z-value');
+			return valExpr ?
+				this.eval(parse(valExpr)) :
+				option.getAttribute('value');
 		};
-		this.handler = function () {
-			if (that.type === 'radio' && !el.checked) { return; }
-			var value = that.type === 'checkbox' ? !!el.checked :
-						that.type === 'select' ? that.optionValue(el.options[el.selectedIndex]) :
-						that.type === 'radio' ? that.optionValue(el) :
-						that.type === 'number' ? Number(el.value) :
-						that.type === 'date' ? el.valueAsDate :
+		this.handler = () => {
+			if (this.type === 'radio' && !el.checked) { return; }
+			let value = this.type === 'checkbox' ? !!el.checked :
+						this.type === 'select' ? this.getValue(el.options[el.selectedIndex]) :
+						this.type === 'radio' ? this.getValue(el) :
+						this.type === 'number' ? Number(el.value) :
+						this.type === 'date' ? el.valueAsDate :
 						el.value;
-			if (value !== that.prevValue) {
-				that.prevValue = value;
-				that.eval({ // evaluate "<expression> = <value>"
+			if (value !== this.prevValue) {
+				this.prevValue = value;
+				this.eval({ // evaluate "<expression> = <value>"
 					type: 'Assignment',
 					operator: '=',
-					left: that.syntax,
-					right: { type: 'Literal', value: value }
+					left: this.syntax,
+					right: { type: 'Literal', value }
 				});
 				scope.$();
 			}
@@ -589,20 +552,19 @@ zam.directive({
 			el.selectedIndex = -1; // select empty value
 		}
 	},
-	update: function (scope, el) { // update dom
-		var that = this,
-			value = this.eval();
+	update(scope, el) { // update dom
+		let value = this.eval();
 		if (value !== this.prevValue) {
 			if (this.type === 'checkbox') {
 				el.checked = !!value;
 			} else if (this.type === 'select') {
-				el.selectedIndex = Array.from(el.options).reduce(function (selected, option, i) {
-					var v = that.optionValue(option);
+				el.selectedIndex = Array.from(el.options).reduce((selected, option, i) => {
+					let v = this.getValue(option);
 					option.setAttribute('value', stringify(v));
 					return v === value ? i : selected;
 				}, -1);
 			} else if (this.type === 'radio') {
-				var v = that.optionValue(el);
+				let v = this.getValue(el);
 				el.checked = value === v;
 				el.setAttribute('value', stringify(v));
 			} else if (this.type === 'number') {
@@ -615,32 +577,24 @@ zam.directive({
 			this.prevValue = value;
 		}
 	},
-	destroy: function (scope, el) {
+	destroy(scope, el) {
 		el.removeEventListener('input', this.handler);
 		el.removeEventListener('change', this.handler);
 	}
 });
 
-var standardEvents = [
-	'load', 'error', 'focus', 'blur', 'click', 'dblclick',   'mousedown',
-	'mousemove', 'mouseup', 'mouseenter', 'mouseleave', 'mouseover', 'mouseout',
-	'keyup', 'keydown', 'keypress', 'input', 'change', 'submit', 'reset',
-	'scroll', 'resize',  'dragstart', 'dragend', 'dragenter', 'dragover',
-	'dragleave', 'drag', 'drop'];
-
 zam.directive({
 	attribute: '{prefix}(?:on-(.+)|(' + standardEvents.join('|') + '))',
-	create: function (scope, el, attr, event, stdevent) {
-		var that = this;
-		this.handler = function (e) {
-			scope.$event = e;
-			that.eval();
+	create(scope, el, attr, event, stdevent) {
+		this.handler = event => {
+			scope.$event = event;
+			this.eval();
 			delete scope.$event;
 			scope.$();
 		};
 		el.addEventListener(event || stdevent, this.handler);
 	},
-	destroy: function (scope, el, attr, event, stdevent) {
+	destroy(scope, el, attr, event, stdevent) {
 		el.removeEventListener(event || stdevent, this.handler);
 	}
 });
