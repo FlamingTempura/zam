@@ -5,27 +5,27 @@ Zam is a fast and minimal library for rendering HTML views and automatically kee
 ```html
 <html>
 <body>
-	<div z-todo-in="todos" z-show="!todo.done">
-		{{ todo.message }}
-		<button z-click="todo.done = true">Done</button>
-	</div>
-	<input type="text" z-model="newTodo.message">
-	<button z-click="create()">Create</button>
-	<script src="zam.js"></script>
-	<script>
-		var view = zam(document.body);
-		view.todos = [];
-		view.newTodo = {};
-		view.create = function () {
-			view.todos.push(view.newTodo);
-			view.newTodo = {};
-		};
-	</script>
+    <div z-todo-in="todos" z-show="!todo.done">
+        {{ todo.message }}
+        <button z-click="todo.done = true">Done</button>
+    </div>
+    <input type="text" z-model="newTodo.message">
+    <button z-click="create()">Create</button>
+    <script src="zam.js"></script>
+    <script>
+        var view = zam(document.body);
+        view.todos = [];
+        view.newTodo = {};
+        view.create = function () {
+            view.todos.push(view.newTodo);
+            view.newTodo = {};
+        };
+    </script>
 </body>
 </html>
 ```
 
-Zam uses [Proxy objects](https://developer.mozilla.org/en/docs/Web/JavaScript/Reference/Global_Objects/Proxy) to observe changes in the data. This means that Zam knows when the update the view and it is not necessary to manually render the view. Each of the below statements will cause the view to be updated (to ensure efficiency, the view is actually only updated once following the last statement).
+Zam uses [Proxy objects](https://developer.mozilla.org/en/docs/Web/JavaScript/Reference/Global_Objects/Proxy) to observe changes in the data. This means that Zam knows when to update the view; it is not necessary to manually render the view. Each of the below statements will cause the view to be updated (to ensure efficiency, the view will actually only update once, following the last statement).
 
 ```js
 var view = zam(document.body);
@@ -73,7 +73,7 @@ var view3 = zam(document.getElementById('memo'));
 
 Directives are specific instructions on how to display the view.
 
-#### `z-text` and `z-html`	- Set text or HTML content
+#### `z-text` and `z-html`  - Set text or HTML content
 
 Note: HTML is not parsed for directives.
 
@@ -83,11 +83,11 @@ Note: HTML is not parsed for directives.
 <div>Some HTML: {{{ boldName }}}</div>
 <div>Even more HTML: <span z-html="italicName"></span></div>
 <script>
-	var view = zam(document.body);
-	view.me = { name: 'Bob' };
-	view.alice = { name: 'Alice' };
-	view.boldName = '<strong>Bob</strong>';
-	view.italicName = '<em>Bob</em>';
+    var view = zam(document.body);
+    view.me = { name: 'Bob' };
+    view.alice = { name: 'Alice' };
+    view.boldName = '<strong>Bob</strong>';
+    view.italicName = '<em>Bob</em>';
 </script>
 ```
 
@@ -102,12 +102,12 @@ Conditionally display the element. Equivelant to `z-attr-display="thing ? '' : '
 <div z-show="showMe">My name is {{ me.name }}</div>
 <button z-on-click="hide()">Hide</button>
 <script>
-	var view = zam(document.body);
-	view.me = { name: 'Bob' };
-	view.showMe = true;
-	view.hide = function () {
-		view.showMe = false;
-	};
+    var view = zam(document.body);
+    view.me = { name: 'Bob' };
+    view.showMe = true;
+    view.hide = function () {
+        view.showMe = false;
+    };
 </script>
 ```
 
@@ -121,12 +121,12 @@ Note: this is equivelant to ng-if in angular.
 <div z-exist="showMe">My name is {{ me.name }}</div>
 <button z-on-click="hide()">Hide</button>
 <script>
-	var view = zam(document.body);
-	view.me = { name: 'Bob' };
-	view.showMe = true;
-	view.hide = function () {
-		view.showMe = false;
-	};
+    var view = zam(document.body);
+    view.me = { name: 'Bob' };
+    view.showMe = true;
+    view.hide = function () {
+        view.showMe = false;
+    };
 </script>
 ```
 
@@ -139,12 +139,12 @@ Note: this is roughly equivelant to ng-repeat.
 ```html
 <div z-todo-in="todos">{{ todo.message }}</div>
 <script>
-	var view = zam(document.body);
-	view.todos = [
-		{ message: 'Buy food' },
-		{ message: 'Fix code' },
-		{ message: 'Wash clothes' }
-	];
+    var view = zam(document.body);
+    view.todos = [
+        { message: 'Buy food' },
+        { message: 'Fix code' },
+        { message: 'Wash clothes' }
+    ];
 </script>
 ```
 
@@ -153,8 +153,8 @@ Note: this is roughly equivelant to ng-repeat.
 ```html
 <button z-attr-disabled="showMe"></button>
 <script>
-	var view = zam(document.body);
-	view.showMe = false;
+    var view = zam(document.body);
+    view.showMe = false;
 </script>
 ```
 
@@ -168,8 +168,8 @@ _Shorthand:_ `attr-` may be omitted for standard HTML attributes, such as such a
 ```html
 <h4 z-class-red="warning"></h4>
 <script>
-	var view = zam(document.body);
-	view.warning = true;
+    var view = zam(document.body);
+    view.warning = true;
 </script>
 ```
 
@@ -177,8 +177,8 @@ _Shorthand:_ `attr-` may be omitted for standard HTML attributes, such as such a
 ```html
 <h1 z-style-font-weight="big ? 'bold' : 'normal'"></h1>
 <script>
-	var view = zam(document.body);
-	view.big = true;
+    var view = zam(document.body);
+    view.big = true;
 </script>
 ```
 
@@ -196,11 +196,11 @@ Two way binding with input element value. The input value will be set to the val
 {{ blah }} <!-- this will always display the value entered in the text input -->
 <input type="button" z-click="thing()">
 <script>
-	var view = zam(document.body);
-	view.blah = 'foo'; // will set the value of the input to blah
-	view.thing = function () {
-		console.log(view.blah); // will print whatever the user entered into the input
-	}
+    var view = zam(document.body);
+    view.blah = 'foo'; // will set the value of the input to blah
+    view.thing = function () {
+        console.log(view.blah); // will print whatever the user entered into the input
+    }
 </script>
 ```
 
@@ -211,10 +211,10 @@ Execute an expression when an event happens. Event data is available in `$event`
 ```html
 <input type="button" z-on-click="doSomething($event)">
 <script>
-	var view = zam(document.body);
-	view.doSomething = function (e) {
-		console.log('click!', e.clientX, e.clientY);
-	}
+    var view = zam(document.body);
+    view.doSomething = function (e) {
+        console.log('click!', e.clientX, e.clientY);
+    }
 </script>
 ```
 
@@ -236,20 +236,20 @@ Directives have access to their parent scopes through `$parent`:
 
 ```html
 <div class="foo">
-	{{ food }} <!-- chips -->
-	{{ drink }} <!-- tea -->
-	<div class="bar">
-		{{ food }} <!-- chips -->
-		{{ drink }} <!-- coffee -->
-		{{ $parent.drink }} <!-- tea -->
-	</div>
+    {{ food }} <!-- chips -->
+    {{ drink }} <!-- tea -->
+    <div class="bar">
+        {{ food }} <!-- chips -->
+        {{ drink }} <!-- coffee -->
+        {{ $parent.drink }} <!-- tea -->
+    </div>
 </div>
 <script>
-	var foo = zam('.foo'),
-		bar = zam('.bar');
-	foo.food = 'chips';
-	foo.drink = 'tea';
-	bar.drink = 'coffee';
+    var foo = zam('.foo'),
+        bar = zam('.bar');
+    foo.food = 'chips';
+    foo.drink = 'tea';
+    bar.drink = 'coffee';
 </script>
 ```
 
@@ -257,17 +257,17 @@ Directives have access to their parent scopes through `$parent`:
 
 ```js
 zam.directive({
-	attribute: 'hide',
-	update: function (el) {
-		$(el).toggle(!this.eval());
-	}
+    attribute: 'hide',
+    update: function (el) {
+        $(el).toggle(!this.eval());
+    }
 });
 
 zam.directive({
-	attribute: 'on-scroll-([xy])',
-	create: function () {},
-	update: function (el) {},
-	destroy: function (el) {}
+    attribute: 'on-scroll-([xy])',
+    create: function () {},
+    update: function (el) {},
+    destroy: function (el) {}
 });
 ```
 * `attribute` - elements with an attribute matching this pattern will use this directive.. This can contain regular expressions. Results from capture groups will be provided to create, update, and remove methods.
@@ -321,11 +321,11 @@ The root object is provided to all views and can be used to provide methods and 
 ```html
 {{ food }}, {{ drink }}, {{ sweet }} <!-- chips, beer, cake -->
 <script>
-	zam.root.food = 'chips';
-	zam.root.drink = 'water';
-	var view = zam(document.body);
-	view.drink = 'beer';
-	zam.root.sweet = 'cake';
+    zam.root.food = 'chips';
+    zam.root.drink = 'water';
+    var view = zam(document.body);
+    view.drink = 'beer';
+    zam.root.sweet = 'cake';
 </script>
 ```
 
@@ -340,11 +340,11 @@ You may wish to define other utility functions in root:
 {{ percent(0.17) }} <!-- 17.00% -->
 {{ date(d, 'DD MMM' }} <!-- 17 Jan -->
 <script>
-	zam.root.date = function (date, format) {
-		return moment(format).format(format);
-	};
-	var view = zam(document.body);
-	view.d = new Date(2017, 0, 17);
+    zam.root.date = function (date, format) {
+        return moment(format).format(format);
+    };
+    var view = zam(document.body);
+    view.d = new Date(2017, 0, 17);
 </script>
 ```
 
