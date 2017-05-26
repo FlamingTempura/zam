@@ -1,6 +1,6 @@
 # Zam.js - Lightweight DOM data binding
 
-Zam is a fast and minimal library for rendering HTML views and keeping them up-to-date. Zam focuses only on the view, and does not require any particular data structures to be used. It is designed to be easy to use, yet powerful enough to handle large-scale web pages. [Try it out on JSFiddle](https://jsfiddle.net/1ta0eada/).
+Zam is a fast and minimal library for rendering HTML views and automatically keeping them up-to-date. Zam focuses only on the view, and does not require any particular data structures to be used. It is designed to be easy to use, yet powerful enough to handle large-scale web pages. [Try it out on JSFiddle](https://jsfiddle.net/1ta0eada/).
 
 ```html
 <html>
@@ -16,7 +16,6 @@ Zam is a fast and minimal library for rendering HTML views and keeping them up-t
 		var view = zam(document.body);
 		view.todos = [];
 		view.newTodo = {};
-		view.$(); // update the view
 		view.create = function () {
 			view.todos.push(view.newTodo);
 			view.newTodo = {};
@@ -24,6 +23,16 @@ Zam is a fast and minimal library for rendering HTML views and keeping them up-t
 	</script>
 </body>
 </html>
+```
+
+Zam uses [Proxy objects](https://developer.mozilla.org/en/docs/Web/JavaScript/Reference/Global_Objects/Proxy) to observe changes in the data. This means that Zam knows when the update the view and it is not necessary to manually render the view. Each of the below statements will cause the view to be updated (to ensure efficiency, the view is actually only updated once following the last statement).
+
+```js
+var view = zam(document.body);
+view.a = 1;
+view.a = 2;
+view.b = {};
+view.b.c = 2;
 ```
 
 ## Installation
@@ -60,21 +69,6 @@ var view2 = zam($('.navbar'));
 var view3 = zam(document.getElementById('memo'));
 ```
 
-#### `view.$()` - Render/update the view
-
-After any changes to the data, call `view.$()` to update the view:
-
-```html
-<div class="contact">Name: {{ name }}</div>
-<script>
-	var view = zam('.contact');
-	view.name = 'Joe';
-	view.$(); // will update view to Joe
-	view.name = 'Jane';
-	view.$(); // will update view to Jane
-</script>
-```
-
 ## Directives
 
 Directives are specific instructions on how to display the view.
@@ -94,7 +88,6 @@ Note: HTML is not parsed for directives.
 	view.alice = { name: 'Alice' };
 	view.boldName = '<strong>Bob</strong>';
 	view.italicName = '<em>Bob</em>';
-	view.$();
 </script>
 ```
 
@@ -112,11 +105,9 @@ Conditionally display the element. Equivelant to `z-attr-display="thing ? '' : '
 	var view = zam(document.body);
 	view.me = { name: 'Bob' };
 	view.showMe = true;
-	view.$();
 	view.hide = function () {
 		view.showMe = false;
 	};
-	view.$();
 </script>
 ```
 
@@ -136,7 +127,6 @@ Note: this is equivelant to ng-if in angular.
 	view.hide = function () {
 		view.showMe = false;
 	};
-	view.$();
 </script>
 ```
 
@@ -155,7 +145,6 @@ Note: this is roughly equivelant to ng-repeat.
 		{ message: 'Fix code' },
 		{ message: 'Wash clothes' }
 	];
-	view.$();
 </script>
 ```
 
@@ -166,7 +155,6 @@ Note: this is roughly equivelant to ng-repeat.
 <script>
 	var view = zam(document.body);
 	view.showMe = false;
-	view.$();
 </script>
 ```
 
@@ -182,7 +170,6 @@ _Shorthand:_ `attr-` may be omitted for standard HTML attributes, such as such a
 <script>
 	var view = zam(document.body);
 	view.warning = true;
-	view.$();
 </script>
 ```
 
@@ -192,7 +179,6 @@ _Shorthand:_ `attr-` may be omitted for standard HTML attributes, such as such a
 <script>
 	var view = zam(document.body);
 	view.big = true;
-	view.$();
 </script>
 ```
 
@@ -211,8 +197,7 @@ Two way binding with input element value. The input value will be set to the val
 <input type="button" z-click="thing()">
 <script>
 	var view = zam(document.body);
-	view.blah = 'foo';
-	view.$(); // will set the value of the input to blah
+	view.blah = 'foo'; // will set the value of the input to blah
 	view.thing = function () {
 		console.log(view.blah); // will print whatever the user entered into the input
 	}
@@ -221,7 +206,7 @@ Two way binding with input element value. The input value will be set to the val
 
 #### `z-on-*` - Event handler
 
-Execute an expression when an event happens. Event data is available in `$event`. View will automatically update after the event (so `view.$()` is not necessary in an event handler).
+Execute an expression when an event happens. Event data is available in `$event`.
 
 ```html
 <input type="button" z-on-click="doSomething($event)">
@@ -265,8 +250,6 @@ Directives have access to their parent scopes through `$parent`:
 	foo.food = 'chips';
 	foo.drink = 'tea';
 	bar.drink = 'coffee';
-	foo.$();
-	bar.$();
 </script>
 ```
 
@@ -343,7 +326,6 @@ The root object is provided to all views and can be used to provide methods and 
 	var view = zam(document.body);
 	view.drink = 'beer';
 	zam.root.sweet = 'cake';
-	view.$();
 </script>
 ```
 
@@ -363,7 +345,6 @@ You may wish to define other utility functions in root:
 	};
 	var view = zam(document.body);
 	view.d = new Date(2017, 0, 17);
-	view.$();
 </script>
 ```
 

@@ -41,7 +41,8 @@ var view = zam($('#thing'));
 
 view.color = 'red';
 view.memos = [{ title: 'blah' }, { title: 'blahdeblah' }];
-view.$();
+view.$q = 1;
+//view.$();
 setInterval(function () {
 	//view.color = view.color === 'red' ? 'green' : 'red';
 	view.upper = !view.upper;
@@ -53,7 +54,7 @@ setInterval(function () {
 	}*/
 	view.d = !view.d;
 	view.q = view.q === 1 ? 'a' : 1;
-	view.$();
+	//view.$();
 }, 1000);
 
 view.$watch('q', function (q) {

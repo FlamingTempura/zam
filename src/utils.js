@@ -1,4 +1,4 @@
-/* jshint node: true, esversion: 6 */
+/* jshint node: true, browser: true, esversion: 6 */
 'use strict';
 
 const stringify = value => String(value !== null && typeof value !== 'undefined' ? value : '');
@@ -15,4 +15,17 @@ const hash = str => {
 	}, 0).toString(16);
 };
 
-export { stringify, arrayRemove, hash };
+const nextTick = typeof process !== 'undefined' ? process.nextTick : cb => {
+	let id = String(Math.random()),
+		fn = e => {
+			if (e.data === id) {
+				e.stopPropagation();
+				cb();
+				window.removeEventListener('message', fn, true);
+			}
+		};
+	window.addEventListener('message', fn, true);
+	window.postMessage(id, '*');
+};
+
+export { stringify, arrayRemove, hash, nextTick };

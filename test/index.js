@@ -1,4 +1,4 @@
-/* jshint node: true, esversion: 6 */
+/* jshint node: true, esversion: 6, browser: true */
 'use strict';
 
 var jsdom = require('jsdom'),
@@ -34,8 +34,14 @@ var $ = function (selector) {
 var $$ = function (selector) {
 	return global.document.querySelectorAll(selector);
 };
-var later = function (cb) { // simulate a change happening later
-	setTimeout(cb, 5);
+var frames = function () { // each frame happens following the previous frame, giving time for dom updates
+	var callbacks = Array.from(arguments);
+	setTimeout(function () {
+		callbacks.shift()();
+		if (callbacks.length > 0) {
+			frames.apply(null, callbacks);
+		}
+	});
 };
 var trigger = function (element, eventname) {
 	var event = new global.window.Event(eventname);
@@ -50,34 +56,43 @@ test('component creation', function (t) {
 	var view1 = zam('#a'),
 		view2 = zam($('#b')),
 		view3 = zam([$('#c')]); // jquery-like
-	view1.name = view2.name = view3.name = 'Lizzy';
-	view1.$();
-	view2.$();
-	view3.$();
-	t.equal($('#a').textContent, 'Lizzy');
-	t.equal($('#b').textContent, 'Lizzy');
-	t.equal($('#c').textContent, 'Lizzy');
+	frames(
+		function () {
+			view1.name = view2.name = view3.name = 'Lizzy';
+		},
+		function () {
+			t.equal($('#a').textContent, 'Lizzy');
+			t.equal($('#b').textContent, 'Lizzy');
+			t.equal($('#c').textContent, 'Lizzy');
+		}
+	);
 });
 
 test('text interpolation', function (t) {
-	t.plan(7);
+	t.plan(9);
 	up(`<div id="a">{{ name }}</div>
 		<div id="b">{{ name + 'y' }}</div>
 		<div id="c">{{ something }}</div>`);
 	var view = zam(document.body);
-	view.name = 'dave';
 	t.equal($('#a').textContent, '');
 	t.equal($('#b').textContent, '');
-	view.$();
-	t.equal($('#a').textContent, 'dave');
-	t.equal($('#b').textContent, 'davey');
-	t.equal($('#c').textContent, '');
-	later(function () {
-		view.name = 'bob';
-		view.$();
-		t.equal($('#a').textContent, 'bob');
-		t.equal($('#b').textContent, 'boby');
-	});
+	frames(
+		function () {
+			t.equal($('#a').textContent, '');
+			t.equal($('#b').textContent, 'y');
+			view.name = 'dave';
+		},
+		function () {
+			t.equal($('#a').textContent, 'dave');
+			t.equal($('#b').textContent, 'davey');
+			t.equal($('#c').textContent, '');
+			view.name = 'bob';
+		},
+		function () {
+			t.equal($('#a').textContent, 'bob');
+			t.equal($('#b').textContent, 'boby');
+		}
+	);
 });
 
 test('html interpolation', function (t) {
@@ -85,22 +100,26 @@ test('html interpolation', function (t) {
 	up(`<div id="a">{{{ name }}}</div>
 		<div id="b">{{{ name + 'y' }}}</div>`);
 	var view = zam(document.body);
-	view.name = '<strong>dave</strong>';
-	t.equal($('#a').textContent, '');
-	t.equal($('#b').textContent, '');
-	view.$();
-	t.equal($('#a').textContent, 'dave');
-	t.equal($('#b').textContent, 'davey');
-	t.equal($('#a strong').textContent, 'dave');
-	t.equal($('#b strong').textContent, 'dave');
-	later(function () {
-		view.name = '<em>bob</em>';
-		view.$();
-		t.equal($('#a').textContent, 'bob');
-		t.equal($('#b').textContent, 'boby');
-		t.equal($('#a em').textContent, 'bob');
-		t.equal($('#b em').textContent, 'bob');
-	});
+	frames(
+		function () {
+			t.equal($('#a').textContent, '');
+			t.equal($('#b').textContent, 'y');
+			view.name = '<strong>dave</strong>';
+		},
+		function () {
+			t.equal($('#a').textContent, 'dave');
+			t.equal($('#b').textContent, 'davey');
+			t.equal($('#a strong').textContent, 'dave');
+			t.equal($('#b strong').textContent, 'dave');
+			view.name = '<em>bob</em>';
+		},
+		function () {
+			t.equal($('#a').textContent, 'bob');
+			t.equal($('#b').textContent, 'boby');
+			t.equal($('#a em').textContent, 'bob');
+			t.equal($('#b em').textContent, 'bob');
+		}
+	);
 });
 
 test('z-text', function (t) { // set text content
@@ -108,18 +127,22 @@ test('z-text', function (t) { // set text content
 	up(`<div>Name: <span z-text="person.name">delete me</span></div>
 		<strong z-text="'Welcome ' + person.name"></strong>`);
 	var view = zam(document.body);
-	t.equal($('span').textContent, '');
-	t.equal($('strong').textContent, '');
-	view.person = { name: 'Alice' };
-	view.$();
-	t.equal($('span').textContent, 'Alice');
-	t.equal($('strong').textContent, 'Welcome Alice');
-	later(function () {
-		view.person = { name: 'Bob' };
-		view.$();
-		t.equal($('span').textContent, 'Bob');
-		t.equal($('strong').textContent, 'Welcome Bob');
-	});
+	frames(
+		function () {
+			t.equal($('span').textContent, '');
+			t.equal($('strong').textContent, 'Welcome ');
+			view.person = { name: 'Alice' };
+		},
+		function () {
+			t.equal($('span').textContent, 'Alice');
+			t.equal($('strong').textContent, 'Welcome Alice');
+			view.person = { name: 'Bob' };
+		},
+		function () {
+			t.equal($('span').textContent, 'Bob');
+			t.equal($('strong').textContent, 'Welcome Bob');
+		}
+	);
 });
 
 test('z-html', function (t) { // Set HTML content
@@ -127,24 +150,30 @@ test('z-html', function (t) { // Set HTML content
 	up(`<div z-html="boldName">Some HTML</div>
 		Even more HTML: <span z-html="italicName + 'boo'"></span>`);
 	var view = zam(document.body);
-	t.equal($('div').textContent, '');
-	t.equal($('span').textContent, '');
-	view.boldName = '<strong>Alice</strong>';
-	view.italicName = '<em>Bob</em>';
-	view.$();
-	t.equal($('div').textContent, 'Alice');
-	t.equal($('div strong').textContent, 'Alice');
-	t.equal($('span').textContent, 'Bobboo');
-	t.equal($('span em').textContent, 'Bob');
-	later(function () {
-		view.boldName = '<strong>Bob</strong>';
-		view.italicName = '<em>Alice</em>';
-		view.$();
-		t.equal($('div').textContent, 'Bob');
-		t.equal($('div strong').textContent, 'Bob');
-		t.equal($('span').textContent, 'Aliceboo');
-		t.equal($('span em').textContent, 'Alice');
-	});
+	frames(
+		function () {
+			t.equal($('div').textContent, '');
+			t.equal($('span').textContent, 'boo');
+			view.boldName = '<strong>Alice</strong>';
+			view.italicName = '<em>Bob</em>';
+		},
+		function () {
+			t.equal($('div').textContent, 'Alice');
+			t.equal($('div strong').textContent, 'Alice');
+			t.equal($('span').textContent, 'Bobboo');
+			t.equal($('span em').textContent, 'Bob');
+		},
+		function () {
+			view.boldName = '<strong>Bob</strong>';
+			view.italicName = '<em>Alice</em>';
+		},
+		function () {
+			t.equal($('div').textContent, 'Bob');
+			t.equal($('div strong').textContent, 'Bob');
+			t.equal($('span').textContent, 'Aliceboo');
+			t.equal($('span em').textContent, 'Alice');
+		}
+	);
 });
 
 test('z-show', function (t) { // Conditionally display the element. Equivelant to attr-display="thing ? "" : 'none'".
@@ -152,22 +181,29 @@ test('z-show', function (t) { // Conditionally display the element. Equivelant t
 	up(`<div z-show="showMe">Hello</div>
 		<span z-show="!showMe">Boo</span>`);
 	var view = zam(document.body);
-	t.equal($('div').style.display, '');
-	t.equal($('span').style.display, '');
-	view.showMe = true;
-	view.$();
-	t.equal($('div').style.display, '');
-	t.equal($('span').style.display, 'none');
-	view.showMe = 1;
-	view.$();
-	t.equal($('div').style.display, '');
-	t.equal($('span').style.display, 'none');
-	later(function () {
-		view.showMe = false;
-		view.$();
-		t.equal($('div').style.display, 'none');
-		t.equal($('span').style.display, '');
-	});
+	frames(
+		function () {
+			t.equal($('div').style.display, 'none');
+			t.equal($('span').style.display, '');
+			view.showMe = true;
+		},
+		function () {
+			t.equal($('div').style.display, '');
+			t.equal($('span').style.display, 'none');
+			view.showMe = 1;
+		},
+		function () {
+			t.equal($('div').style.display, '');
+			t.equal($('span').style.display, 'none');
+		},
+		function () {
+			view.showMe = false;
+		},
+		function () {
+			t.equal($('div').style.display, 'none');
+			t.equal($('span').style.display, '');
+		}
+	);
 });
 
 test('z-skip', function (t) { // Skip compilation of this element
@@ -177,9 +213,12 @@ test('z-skip', function (t) { // Skip compilation of this element
 	var view = zam(document.body);
 	view.skipme = 'boo';
 	view.blah = 'blah';
-	view.$();
-	t.equal($('div').textContent, 'hello {{ skipme }}');
-	t.equal($('input').getAttribute('z-model'), 'blah');
+	frames(
+		function () {
+			t.equal($('div').textContent, 'hello {{ skipme }}');
+			t.equal($('input').getAttribute('z-model'), 'blah');
+		}
+	);
 });
 
 test('z-attr-*', function (t) { // Attribute value
@@ -188,17 +227,19 @@ test('z-attr-*', function (t) { // Attribute value
 		<div z-attr-lang="showMe ? 'english' : 'french'"></div>`);
 	var view = zam(document.body);
 	view.showMe = false;
-	view.$();
-	t.equal($('input').getAttribute('disabled'), 'disabled');
-	t.equal($('input').getAttribute('value'), 'true');
-	t.equal($('div').getAttribute('lang'), 'french');
-	later(function () {
-		view.showMe = true;
-		view.$();
-		t.equal($('input').getAttribute('disabled'), null);
-		t.equal($('input').getAttribute('value'), 'false');
-		t.equal($('div').getAttribute('lang'), 'english');
-	});
+	frames(
+		function () {
+			t.equal($('input').getAttribute('disabled'), 'disabled');
+			t.equal($('input').getAttribute('value'), 'true');
+			t.equal($('div').getAttribute('lang'), 'french');
+			view.showMe = true;
+		},
+		function () {
+			t.equal($('input').getAttribute('disabled'), null);
+			t.equal($('input').getAttribute('value'), 'false');
+			t.equal($('div').getAttribute('lang'), 'english');
+		}
+	);
 });
 
 test('z-class-*', function (t) { // Conditional class name
@@ -206,13 +247,15 @@ test('z-class-*', function (t) { // Conditional class name
 	up(`<h4 class="thing" z-class-red="warning" z-class-blue="!warning"></h4>`);
 	var view = zam(document.body);
 	view.warning = false;
-	view.$();
-	t.equal($('h4').getAttribute('class'), 'thing blue');
-	later(function () {
-		view.warning = true;
-		view.$();
-		t.equal($('h4').getAttribute('class'), 'thing red');
-	});
+	frames(
+		function () {
+			t.equal($('h4').getAttribute('class'), 'thing blue');
+			view.warning = true;
+		},
+		function () {
+			t.equal($('h4').getAttribute('class'), 'thing red');
+		}
+	);
 });
 
 
@@ -221,15 +264,17 @@ test('z-style-*', function (t) { // Style value
 	up(`<h1 z-style-font-weight="big ? 'bold' : 'normal'" z-text-transform="big ? 'uppercase' : 'lowercase'"></h1>`);
 	var view = zam(document.body);
 	view.big = false;
-	view.$();
-	t.equal($('h1').style.fontWeight, 'normal');
-	t.equal($('h1').style.textTransform, 'lowercase');
-	later(function () {
-		view.big = true;
-		view.$();
-		t.equal($('h1').style.fontWeight, 'bold');
-		t.equal($('h1').style.textTransform, 'uppercase');
-	});
+	frames(
+		function () {
+			t.equal($('h1').style.fontWeight, 'normal');
+			t.equal($('h1').style.textTransform, 'lowercase');
+			view.big = true;
+		},
+		function () {
+			t.equal($('h1').style.fontWeight, 'bold');
+			t.equal($('h1').style.textTransform, 'uppercase');
+		}
+	);
 });
 
 test('z-model', function (t) { // Two way binding with element value
@@ -240,26 +285,32 @@ test('z-model', function (t) { // Two way binding with element value
 	var view = zam(document.body);
 	view.blah = 'boo';
 	view.thing = { blah: 'foo' };
-	view.$();
-	t.equal($('#a').value, 'boo');
-	t.equal($('#b').value, 'foo');
-	t.equal($('div').textContent, 'such boo');
-	$('#a').value = 'wow';
-	trigger($('#a'), 'input');
-	t.equal(view.blah, 'wow');
-	t.equal($('div').textContent, 'such wow');
-	$('#b').value = 'boo';
-	trigger($('#b'), 'input');
-	t.equal(view.thing.blah, 'boo');
-	later(function () {
-		view.blah = 'amaze';
-		view.$();
-		t.equal($('#a').value, 'amaze');
-		t.equal($('div').textContent, 'such amaze');
+	frames(
+		function () {
+			t.equal($('#a').value, 'boo');
+			t.equal($('#b').value, 'foo');
+			t.equal($('div').textContent, 'such boo');
+			$('#a').value = 'wow';
+			trigger($('#a'), 'input');
+		},
+		function () {
+			t.equal(view.blah, 'wow');
+			t.equal($('div').textContent, 'such wow');
+			$('#b').value = 'boo';
+			trigger($('#b'), 'input');
+		},
+		function () {
+			t.equal(view.thing.blah, 'boo');
+			view.blah = 'amaze';
+		},
+		function () {
+			t.equal($('#a').value, 'amaze');
+			t.equal($('div').textContent, 'such amaze');
 		trigger($('#a'), 'input');
-		t.equal($('#a').value, 'amaze');
-		t.equal($('div').textContent, 'such amaze');
-	});
+			t.equal($('#a').value, 'amaze');
+			t.equal($('div').textContent, 'such amaze');
+		}
+	);
 });
 
 test('z-on-*', function (t) { // Event handler
@@ -270,19 +321,24 @@ test('z-on-*', function (t) { // Event handler
 	view.i = 0;
 	view.q = 'boo';
 	view.doSomething = function (e) {
-		t.equal(typeof e, 'object');
-		view.i = 1;
+			t.equal(typeof e, 'object');
+			view.i = 1;
 	};
 	view.doSomething2 = function (e) {
 		t.equal(typeof e, 'object');
 	};
-	view.$();
-	t.equal($('div').textContent, '0');
-	trigger($('input'), 'click');
-	trigger($('div'), 'mousemove');
-	t.equal(view.i, 1);
-	t.equal(view.q, 'hello');
-	t.equal($('div').textContent, '1');
+	frames(
+		function () {
+			t.equal($('div').textContent, '0');
+			trigger($('input'), 'click');
+			trigger($('div'), 'mousemove');
+			t.equal(view.i, 1);
+			t.equal(view.q, 'hello');
+		},
+		function () {
+			t.equal($('div').textContent, '1');
+		}
+	);
 });
 
 test('z-on-* shorthand', function (t) { // Event handler
@@ -296,36 +352,50 @@ test('z-on-* shorthand', function (t) { // Event handler
 		t.equal(typeof e, 'object');
 		view.i = 1;
 	};
-	view.$();
-	t.equal($('div').textContent, '0');
-	trigger($('input'), 'click');
-	trigger($('div'), 'mousemove');
-	t.equal(view.i, 1);
-	t.equal(view.q, 'hello');
-	t.equal($('div').textContent, '1');
+	frames(
+		function () {
+			t.equal($('div').textContent, '0');
+			trigger($('input'), 'click');
+			trigger($('div'), 'mousemove');
+			t.equal(view.i, 1);
+			t.equal(view.q, 'hello');
+		},
+		function () {
+			t.equal($('div').textContent, '1');
+		}
+	);
 });
 
 test('z-exist', function (t) { // Conditional existance
 	t.plan(5);
 	up(`<div z-exist="showMe">My name is {{ me.name }}</div>`);
 	var view = zam(document.body);
-	view.me = { name: 'moi' };
-	view.showMe = false;
-	view.$();
-	t.equal($('div'), null);
-	view.showMe = true;
-	view.$();
-	t.equal($('div').textContent, 'My name is moi');
-	view.showMe = 1;
-	view.$();
-	t.equal($('div').textContent, 'My name is moi');
-	view.showMe = 0;
-	view.$();
-	t.equal($('div'), null);
-	view.showMe = 1;
-	view.me.name = 'boo';
-	view.$();
-	t.equal($('div').textContent, 'My name is boo');
+	frames(
+		function () {
+			view.me = { name: 'moi' };
+			view.showMe = false;
+		},
+		function () {
+			t.equal($('div'), null);
+			view.showMe = true;
+		},
+		function () {
+			t.equal($('div').textContent, 'My name is moi');
+			view.showMe = 1;
+		},
+		function () {
+			t.equal($('div').textContent, 'My name is moi');
+			view.showMe = 0;
+		},
+		function () {
+			t.equal($('div'), null);
+			view.showMe = 1;
+			view.me.name = 'boo';
+		},
+		function () {
+			t.equal($('div').textContent, 'My name is boo');
+		}
+	);
 });
 
 
@@ -334,32 +404,39 @@ test('z-*-in', function (t) { // Iterate through an array
 	up(`<div z-todo-in="todos">{{ todo.message }}</div>
 		<span z-todo-in="plob"></span>`);
 	var view = zam(document.body);
-	view.todos = [
-		{ message: 'Buy food' },
-		{ message: 'Fix code' },
-		{ message: 'Wash clothes' }
-	];
-	view.$();
-	var els = $$('div');
-	t.equal(els.length, 3);
-	view.todos.forEach(function (todo, i) {
-		t.equal(els[i].textContent, todo.message);
-	});
-	view.todos.push({ message: 'Wash car' });
-	view.$();
-	els = $$('div');
-	t.equal(els.length, 4);
-	view.todos.forEach(function (todo, i) {
-		t.equal(els[i].textContent, todo.message);
-	});
-	view.todos.splice(2, 1);
-	view.$();
-	els = $$('div');
-	t.equal(els.length, 3);
-	view.todos.forEach(function (todo, i) {
-		t.equal(els[i].textContent, todo.message);
-	});
-	t.equal($('span'), null);
+	frames(
+		function () {
+			view.todos = [
+				{ message: 'Buy food' },
+				{ message: 'Fix code' },
+				{ message: 'Wash clothes' }
+			];
+		},
+		function () {
+			var els = $$('div');
+			t.equal(els.length, 3);
+			view.todos.forEach(function (todo, i) {
+				t.equal(els[i].textContent, todo.message);
+			});
+			view.todos.push({ message: 'Wash car' });
+		},
+		function () {
+			var els = $$('div');
+			t.equal(els.length, 4);
+			view.todos.forEach(function (todo, i) {
+				t.equal(els[i].textContent, todo.message);
+			});
+			view.todos.splice(2, 1);
+		},
+		function () {
+			var els = $$('div');
+			t.equal(els.length, 3);
+			view.todos.forEach(function (todo, i) {
+				t.equal(els[i].textContent, todo.message);
+			});
+			t.equal($('span'), null);
+		}
+	);
 });
 
 test('root scope', function (t) {
@@ -367,23 +444,29 @@ test('root scope', function (t) {
 	// The root object is provided to all components and can be used to provide methods and data which should be available to all components.
 	up(`{{ food }} {{ drink }} {{ sweet }}. {{ date(d) }}`); // chips, beer, cake
 	var view = zam(document.body);
-	global.food = 'carrots';
-	zam.root.drink = 'water';
-	view.sweet = 'cake';
-	view.d = new Date(2017, 0, 17);
-	zam.root.date = function (date) {
-		return date.getDate() + ' Jan';
-	};
-	view.$();
-	t.equals(document.body.textContent, 'carrots water cake. 17 Jan');
-	zam.root.food = 'chips';
-	view.drink = 'beer';
-	zam.root.sweet = 'chocolate';
-	view.date = function (date) {
-		return date.getDate() + ' enero';
-	};
-	view.$();
-	t.equals(document.body.textContent, 'chips beer cake. 17 enero');
+	frames(
+		function () {
+			global.food = 'carrots';
+			zam.root.drink = 'water';
+			view.sweet = 'cake';
+			view.d = new Date(2017, 0, 17);
+			zam.root.date = function (date) {
+				return date.getDate() + ' Jan';
+			};
+		},
+		function () {
+			t.equals(document.body.textContent, 'carrots water cake. 17 Jan');
+			zam.root.food = 'chips';
+			view.drink = 'beer';
+			zam.root.sweet = 'chocolate';
+			view.date = function (date) {
+				return date.getDate() + ' enero';
+			};
+		},
+		function () {
+			t.equals(document.body.textContent, 'chips beer cake. 17 enero');
+		}
+	);
 });
 
 test('parent then child inheritence', function (t) {
@@ -391,18 +474,22 @@ test('parent then child inheritence', function (t) {
 	up(`<div id="container">{{ name }}<div id="thing">{{ food }}{{ $parent.food }}</div></div>`);
 	var container = zam($('#container')),
 		thing = zam($('#thing'));
-	container.name = 'joe';
-	container.food = 'pop';
-	container.$();
-	thing.$();
-	t.equals($('#container').textContent, 'joepoppop');
-	t.equals($('#thing').textContent, 'poppop');
-	thing.name = 'jane';
-	thing.food = 'mess';
-	container.$();
-	thing.$();
-	t.equals($('#container').textContent, 'joemesspop');
-	t.equals($('#thing').textContent, 'messpop');
+	frames(
+		function () {
+			container.name = 'joe';
+			container.food = 'pop';
+		},
+		function () {
+			t.equals($('#container').textContent, 'joepoppop');
+			t.equals($('#thing').textContent, 'poppop');
+			thing.name = 'jane';
+			thing.food = 'mess';
+		},
+		function () {
+			t.equals($('#container').textContent, 'joemesspop');
+			t.equals($('#thing').textContent, 'messpop');
+		}
+	);
 });
 
 test('child then parent inheritence', function (t) {
@@ -410,26 +497,33 @@ test('child then parent inheritence', function (t) {
 	up(`<div id="container">{{ name }}<div id="thing">{{ food }}{{ $parent.food }}</div></div>`);
 	var thing = zam($('#thing')),
 		container = zam($('#container'));
-	container.name = 'joe';
-	container.food = 'pop';
-	container.$();
-	thing.$();
-	t.equals($('#container').textContent, 'joepoppop');
-	t.equals($('#thing').textContent, 'poppop');
-	thing.name = 'jane';
-	thing.food = 'mess';
-	container.$();
-	thing.$();
-	t.equals($('#container').textContent, 'joemesspop');
-	t.equals($('#thing').textContent, 'messpop');
+	frames(
+		function () {
+			container.name = 'joe';
+			container.food = 'pop';
+		},
+		function () {
+			t.equals($('#container').textContent, 'joepoppop');
+			t.equals($('#thing').textContent, 'poppop');
+			thing.name = 'jane';
+			thing.food = 'mess';
+		},
+		function () {
+			t.equals($('#container').textContent, 'joemesspop');
+			t.equals($('#thing').textContent, 'messpop');
+		}
+	);
 });
 
 test('utility functions', function (t) {
 	t.plan(1);
 	up(`{{ number(1.553, 1) }} {{ number(1.553) }} {{ percent(0.17) }}`);
 	var view = zam(document.body);
-	view.$();
-	t.equals(document.body.textContent, '1.6 1.55 17.00%');
+	frames(
+		function () {
+			t.equals(document.body.textContent, '1.6 1.55 17.00%');
+		}
+	);
 });
 
 test('version', function (t) { // Gets the version of zam (e.g. "0.1.0").
@@ -503,6 +597,8 @@ test('Expressions', function (t) { // The expressions used in a directive mostly
 	assert('"a" + \'b\'', 'ab');
 	assert('"\\""', '"');
 	assert('\'\\\'\'', '\'');
+	assert('"a" + 1', 'a1');
+	assert('"a" + undefined', 'a');
 
 	// Array literals
 	assert('[]', []);
@@ -638,11 +734,16 @@ test('custom directives', function (t) {
 	});
 
 	var view = zam(document.body);
-	view.todos = [{ message: 'buy cake' }];
-	view.boo = 'foo';
-	view.$();
-	t.equal($('todo-item').textContent, 'buy cake');
-	t.equal($('span').textContent, 'foo');
+	frames(
+		function () {
+			view.todos = [{ message: 'buy cake' }];
+			view.boo = 'foo';
+		},
+		function () {
+			t.equal($('todo-item').textContent, 'buy cake');
+			t.equal($('span').textContent, 'foo');
+		}
+	);
 });
 
 test('multiple directives', function (t) {
@@ -650,20 +751,25 @@ test('multiple directives', function (t) {
 	up(`<div z-thing-in="things" z-exist="thing.show">{{ thing.foo }}</div>`);
 	var view = zam(document.body);
 	view.things = [{ show: true, foo: 'blah'}, { show: false, foo: 'hello' }];
-	view.$();
-	t.equal($$('div').length, 1);
-	t.equal($$('div')[0].textContent, 'blah');
-	view.things[1].show = true;
-	view.$();
-	t.equal($$('div').length, 2);
-	t.equal($$('div')[0].textContent, 'blah');
-	t.equal($$('div')[1].textContent, 'hello');
-	view.things[0].show = false;
-	view.$();
-	t.equal($$('div').length, 1);
-	t.equal($$('div')[0].textContent, 'hello');
+	frames(
+		function () {
+			t.equal($$('div').length, 1);
+			t.equal($$('div')[0].textContent, 'blah');
+			view.boo = 1;
+			view.things[1].show = true;
+		},
+		function () {
+			t.equal($$('div').length, 2);
+			t.equal($$('div')[0].textContent, 'blah');
+			t.equal($$('div')[1].textContent, 'hello');
+			view.things[0].show = false;
+		},
+		function () {
+			t.equal($$('div').length, 1);
+			t.equal($$('div')[0].textContent, 'hello');
+		}
+	);
 });
-
 
 test('template', function (t) {
 	t.plan(3);
@@ -676,11 +782,16 @@ test('template', function (t) {
 		template: '<p>{{ memo.who }}: {{ memo.message }}</p>'
 	});
 	var view = zam(document.body);
-	view.memos = [{ who: 'me', message: 'thing' }, { who: 'joe', message: 'blah' }];
-	view.$();
-	t.equal($$('p').length, 2);
-	t.equal($$('p')[0].textContent, 'me: thing');
-	t.equal($$('p')[1].textContent, 'joe: blah');
+	frames(
+		function () {
+			view.memos = [{ who: 'me', message: 'thing' }, { who: 'joe', message: 'blah' }];
+		},
+		function () {
+			t.equal($$('p').length, 2);
+			t.equal($$('p')[0].textContent, 'me: thing');
+			t.equal($$('p')[1].textContent, 'joe: blah');
+		}
+	);
 });
 
 test('input text and textarea', function (t) {
@@ -688,141 +799,189 @@ test('input text and textarea', function (t) {
 	up(`<input type="text" z-model="blah">
 		<textarea z-model="blah">`);
 	var view = zam(document.body);
-	view.blah = 'boo';
-	view.$();
-	t.equal($('input').value, 'boo');
-	t.equal($('textarea').value, 'boo');
-	$('input').value = 'wow';
-	trigger($('input'), 'input');
-	t.equal(view.blah, 'wow');
-	$('textarea').value = 'foo';
-	trigger($('textarea'), 'input');
-	t.equal(view.blah, 'foo');
-	later(function () {
-		view.blah = 'amaze';
-		view.$();
-		t.equal($('input').value, 'amaze');
-		t.equal($('textarea').value, 'amaze');
-	});
+	frames(
+		function () {
+			view.blah = 'boo';
+		},
+		function () {
+			t.equal($('input').value, 'boo');
+			t.equal($('textarea').value, 'boo');
+			$('input').value = 'wow';
+			trigger($('input'), 'input');
+			t.equal(view.blah, 'wow');
+			$('textarea').value = 'foo';
+			trigger($('textarea'), 'input');
+			t.equal(view.blah, 'foo');
+		},
+		function () {
+			view.blah = 'amaze';
+		},
+		function () {
+			t.equal($('input').value, 'amaze');
+			t.equal($('textarea').value, 'amaze');
+		}
+	);
 });
 
 test('input password', function (t) {
 	t.plan(3);
 	up(`<input type="password" z-model="blah">`);
 	var view = zam(document.body);
-	view.blah = 'boo';
-	view.$();
-	t.equal($('input').value, 'boo');
-	$('input').value = 'wow';
-	trigger($('input'), 'input');
-	t.equal(view.blah, 'wow');
-	later(function () {
-		view.blah = 'amaze';
-		view.$();
-		t.equal($('input').value, 'amaze');
-	});
+	frames(
+		function () {
+			view.blah = 'boo';
+		},
+		function () {
+			t.equal($('input').value, 'boo');
+			$('input').value = 'wow';
+			trigger($('input'), 'input');
+			t.equal(view.blah, 'wow');
+		},
+		function () {
+			view.blah = 'amaze';
+		},
+		function () {
+			t.equal($('input').value, 'amaze');
+		}
+	);
 });
 
 test('input search', function (t) {
 	t.plan(3);
 	up(`<input type="search" z-model="blah">`);
 	var view = zam(document.body);
-	view.blah = 'boo';
-	view.$();
-	t.equal($('input').value, 'boo');
-	$('input').value = 'wow';
-	trigger($('input'), 'input');
-	t.equal(view.blah, 'wow');
-	later(function () {
-		view.blah = 'amaze';
-		view.$();
-		t.equal($('input').value, 'amaze');
-	});
+	frames(
+		function () {
+			view.blah = 'boo';
+		},
+		function () {
+			t.equal($('input').value, 'boo');
+			$('input').value = 'wow';
+			trigger($('input'), 'input');
+			t.equal(view.blah, 'wow');
+		},
+		function () {
+			view.blah = 'amaze';
+		},
+		function () {
+			t.equal($('input').value, 'amaze');
+		}
+	);
 });
 
 test('input hidden', function (t) {
 	t.plan(3);
 	up(`<input type="hidden" z-model="blah">`);
 	var view = zam(document.body);
-	view.blah = 'boo';
-	view.$();
-	t.equal($('input').value, 'boo');
-	$('input').value = 'wow';
-	trigger($('input'), 'input');
-	t.equal(view.blah, 'wow');
-	later(function () {
-		view.blah = 'amaze';
-		view.$();
-		t.equal($('input').value, 'amaze');
-	});
+	frames(
+		function () {
+			view.blah = 'boo';
+		},
+		function () {
+			t.equal($('input').value, 'boo');
+			$('input').value = 'wow';
+			trigger($('input'), 'input');
+			t.equal(view.blah, 'wow');
+		},
+		function () {
+			view.blah = 'amaze';
+		},
+		function () {
+			t.equal($('input').value, 'amaze');
+		}
+	);
 });
 
 test('input url', function (t) {
 	t.plan(3);
 	up(`<input type="url" z-model="blah">`);
 	var view = zam(document.body);
-	view.blah = 'http://foo.bar';
-	view.$();
-	t.equal($('input').value, 'http://foo.bar');
-	$('input').value = 'http://foo.bar/wow';
-	trigger($('input'), 'input');
-	t.equal(view.blah, 'http://foo.bar/wow');
-	later(function () {
-		view.blah = 'http://foo.bar/amaze';
-		view.$();
-		t.equal($('input').value, 'http://foo.bar/amaze');
-	});
+	frames(
+		function () {
+			view.blah = 'http://foo.bar';
+		},
+		function () {
+			t.equal($('input').value, 'http://foo.bar');
+			$('input').value = 'http://foo.bar/wow';
+			trigger($('input'), 'input');
+			t.equal(view.blah, 'http://foo.bar/wow');
+		},
+		function () {
+			view.blah = 'http://foo.bar/amaze';
+		},
+		function () {
+			t.equal($('input').value, 'http://foo.bar/amaze');
+		}
+	);
 });
 
 test('input email', function (t) {
 	t.plan(3);
 	up(`<input type="email" z-model="blah">`);
 	var view = zam(document.body);
-	view.blah = 'boo@foo.bar';
-	view.$();
-	t.equal($('input').value, 'boo@foo.bar');
-	$('input').value = 'wow@foo.bar';
-	trigger($('input'), 'input');
-	t.equal(view.blah, 'wow@foo.bar');
-	later(function () {
-		view.blah = 'amaze@foo.bar';
-		view.$();
-		t.equal($('input').value, 'amaze@foo.bar');
-	});
+	frames(
+		function () {
+			view.blah = 'boo@foo.bar';
+		},
+		function () {
+			t.equal($('input').value, 'boo@foo.bar');
+			$('input').value = 'wow@foo.bar';
+			trigger($('input'), 'input');
+			t.equal(view.blah, 'wow@foo.bar');
+		},
+		function () {
+			view.blah = 'amaze@foo.bar';
+		},
+		function () {
+			t.equal($('input').value, 'amaze@foo.bar');
+		}
+	);
 });
 
 test('input number', function (t) {
 	t.plan(3);
 	up(`<input type="number" z-model="blah">`);
 	var view = zam(document.body);
-	view.blah = 102;
-	view.$();
-	t.equal($('input').value, '102');
-	$('input').value = 87;
-	trigger($('input'), 'input');
-	t.equal(view.blah, 87);
-	later(function () {
-		view.blah = 10;
-		view.$();
-		t.equal($('input').value, '10');
-	});
+	frames(
+		function () {
+			view.blah = 102;
+		},
+		function () {
+			t.equal($('input').value, '102');
+			$('input').value = 87;
+			trigger($('input'), 'input');
+			t.equal(view.blah, 87);
+		},
+		function () {
+			view.blah = 10;
+		},
+		function () {
+			t.equal($('input').value, '10');
+		}
+	);
 });
 
 test('input range', function (t) {
 	t.plan(3);
 	up(`<input type="range" min="0" max="10" step="1" z-model="blah">`);
 	var view = zam(document.body);
-	view.blah = 1;
-	view.$();
-	t.equal($('input').value, '1');
-	$('input').value = 9;
-	trigger($('input'), 'input');
-	t.equal(view.blah, 9);
-	later(function () {
-		view.blah = 4;
-		view.$();
-		t.equal($('input').value, '4');
-	});
+	frames(
+		function () {
+			view.blah = 1;
+		},
+		function () {
+			t.equal($('input').value, '1');
+			$('input').value = 9;
+			trigger($('input'), 'input');
+			t.equal(view.blah, 9);
+		},
+		function () {
+			view.blah = 4;
+		},
+		function () {
+			t.equal($('input').value, '4');
+		}
+	);
 });
 
 test('input date/month/week/time', function (t) {
@@ -836,64 +995,73 @@ test('input date/month/week/time', function (t) {
 	var date = moment().toDate();
 	var view = zam(document.body);
 	view.blah = date;
-	view.$();
-	t.equal($('#datetime').value, moment(date).format('YYYY-MM-DD[T]HH:mm:ss.SS'));
-	t.equal($('#date').value, moment(date).format('YYYY-MM-DD'));
-	t.equal($('#month').value, moment(date).format('YYYY-MM'));
-	t.equal($('#week').value, moment(date).format('YYYY-[W]WW'));
-	t.equal($('#time').value, moment(date).format('HH:mm:ss.SS'));
+	frames(
+		function () {
+			t.equal($('#datetime').value, moment(date).format('YYYY-MM-DD[T]HH:mm:ss.SS'));
+			t.equal($('#date').value, moment(date).format('YYYY-MM-DD'));
+			t.equal($('#month').value, moment(date).format('YYYY-MM'));
+			t.equal($('#week').value, moment(date).format('YYYY-[W]WW'));
+			t.equal($('#time').value, moment(date).format('HH:mm:ss.SS'));
 
-	date = moment().subtract(2, 'days').toDate();
-	$('#datetime').value = moment(date).format('YYYY-MM-DD[T]HH:mm:ss.SS');
-	trigger($('#datetime'), 'input');
-	t.equal(moment(view.blah).format('YYYY-MM-DD[T]HH:mm:ss.SS'), moment(date).format('YYYY-MM-DD[T]HH:mm:ss.SS'));
+			date = moment().subtract(2, 'days').toDate();
+			$('#datetime').value = moment(date).format('YYYY-MM-DD[T]HH:mm:ss.SS');
+			trigger($('#datetime'), 'input');
+			t.equal(moment(view.blah).format('YYYY-MM-DD[T]HH:mm:ss.SS'), moment(date).format('YYYY-MM-DD[T]HH:mm:ss.SS'));
 
-	$('#date').value = moment(date).format('YYYY-MM-DD');
-	trigger($('#date'), 'input');
-	t.equal(moment(view.blah).format('YYYY-MM-DD'), moment(date).format('YYYY-MM-DD'));
+			$('#date').value = moment(date).format('YYYY-MM-DD');
+			trigger($('#date'), 'input');
+			t.equal(moment(view.blah).format('YYYY-MM-DD'), moment(date).format('YYYY-MM-DD'));
 
-	$('#month').value = moment(date).format('YYYY-MM');
-	trigger($('#month'), 'input');
-	t.equal(moment(view.blah).format('YYYY-MM'), moment(date).format('YYYY-MM'));
+			$('#month').value = moment(date).format('YYYY-MM');
+			trigger($('#month'), 'input');
+			t.equal(moment(view.blah).format('YYYY-MM'), moment(date).format('YYYY-MM'));
 
-	$('#week').value = moment(date).format('YYYY-[W]WW');
-	trigger($('#week'), 'input');
-	t.equal(moment(view.blah).format('YYYY-[W]WW'), moment(date).format('YYYY-[W]WW'));
+			$('#week').value = moment(date).format('YYYY-[W]WW');
+			trigger($('#week'), 'input');
+			t.equal(moment(view.blah).format('YYYY-[W]WW'), moment(date).format('YYYY-[W]WW'));
 
-	$('#time').value = moment(date).format('HH:mm:ss.SS');
-	trigger($('#time'), 'input');
-	t.equal(moment(view.blah).format('HH:mm:ss.SS'), moment(date).format('HH:mm:ss.SS'));
-
-	later(function () {
-		date = moment().subtract(1, 'minute').toDate();
-		view.blah = date;
-		view.$();
-		t.equal($('#datetime').value, moment(date).format('YYYY-MM-DD[T]HH:mm:ss.SS'));
-		t.equal($('#date').value, moment(date).format('YYYY-MM-DD'));
-		t.equal($('#month').value, moment(date).format('YYYY-MM'));
-		t.equal($('#week').value, moment(date).format('YYYY-[W]WW'));
-		t.equal($('#time').value, moment(date).format('HH:mm:ss.SS'));
-	});
+			$('#time').value = moment(date).format('HH:mm:ss.SS');
+			trigger($('#time'), 'input');
+			t.equal(moment(view.blah).format('HH:mm:ss.SS'), moment(date).format('HH:mm:ss.SS'));
+		},
+		function () {
+			date = moment().subtract(1, 'minute').toDate();
+			view.blah = date;
+		},
+		function () {
+			t.equal($('#datetime').value, moment(date).format('YYYY-MM-DD[T]HH:mm:ss.SS'));
+			t.equal($('#date').value, moment(date).format('YYYY-MM-DD'));
+			t.equal($('#month').value, moment(date).format('YYYY-MM'));
+			t.equal($('#week').value, moment(date).format('YYYY-[W]WW'));
+			t.equal($('#time').value, moment(date).format('HH:mm:ss.SS'));
+		}
+	);
 });
 
 test('input checkbox', function (t) {
 	t.plan(4);
 	up(`<input type="checkbox" z-model="blah">`);
 	var view = zam(document.body);
-	view.blah = true;
-	view.$();
-	t.equal($('input').checked, true);
-	$('input').checked = false;
-	trigger($('input'), 'change');
-	t.equal(view.blah, false);
-	$('input').checked = true;
-	trigger($('input'), 'change');
-	t.equal(view.blah, true);
-	later(function () {
-		view.blah = false;
-		view.$();
-		t.equal($('input').checked, false);
-	});
+	frames(
+		function () {
+			view.blah = true;
+		},
+		function () {
+			t.equal($('input').checked, true);
+			$('input').checked = false;
+			trigger($('input'), 'change');
+			t.equal(view.blah, false);
+			$('input').checked = true;
+			trigger($('input'), 'change');
+			t.equal(view.blah, true);
+		},
+		function () {
+			view.blah = false;
+		},
+		function () {
+			t.equal($('input').checked, false);
+		}
+	);
 });
 
 test('input select', function (t) {
@@ -907,28 +1075,33 @@ test('input select', function (t) {
 			<option z-value="foo">test6</option>
 		</select>`);
 
-	var view = zam(document.body);
-	view.foo = 'bar';
-
+	var view = zam(document.body),
+		fs = [function () {
+			view.foo = 'bar';	
+		}];
 	['hello', '1', 'boo', 2, { a: 1 }, 'bar'].forEach(function (val, i) {
-		view.blah = val;
-		view.$();
-		if (typeof val !== 'object') {
+		fs.push(function () {
+			view.blah = val;
+		}, function () {
+			if (typeof val !== 'object') {
+				t.equal($('select').value, String(val));
+				t.equal($('select').selectedIndex, i);
+			}
+		});
+	});
+	['hello', '1', 'boo', 2, { a: 1 }, 'bar'].forEach(function (val, i) {
+		fs.push(function () {
+			$('select').selectedIndex = i;
+			trigger($('select'), 'change');
 			t.equal($('select').value, String(val));
-			t.equal($('select').selectedIndex, i);
-		}
+			if (typeof val === 'string') {
+				t.equal(view.blah, val);
+			} else {
+				t.same(view.blah, val);
+			}
+		});
 	});
-
-	['hello', '1', 'boo', 2, { a: 1 }, 'bar'].forEach(function (val, i) {
-		$('select').selectedIndex = i;
-		trigger($('select'), 'change');
-		t.equal($('select').value, String(val));
-		if (typeof val === 'string') {
-			t.equal(view.blah, val);
-		} else {
-			t.same(view.blah, val);
-		}
-	});
+	frames.apply(null, fs);
 });
 
 test('input radio', function (t) {
@@ -946,30 +1119,35 @@ test('input radio', function (t) {
 			<input type="radio" z-model="moo" value="y">
 		</div>`);
 
-	var view = zam(document.body);
-	view.foo = 'bar';
-	view.moo = 'y';
-
+	var view = zam(document.body),
+		fs = [function () {
+			view.foo = 'bar';
+			view.moo = 'y';
+		}];
 	['hello', '1', 'boo', 2, { a: 1 }, 'bar'].forEach(function (val, i) {
-		view.blah = val;
-		view.$();
-		if (typeof val !== 'object') {
+		fs.push(function () {
+			view.blah = val;
+		}, function () {
+			if (typeof val !== 'object') {
+				t.equal($('.a input:checked').value, String(val));
+				t.equal($('.b input:checked').value, 'y');
+			}
+		});
+	});
+	['hello', '1', 'boo', 2, { a: 1 }, 'bar'].forEach(function (val, i) {
+		fs.push(function () {
+			$('.a input:nth-child(' + (i + 1) + ')').checked = true;
+			trigger($('.a input:nth-child(' + (i + 1) + ')'), 'change');
 			t.equal($('.a input:checked').value, String(val));
 			t.equal($('.b input:checked').value, 'y');
-		}
+			if (typeof val === 'string') {
+				t.equal(view.blah, val);
+			} else {
+				t.same(view.blah, val);
+			}
+		});
 	});
-
-	['hello', '1', 'boo', 2, { a: 1 }, 'bar'].forEach(function (val, i) {
-		$('.a input:nth-child(' + (i + 1) + ')').checked = true;
-		trigger($('.a input:nth-child(' + (i + 1) + ')'), 'change');
-		t.equal($('.a input:checked').value, String(val));
-		t.equal($('.b input:checked').value, 'y');
-		if (typeof val === 'string') {
-			t.equal(view.blah, val);
-		} else {
-			t.same(view.blah, val);
-		}
-	});
+	frames.apply(null, fs);
 });
 
 test('$watch', function (t) {
@@ -978,25 +1156,34 @@ test('$watch', function (t) {
 	var view = zam(document.body),
 		count = 0,
 		handler = function (foo) { count++; };
-	view.$watch('foo', handler);
-	view.foo = 1;
-	view.foo = 2;
-	view.$(); // should trigger watch
-	view.foo = 4;
-	$('input').value = 'bar';
-	trigger($('input'), 'input'); // should trigger watch
-	view.$();
-	view.foo = 'bar';
-	view.$();
-	view.$unwatch('foo', handler);
-	view.foo = '$$$';
-	view.$();
-	view.$watch('foo', function (foo) {
-		t.equal(foo, 'can');
-	});
-	view.foo = 'can';
-	view.$();
-	t.equal(count, 2);
+	frames(
+		function () { // should trigger watch
+			view.$watch('foo', handler);
+			view.foo = 1;
+			view.foo = 2;
+			view.foo = 4; // should trigger watch only once
+		},
+		function () {
+			$('input').value = 'bar';
+			trigger($('input'), 'input'); // should trigger watch
+		},
+		function () {
+			view.foo = 'bar'; // should not trigger watch
+		},
+		function () {
+			view.$unwatch('foo', handler);
+			view.foo = '$$$'; // should not trigger watch
+		},
+		function () {
+			view.$watch('foo', function (foo) {
+				t.equal(foo, 'can');
+			});
+			view.foo = 'can';
+		},
+		function () {
+			t.equal(count, 2);
+		}
+	);
 });
 
 test('prefix', function (t) {
@@ -1005,29 +1192,39 @@ test('prefix', function (t) {
 	zam.prefix = 'foo-';
 	var view = zam(document.body);
 	view.bar = 'blah';
-	view.$();
-	t.equal($('div').textContent, 'blah');
+	frames(
+		function () {
+			t.equal($('div').textContent, 'blah');
+		}
+	);
 	zam.prefix = 'z-';
 });
+
 
 test('$destroy', function (t) {
 	t.plan(4);
 	up(`<div z-text="bar"></div>`);
-	var count = 0;
 	t.equal($('div').getAttribute('z-text'), 'bar');
 	var view = zam(document.body);
-	t.equal($('div').getAttribute('z-text'), null);
-	view.$on('destroy', function () { count++; });
-	view.$destroy();
-	t.equal($('div').getAttribute('z-text'), 'bar');
-	t.equal(count, 1);
+	var count = 0;
+	frames(
+		function () {
+			t.equal($('div').getAttribute('z-text'), null);
+			view.$on('destroy', function () { count++; });
+			view.$destroy();
+		},
+		function () {
+			t.equal($('div').getAttribute('z-text'), 'bar');
+			t.equal(count, 1);
+		}
+	);
 });
 
 var repeats = 3,
 	count = 0,
 	time = 0;
-var n1 = 100, n2 = 100;
-//var n1 = 5, n2 = 5;
+//var n1 = 100, n2 = 100;
+var n1 = 5, n2 = 5;
 new Array(repeats).fill(1).forEach(function () {
 	test('z-*-in (stress)', function (t) { // Iterate through an array
 		var t1 = Date.now();
@@ -1042,13 +1239,16 @@ new Array(repeats).fill(1).forEach(function () {
 				})
 			};
 		});
-		view.$();
-		t.equal($$('div').length, n1);
-		t.equal($$('span').length, n1 * n2);
-		time += Date.now() - t1;
-		count++;
-		if (count === repeats) {
-			console.log('AVG TIME TAKEN OVER', repeats, 'REPEATS:', (time / repeats / 1000).toFixed(3) + 's');
-		}
+		frames(
+			function () {
+				t.equal($$('div').length, n1);
+				t.equal($$('span').length, n1 * n2);
+				time += Date.now() - t1;
+				count++;
+				if (count === repeats) {
+					console.log('AVG TIME TAKEN OVER', repeats, 'REPEATS:', (time / repeats / 1000).toFixed(3) + 's');
+				}
+			}
+		);
 	});
 });

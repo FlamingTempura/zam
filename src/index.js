@@ -3,7 +3,7 @@
 
 import parser from './grammar.pegjs';
 import { version } from '../package.json';
-import { stringify, arrayRemove, hash } from './utils';
+import { stringify, arrayRemove, hash, nextTick } from './utils';
 
 const parse = (expr, startRule = 'Expression') => parser.parse(expr, { startRule }); // generates the abstract syntax tree
 
@@ -137,7 +137,7 @@ const evaluate = (syntax, scope) => {
 		        operator === '>='  ? leftv >=  rightv :
 		        operator === '&&'  ? leftv &&  rightv :
 		        operator === '||'  ? leftv ||  rightv :
-		        operator === '+'   ? leftv +   rightv :
+		        operator === '+'   ? typeof (leftv + rightv) === 'string' ? stringify(leftv) + stringify(rightv) : leftv + rightv : // avoids undefined + 'a' = 'undefineda'
 		        operator === '-'   ? leftv -   rightv :
 		        operator === '*'   ? leftv *   rightv :
 		        operator === '/'   ? leftv /   rightv :
@@ -278,18 +278,31 @@ const initBinds = (view, node, vDOM, parent) => {
 		node.parentNode.removeChild(node);
 	}
 };
-
+var a = 0;
 let id = 0;
 const zam = (el, data, parent) => {
 	el = typeof el === 'string' ? document.querySelector(el) : el[0] || el; // convert from string or jquery
-	
+	//console.log('[.] view(' + (id) + ').create')
 	let vDOM = [], // virtual DOM
 		events = {},
 		watchers = [],
+		deferringUpdate,
+		deferUpdate = function () { // wait until end of execution cycle to update dom, and update only once
+			if (deferringUpdate) { return; }
+			nextTick(() => {
+				//console.log('[b] view(' + view.$id + ').runUpdate()');
+				view.$();
+				deferringUpdate = undefined;
+			});
+			deferringUpdate = true;
+		},
+		destroyed,
 		view = {
 			$id: id++,
 			$vDOM: vDOM,
 			$() { // update binds
+				if (destroyed) { return; }
+				//console.log('[c] view(' + view.$id + ').render()');
 				traverseVDOM(vDOM, el => el.binds.forEach(bind => bind.exec('update')));
 				view.$emit('update');
 			},
@@ -299,6 +312,7 @@ const zam = (el, data, parent) => {
 					delete el.node.vElement;
 					el.removedAttrs.forEach(attr => el.node.setAttribute(attr.name, attr.value)); // restore attributes
 				});
+				destroyed = true;
 				view.$emit('destroy');
 			},
 			$on(event, cb) {
@@ -321,14 +335,15 @@ const zam = (el, data, parent) => {
 			$setParent (newParent) {
 				const oldParent = view.$parent;
 				view.$parent = newParent;
-				if (oldParent && oldParent.$off) { oldParent.$off('update', view.$); }
-				if (newParent.$on)               { newParent.$on ('update', view.$); }
+				if (oldParent && oldParent.$off) { oldParent.$off('update', deferUpdate); }
+				if (newParent.$on)               { newParent.$on ('update', deferUpdate); }
 			}
 		};
-	Object.assign(view, data);
+	
 	view.$on('update', () => {
 		watchers.forEach(watcher => {
 			const val = evaluate(watcher.syntax, view).value;
+			//console.log('WATCHER', val, watcher.val);
 			if (val !== watcher.val) {
 				watcher.val = val;
 				watcher.cb(val);
@@ -340,7 +355,44 @@ const zam = (el, data, parent) => {
 	initBinds(view, el, vDOM); // traverse the dom
 	traverseVDOM(vDOM, el => el.binds.forEach(bind => bind.exec('create')));
 
-	return view;
+	var watchObj = function (obj, recurse) { // when something in the scope changes, update the view
+		if (typeof obj !== 'object') { return obj; }
+		
+		var proxy = new Proxy(obj, {
+			get(target, prop, receiver) {
+				//console.log('a', target, prop, target[prop])
+				var q = Reflect.get(target, prop, receiver);
+				//console.log(arguments);
+				if (!(target instanceof Array) && typeof q === 'function') {
+					return q.bind(target); // this ensures things like Date.getDate work
+				} else {
+					return q;
+				}
+			},
+			set(obj, prop, value, receiver) { 
+				if (obj === view && prop.indexOf('$') === 0) {
+					console.warn('Properties beginning with $ are reserved for zam');
+				}
+				//console.log('[a] view(' + view.$id + ').update(' + prop + ',', value, ')', typeof value);
+				if (typeof value === 'object' && !(value instanceof Date)) { value = watchObj(value, true); } // TODO date should be proxied (if it works)
+				deferUpdate();
+				return Reflect.set(obj, prop, value, receiver);
+			}
+		});
+
+		if (recurse) {
+			if (obj instanceof Array) {
+				obj.forEach((el, i) => proxy[i] = watchObj(el, true));
+			} else {
+				Object.keys(obj).forEach(k => proxy[k] = watchObj(obj[k], true));
+			}
+		}
+
+		return proxy;
+	};
+	deferUpdate();
+
+	return Object.assign(watchObj(view), data);
 };
 
 Object.assign(zam, {
@@ -403,19 +455,20 @@ zam.directive({
 	},	
 	update(scope, el) {
 		let value = !!this.eval();
+		//console.log('exist?')
 		if (value !== this.prevValue) {
 			if (value) {
+				//console.log('EXIST')
 				this.clone = el.cloneNode(true);
 				this.childView = zam(this.clone, undefined, scope);
 				this.marker.parentNode.insertBefore(this.clone, this.marker);
 			} else if (this.clone) {
+				//console.log('UNEXIST')
 				this.marker.parentNode.removeChild(this.clone);
-				// TODO: zam.destroy();
+				this.childView.$destroy();
+				delete this.childView;
 			}
 			this.prevValue = value;
-		}
-		if (this.clone) {
-			this.childView.$();
 		}
 	}
 });
@@ -427,28 +480,31 @@ zam.directive({
 	create(scope, el, attr) {
 		this.items = [];
 		this.marker = document.createComment(attr);
+		this.key = item => JSON.stringify(item); // TODO: allow specifying key
 		el.parentNode.replaceChild(this.marker, el);
 	},	
 	update(scope, el, attr, varname) {
 		let array = this.eval() || [],
 			fragment = document.createDocumentFragment();
+		//console.log('[d] in.update(' + this.items.length + ' to ' + array.length + ')');
 		// remove old nodes
 		this.items.forEach(item => {
-			if (array.indexOf(item.data) === -1) {
+			let exists = array.find(el => this.key(el) === this.key(item.data));
+			if (!exists) {
+				//console.log('[e] remove el');
+				item.view.$destroy();
 				this.marker.parentNode.removeChild(item.el);
-				// TODO: destroy zam
 				arrayRemove(this.items, item);
 			}
 		});
 		// create new nodes / update existing nodes
 		array.forEach(data => {
-			let item = this.items.find(item_ => {
-				return item_.data === data;
-			});
+			let item = this.items.find(item_ => this.key(item_.data) === this.key(data));
 			if (!item) {
-				let clone = el.cloneNode(true);
-				this.items.push({ el: clone, data });
-				fragment.appendChild(clone);
+				//console.log('******* DOUBLE NO ********', this.items, data)
+				item = { el: el.cloneNode(true), data };
+				this.items.push(item);
+				fragment.appendChild(item.el);
 			}
 			// todo: sorting (this mean that markers of child directives (e.g. exist) fall out of place)
 		});
@@ -457,10 +513,8 @@ zam.directive({
 		// create any views (this needs to happen after dom insertion)
 		this.items.forEach(item => {
 			if (!item.view) {
-				item.view = zam(item.el, undefined, scope);
-				item.view[varname] = item.data;
+				item.view = zam(item.el, { [varname]: item.data }, scope);
 			}
-			item.view.$();
 		});
 	}
 });
@@ -590,7 +644,7 @@ zam.directive({
 			scope.$event = event;
 			this.eval();
 			delete scope.$event;
-			scope.$();
+			//scope.$();
 		};
 		el.addEventListener(event || stdevent, this.handler);
 	},
