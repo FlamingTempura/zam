@@ -1,6 +1,9 @@
 /* jshint node: true, browser: true, esversion: 6 */
 'use strict';
 
+import parser from './grammar.pegjs';
+const parse = (expr, startRule = 'Expression') => parser.parse(expr, { startRule }); // generates the abstract syntax tree
+
 const stringify = value => String(value !== null && typeof value !== 'undefined' ? value : '');
 
 const arrayRemove = (array, element) => {
@@ -28,4 +31,4 @@ const nextTick = typeof process !== 'undefined' ? process.nextTick : cb => {
 	window.postMessage(id, '*');
 };
 
-export { stringify, arrayRemove, hash, nextTick };
+export { stringify, arrayRemove, hash, nextTick, parse };

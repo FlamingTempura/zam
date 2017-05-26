@@ -1,15 +1,28 @@
-/* jshint node: true */
+/* jshint node: true, esversion: 6, unused: true */
 'use strict';
 
-var pegjs = require('rollup-plugin-pegjs'),
-	uglify = require('rollup-plugin-uglify'),
-	harmony = require('uglify-js-harmony'),
-	json = require('rollup-plugin-json'),
-	babel = require('rollup-plugin-babel');
+const pegjs = require('rollup-plugin-pegjs'),
+      uglify = require('rollup-plugin-uglify'),
+      harmony = require('uglify-js-harmony'),
+      json = require('rollup-plugin-json'),
+      babel = require('rollup-plugin-babel'),
+      fs = require('fs');
+
+let generateDocs = function () {
+	var readme = fs.readFileSync('README.md', 'utf8'),
+		docs = fs.readdirSync('src/directives').map(function (file) {
+			var src = fs.readFileSync('src/directives/' + file, 'utf8');
+			return src.slice(src.indexOf('/*') + 2, src.indexOf('*/')).trim();
+		});
+	readme = readme.replace(/\[\/\/\]: # \(DOC1\)[\w\W]*\[\/\/\]: # \(DOC1!\)/m,
+		'[//]: # (DOC1)\n\n' + docs.join('\n\n') + '\n\n[//]: # (DOC1!)');
+	fs.writeFileSync('README.md', readme, 'utf8');
+};
 
 export default {
 	entry: 'src/index.js',
 	plugins: [
+		{ ongenerate: generateDocs },
 		pegjs({
 			allowedStartRules: ['Text', 'Expression'],
 			optimize: 'speed', // 'speed'
