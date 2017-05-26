@@ -282,15 +282,16 @@ var a = 0;
 let id = 0;
 const zam = (el, data, parent) => {
 	el = typeof el === 'string' ? document.querySelector(el) : el[0] || el; // convert from string or jquery
-	//console.log('[.] view(' + (id) + ').create')
+	console.log('view#' + id + '.create');
 	let vDOM = [], // virtual DOM
 		events = {},
 		watchers = [],
 		deferringUpdate,
 		deferUpdate = function () { // wait until end of execution cycle to update dom, and update only once
+			console.log('view#' + view.$id + '.deferUpdate');
 			if (deferringUpdate) { return; }
+			console.log('view#' + view.$id + '.deferredUpdate');
 			nextTick(() => {
-				//console.log('[b] view(' + view.$id + ').runUpdate()');
 				view.$();
 				deferringUpdate = undefined;
 			});
@@ -302,7 +303,7 @@ const zam = (el, data, parent) => {
 			$vDOM: vDOM,
 			$() { // update binds
 				if (destroyed) { return; }
-				//console.log('[c] view(' + view.$id + ').render()');
+				console.log('view#' + view.$id + '.update');
 				traverseVDOM(vDOM, el => el.binds.forEach(bind => bind.exec('update')));
 				view.$emit('update');
 			},
@@ -341,9 +342,9 @@ const zam = (el, data, parent) => {
 		};
 	
 	view.$on('update', () => {
+		console.log('view#' + view.$id + '.event.update');
 		watchers.forEach(watcher => {
 			const val = evaluate(watcher.syntax, view).value;
-			//console.log('WATCHER', val, watcher.val);
 			if (val !== watcher.val) {
 				watcher.val = val;
 				watcher.cb(val);
@@ -357,12 +358,10 @@ const zam = (el, data, parent) => {
 
 	var watchObj = function (obj, recurse) { // when something in the scope changes, update the view
 		if (typeof obj !== 'object') { return obj; }
-		
+
 		var proxy = new Proxy(obj, {
 			get(target, prop, receiver) {
-				//console.log('a', target, prop, target[prop])
 				var q = Reflect.get(target, prop, receiver);
-				//console.log(arguments);
 				if (!(target instanceof Array) && typeof q === 'function') {
 					return q.bind(target); // this ensures things like Date.getDate work
 				} else {
@@ -373,7 +372,7 @@ const zam = (el, data, parent) => {
 				if (obj === view && prop.indexOf('$') === 0) {
 					console.warn('Properties beginning with $ are reserved for zam');
 				}
-				//console.log('[a] view(' + view.$id + ').update(' + prop + ',', value, ')', typeof value);
+				console.log('view#' + view.$id + '.set: ' + prop + ' =', value);
 				if (typeof value === 'object' && !(value instanceof Date)) { value = watchObj(value, true); } // TODO date should be proxied (if it works)
 				deferUpdate();
 				return Reflect.set(obj, prop, value, receiver);
@@ -391,8 +390,8 @@ const zam = (el, data, parent) => {
 		return proxy;
 	};
 	deferUpdate();
-
-	return Object.assign(watchObj(view), data);
+	Object.assign(view, data);
+	return watchObj(view);
 };
 
 Object.assign(zam, {

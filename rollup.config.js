@@ -30,7 +30,7 @@ export default {
 				reduce_vars: true,
 				cascade: true,
 				collapse_vars: true,
-				//drop_console: true,
+				drop_console: true,
 				//passes: 1,
 				properties: true,
 				//sequences: false
