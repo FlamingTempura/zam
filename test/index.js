@@ -48,6 +48,86 @@ var trigger = function (element, eventname) {
 	element.dispatchEvent(event);
 };
 
+
+
+
+test('z-*-in (stress)', function (t) { // Iterate through an array
+	var nRepeats = 3,
+		nLists = 100,
+		nItems = 5,
+		count = 0,
+		time = 0;
+	t.plan(1 + nRepeats * 2);
+	new Array(nRepeats).fill(1).forEach(function () {
+		up(`<div z-list-in="lists">
+				<span z-item-in="list.items">{{ item.message }}</span>
+			</div>`);
+		var t1 = Date.now();
+		var view = zam(document.body);
+		view.lists = new Array(nLists).fill(1).map(function () {
+			return {
+				items: new Array(nItems).fill(1).map(function () {
+					return { message: Math.round(Math.random() * 100000000).toString(16) };
+				})
+			};
+		});
+		view.$();
+		t.equal($$('div').length, nLists);
+		t.equal($$('span').length, nLists * nItems);
+		count++;
+		time += Date.now() - t1;
+		if (count === nRepeats) {
+			t.equal(time < 30000, true);
+			console.log('AVG TIME TAKEN OVER', nRepeats, 'REPEATS:', (time / nRepeats / 1000).toFixed(3) + 's');
+		}
+	});
+});
+return;
+/*
+test('template', function (t) {
+	t.plan(3);
+	up(`<section>
+			<memo z-memo-in="memos"></memo>
+		</section>`);
+
+	zam.directive({
+		tag: 'memo',
+		template: '<p>{{ memo.who }}: {{ memo.message }}</p>'
+	});
+	var view = zam(document.body);
+	console.log(document.body.outerHTML);
+	frames(
+		function () {
+			view.memos = [{ who: 'me', message: 'thing' }, { who: 'joe', message: 'blah' }];
+		},
+		function () {
+			t.equal($$('p').length, 2);
+			t.equal($$('p')[0].textContent, 'me: thing');
+			t.equal($$('p')[1].textContent, 'joe: blah');
+		}
+	);
+});*/
+
+test('text interpolation', function (t) {
+	t.plan(4);
+	up(`<div id="a">{{ name }}</div>`);
+	var view = zam(document.body);
+	t.equal($('#a').textContent, '');
+	frames(
+		function () {
+			t.equal($('#a').textContent, '');
+			view.name = 'dave';
+		},
+		function () {
+			t.equal($('#a').textContent, 'dave');
+			view.name = 'bob';
+		},
+		function () {
+			t.equal($('#a').textContent, 'bob');
+		}
+	);
+});
+
 test('component creation', function (t) {
 	t.plan(3);
 	up(`<div id="a">{{ name }}</div>
@@ -398,7 +478,6 @@ test('z-exist', function (t) { // Conditional existance
 	);
 });
 
-
 test('z-*-in', function (t) { // Iterate through an array
 	t.plan(14);
 	up(`<div z-todo-in="todos">{{ todo.message }}</div>
@@ -469,16 +548,14 @@ test('root scope', function (t) {
 	);
 });
 
-test('parent then child inheritence', function (t) {
+test('parent then child scoping', function (t) {
 	t.plan(4);
 	up(`<div id="container">{{ name }}<div id="thing">{{ food }}{{ $parent.food }}</div></div>`);
 	var container = zam($('#container')),
 		thing = zam($('#thing'));
+	container.name = 'joe';
+	container.food = 'pop';
 	frames(
-		function () {
-			container.name = 'joe';
-			container.food = 'pop';
-		},
 		function () {
 			t.equals($('#container').textContent, 'joepoppop');
 			t.equals($('#thing').textContent, 'poppop');
@@ -492,7 +569,7 @@ test('parent then child inheritence', function (t) {
 	);
 });
 
-test('child then parent inheritence', function (t) {
+test('child then parent scoping', function (t) {
 	t.plan(4);
 	up(`<div id="container">{{ name }}<div id="thing">{{ food }}{{ $parent.food }}</div></div>`);
 	var thing = zam($('#thing')),
@@ -767,29 +844,6 @@ test('multiple directives', function (t) {
 		function () {
 			t.equal($$('div').length, 1);
 			t.equal($$('div')[0].textContent, 'hello');
-		}
-	);
-});
-
-test('template', function (t) {
-	t.plan(3);
-	up(`<section>
-			<memo z-memo-in="memos"></memo>
-		</section>`);
-
-	zam.directive({
-		tag: 'memo',
-		template: '<p>{{ memo.who }}: {{ memo.message }}</p>'
-	});
-	var view = zam(document.body);
-	frames(
-		function () {
-			view.memos = [{ who: 'me', message: 'thing' }, { who: 'joe', message: 'blah' }];
-		},
-		function () {
-			t.equal($$('p').length, 2);
-			t.equal($$('p')[0].textContent, 'me: thing');
-			t.equal($$('p')[1].textContent, 'joe: blah');
 		}
 	);
 });
@@ -1185,7 +1239,7 @@ test('$watch', function (t) {
 		}
 	);
 });
-
+/*
 test('prefix', function (t) {
 	t.plan(1);
 	up(`<div foo-text="bar"></div>`);
@@ -1218,14 +1272,14 @@ test('$destroy', function (t) {
 			t.equal(count, 1);
 		}
 	);
-});
+});*/
 
-var repeats = 3,
+/*var repeats = 3,
 	count = 0,
-	time = 0;
+	time = 0;*/
 //var n1 = 100, n2 = 100;
-var n1 = 5, n2 = 5;
-new Array(repeats).fill(1).forEach(function () {
+//var n1 = 5, n2 = 5;
+/*new Array(repeats).fill(1).forEach(function () {
 	test('z-*-in (stress)', function (t) { // Iterate through an array
 		var t1 = Date.now();
 		t.plan(2);
@@ -1251,4 +1305,6 @@ new Array(repeats).fill(1).forEach(function () {
 			}
 		);
 	});
-});
+});*/
+
+

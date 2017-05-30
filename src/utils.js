@@ -1,9 +1,6 @@
 /* jshint node: true, browser: true, esversion: 6 */
 'use strict';
 
-import parser from './grammar.pegjs';
-const parse = (expr, startRule = 'Expression') => parser.parse(expr, { startRule }); // generates the abstract syntax tree
-
 const stringify = value => String(value !== null && typeof value !== 'undefined' ? value : '');
 
 const arrayRemove = (array, element) => {
@@ -18,17 +15,31 @@ const hash = str => {
 	}, 0).toString(16);
 };
 
-const nextTick = typeof process !== 'undefined' ? process.nextTick : cb => {
-	let id = String(Math.random()),
-		fn = e => {
-			if (e.data === id) {
-				e.stopPropagation();
-				cb();
-				window.removeEventListener('message', fn, true);
-			}
-		};
-	window.addEventListener('message', fn, true);
-	window.postMessage(id, '*');
+const nextTick = function (cb) {
+	var cancelled,
+		fn = () => { if (!cancelled) { cb(); } };
+	if (typeof process !== 'undefined') {
+		process.nextTick(fn);
+	} else {
+		let id = String(Math.random()),
+			handler = e => {
+				if (e.data === id) {
+					e.stopPropagation();
+					fn();
+					window.removeEventListener('message', handler, true);
+				}
+			};
+		window.addEventListener('message', handler, true);
+		window.postMessage(id, '*');
+	}
+	return () => { cancelled = true; };
 };
 
-export { stringify, arrayRemove, hash, nextTick, parse };
+/*var without$ = function (obj) {
+	obj = Object.assign({}, obj);
+	Object.keys(obj).forEach(k => { if (k.indexOf('$') === 0) { delete obj[k]; } });
+	return obj;
+};*/
+let log = (...msg) => console.log(...msg);
+
+export { stringify, arrayRemove, hash, nextTick, log };

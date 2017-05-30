@@ -30,15 +30,15 @@ const standardEvents = [
 
 export default {
 	attribute: '{prefix}(?:on-(.+)|(' + standardEvents.join('|') + '))',
-	create(scope, el, attr, event, stdevent) {
+	create(scope, el, val, attr, event, stdevent) {
 		this.handler = event => {
 			scope.$event = event;
-			this.eval();
+			val();
 			delete scope.$event;
 		};
 		el.addEventListener(event || stdevent, this.handler);
 	},
-	destroy(scope, el, attr, event, stdevent) {
+	destroy(scope, el, val, attr, event, stdevent) {
 		el.removeEventListener(event || stdevent, this.handler);
 	}
 };

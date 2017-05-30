@@ -3,7 +3,6 @@
 
 const pegjs = require('rollup-plugin-pegjs'),
       uglify = require('rollup-plugin-uglify'),
-      harmony = require('uglify-js-harmony'),
       json = require('rollup-plugin-json'),
       babel = require('rollup-plugin-babel'),
       fs = require('fs');
@@ -43,17 +42,16 @@ export default {
 				reduce_vars: true,
 				cascade: true,
 				collapse_vars: true,
-				drop_console: true,
-				//passes: 1,
+				//drop_console: true,
 				properties: true,
 				//sequences: false
 			},
 			output: {
-				//beautify: true,
+				beautify: true,
 				//max_line_len: 80
 				//preserve_line: true
 			}
-		}, harmony.minify)
+		}/*, harmony.minify*/)
 	],
 	//sourceMap: true,
 	moduleName: 'zam',

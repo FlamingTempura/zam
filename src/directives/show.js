@@ -22,8 +22,8 @@ Conditionally display the element. Equivelant to `z-attr-display="thing ? '' : '
 
 export default {
 	attribute: '{prefix}show',
-	update(scope, el) {
-		let value = this.eval() ? '' : 'none';
+	update(scope, el, val) {
+		let value = val() ? '' : 'none';
 		if (value !== this.prevValue) {
 			el.style.display = value;
 			this.prevValue = value;

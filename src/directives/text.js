@@ -35,8 +35,8 @@ export default {
 	create(scope, el) {
 		el.innerHTML = '';
 	},
-	update(scope, el, attr, type) {
-		let value = stringify(this.eval());
+	update(scope, el, val, attr, type) {
+		let value = stringify(val());
 		if (value !== this.prevValue) {
 			if (type === 'html') {
 				el.innerHTML = value;

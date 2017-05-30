@@ -28,29 +28,34 @@ Note: this is equivelant to `ng-if` in angular.
 'use strict';
 
 import zam from '../zam';
+import virtualdom from '../virtualdom';
 
 export default {
 	attribute: '{prefix}exist',
 	order: 3,
 	block: true, // this prevents wasting effort when element does not exist
-	create(scope, el, attr) {
+	initialize(el) { // dom manipulation shouldn't happen in init as it will interfere with the virtualdom
+		this.template = virtualdom(el.cloneNode(true));
+	},
+	create(scope, el, val, attr) {
 		this.marker = document.createComment(attr);
 		el.parentNode.replaceChild(this.marker, el);
+		scope.$on('update', () => {
+			if (this.view) { this.view.$(); }
+		});
 	},	
-	update(scope, el) {
-		let value = !!this.eval();
-		//console.log('exist?')
+	update(scope, el, val) {
+		let value = !!val();
 		if (value !== this.prevValue) {
 			if (value) {
-				//console.log('EXIST')
-				this.clone = el.cloneNode(true);
-				this.childView = zam(this.clone, undefined, scope);
-				this.marker.parentNode.insertBefore(this.clone, this.marker);
-			} else if (this.clone) {
-				//console.log('UNEXIST')
-				this.marker.parentNode.removeChild(this.clone);
-				this.childView.$destroy();
-				delete this.childView;
+				this.vnode = this.template.clone();
+				this.marker.parentNode.insertBefore(this.vnode.node, this.marker);
+				this.view = zam(this.vnode, undefined, scope);
+			} else if (this.view) {
+				this.marker.parentNode.removeChild(this.vnode.node);
+				this.view.$destroy();
+				delete this.vnode;
+				delete this.view;
 			}
 			this.prevValue = value;
 		}

@@ -2,6 +2,7 @@
 'use strict';
 
 import zam from './zam';
+import { directive } from './directive';
 
 import dText from './directives/text';
 import dShow from './directives/show';
@@ -15,6 +16,6 @@ import dOn from './directives/on';
 import dSkip from './directives/skip';
 
 [dText, dShow, dAttr, dClass, dExist, dStyle, dModel, dIn, dOn, dSkip]
-	.forEach(zam.directive);
+	.forEach(directive);
 
 export default zam;

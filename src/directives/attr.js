@@ -43,9 +43,9 @@ const booleanAttributes = [
 
 export default {
 	attribute: '{prefix}(?:attr-(.+)|(' + standardAttributes.join('|') + '))',
-	update(scope, el, attr, attribute, stdattribute) {
+	update(scope, el, val, attr, attribute, stdattribute) {
 		attribute = attribute || stdattribute;
-		let value = this.eval();
+		let value = val();
 		if (value !== this.prevValue) {
 			this.prevValue = value;
 			if (booleanAttributes.indexOf(attribute) > -1) {

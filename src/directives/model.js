@@ -20,12 +20,13 @@ Two way binding with input element value. The input value will be set to the val
 /* jshint node: true, browser: true, esversion: 6, unused: true */
 'use strict';
 
-import { stringify, parse, hash } from '../utils';
+import { stringify, hash } from '../utils';
+import { parse } from '../expression';
 
 export default {
 	attribute: '{prefix}model',
 	block: true,
-	create(scope, el) {
+	create(scope, el, val) {
 		let tag = el.tagName.toLowerCase(),
 			inputType = (el.getAttribute('type') || '').toLowerCase();
 		this.type = inputType === 'checkbox' ? 'checkbox' :
@@ -35,12 +36,12 @@ export default {
 					['date', 'datetime-local', 'time', 'month', 'week'].indexOf(inputType) > -1 ? 'date' :
 					'text';
 		if (this.type === 'radio' && !el.getAttribute('name')) {
-			el.setAttribute('name', hash(scope.$id + JSON.stringify(this.syntax))); // group radios by their model and scope
+			el.setAttribute('name', hash(scope.$id + JSON.stringify(this.ast))); // group radios by their model and scope
 		}
 		this.getValue = option => {
 			var valExpr = option.getAttribute('z-value');
 			return valExpr ?
-				this.eval(parse(valExpr)) :
+				val(parse(valExpr)) :
 				option.getAttribute('value');
 		};
 		this.handler = () => {
@@ -53,10 +54,10 @@ export default {
 						el.value;
 			if (value !== this.prevValue) {
 				this.prevValue = value;
-				this.eval({ // evaluate "<expression> = <value>"
+				val({ // evaluate "<expression> = <value>"
 					type: 'Assignment',
 					operator: '=',
-					left: this.syntax,
+					left: this.ast,
 					right: { type: 'Literal', value }
 				});
 				scope.$();
@@ -68,8 +69,8 @@ export default {
 			el.selectedIndex = -1; // select empty value
 		}
 	},
-	update(scope, el) { // update dom
-		let value = this.eval();
+	update(scope, el, val) { // update dom
+		let value = val();
 		if (value !== this.prevValue) {
 			if (this.type === 'checkbox') {
 				el.checked = !!value;
@@ -81,8 +82,8 @@ export default {
 				}, -1);
 			} else if (this.type === 'radio') {
 				let v = this.getValue(el);
-				el.checked = value === v;
 				el.setAttribute('value', stringify(v));
+				el.checked = value === v;
 			} else if (this.type === 'number') {
 				el.value = Number(value);
 			} else if (this.type === 'date') {

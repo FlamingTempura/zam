@@ -38,8 +38,8 @@ const standardStyles = [
 
 export default {
 	attribute: '{prefix}(?:style-(.+)|(' + standardStyles.join('|') + '))',
-	update(scope, el, attr, style, stdstyle) {
-		let value = this.eval();
+	update(scope, el, val, attr, style, stdstyle) {
+		let value = val();
 		if (value !== this.prevValue) {
 			this.prevValue = value;
 			el.style[style || stdstyle] = value;

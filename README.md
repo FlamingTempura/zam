@@ -71,51 +71,45 @@ var view3 = zam(document.getElementById('memo'));
 
 ## Directives
 
-Directives are specific instructions on how to display the view.
+Directives are specific instructions on how to display the view
 
-#### `z-text` and `z-html`  - Set text or HTML content
+[//]: # (DOC1)
 
-Note: HTML is not parsed for directives.
+`z-attr-*` - Attribute value
 
 ```html
-<div>My name is {{ me.name }}</div>
-<div>My friend's name is <div z-text="alice.name"></div></div>
-<div>Some HTML: {{{ boldName }}}</div>
-<div>Even more HTML: <span z-html="italicName"></span></div>
+<button z-attr-disabled="showMe"></button>
 <script>
     var view = zam(document.body);
-    view.me = { name: 'Bob' };
-    view.alice = { name: 'Alice' };
-    view.boldName = '<strong>Bob</strong>';
-    view.italicName = '<em>Bob</em>';
+    view.showMe = false;
 </script>
 ```
 
-Warning: Be aware that binding HTML can cause [XSS](https://en.wikipedia.org/wiki/Cross-site_scripting). You should not use user-entered content without sanitisation.
+_Shorthand:_ `attr-` may be omitted for standard HTML attributes, such as such as `disabled`, `title`, and `src`:
+```html
+<button z-disabled="showMe"></button>
+```
 
-
-#### `z-show` - Conditional visibility
-
-Conditionally display the element. Equivelant to `z-attr-display="thing ? '' : 'none'"`.
+`z-class-*` - Conditional class name
 
 ```html
-<div z-show="showMe">My name is {{ me.name }}</div>
-<button z-on-click="hide()">Hide</button>
+<h4 z-class-red="warning"></h4>
 <script>
     var view = zam(document.body);
-    view.me = { name: 'Bob' };
-    view.showMe = true;
-    view.hide = function () {
-        view.showMe = false;
-    };
+    view.warning = true;
 </script>
 ```
 
-#### `z-exist` - Conditional existance
+`z-exist` - Conditional existance
 
-Render the element only if the result of the expression is [truthy](https://developer.mozilla.org/en/docs/Glossary/Truthy) (e.g. true, 1). Unlike z-show, the directives inside the element will not be updated while the element is hidden (since the element is in fact destroyed when falsey and recreated when truthy). This directive occurs after `z-in` and before anything else.
+Render the element only if the result of the expression is
+[truthy](https://developer.mozilla.org/en/docs/Glossary/Truthy) (e.g. true,
+1). Unlike z-show, the directives inside the element will not be updated while
+the element is hidden (since the element is in fact destroyed when falsey and
+recreated when truthy). This directive occurs after `z-in` and before anything
+else.
 
-Note: this is equivelant to ng-if in angular.
+Note: this is equivelant to `ng-if` in angular.
 
 ```html
 <div z-exist="showMe">My name is {{ me.name }}</div>
@@ -130,7 +124,7 @@ Note: this is equivelant to ng-if in angular.
 </script>
 ```
 
-#### `z-*-in` - Iterate through an array
+`z-*-in` - Iterate through an array
 
 Render the element for each item in an array. Each item is assigned to a variable name specified in the attribute name (see example below). This directive occurs before anything else.
 
@@ -148,46 +142,7 @@ Note: this is roughly equivelant to ng-repeat.
 </script>
 ```
 
-#### `z-attr-*` - Attribute value
-
-```html
-<button z-attr-disabled="showMe"></button>
-<script>
-    var view = zam(document.body);
-    view.showMe = false;
-</script>
-```
-
-_Shorthand:_ `attr-` may be omitted for standard HTML attributes, such as such as `disabled`, `title`, and `src`:
-```html
-<button z-disabled="showMe"></button>
-```
-
-#### `z-class-*` - Conditional class name
-
-```html
-<h4 z-class-red="warning"></h4>
-<script>
-    var view = zam(document.body);
-    view.warning = true;
-</script>
-```
-
-#### `z-style-*` - Style value
-```html
-<h1 z-style-font-weight="big ? 'bold' : 'normal'"></h1>
-<script>
-    var view = zam(document.body);
-    view.big = true;
-</script>
-```
-
-_Shorthand:_ `style-` may be omitted for standard CSS properties, such as such as `font-weight`, `top`, and `background`:
-```html
-<h1 z-font-weight="big ? 'bold' : 'normal'"></h1>
-```
-
-#### `z-model` - Bind input
+`z-model` - Bind input
 
 Two way binding with input element value. The input value will be set to the value of z-model. When the input value is changed by the user, the data will also change, and the view will be kept up to date.
 
@@ -204,7 +159,7 @@ Two way binding with input element value. The input value will be set to the val
 </script>
 ```
 
-#### `z-on-*` - Event handler
+`z-on-*` - Event handler
 
 Execute an expression when an event happens. Event data is available in `$event`.
 
@@ -224,7 +179,24 @@ _Shorthand:_ `on-` may be omitted for standard DOM events, such as `click`, `mou
 <form z-submit="doSomething($event)"></form>
 ```
 
-#### `z-skip` - Skip compilation of this element
+`z-show` - Conditional visibility
+
+Conditionally display the element. Equivelant to `z-attr-display="thing ? '' : 'none'"`.
+
+```html
+<div z-show="showMe">My name is {{ me.name }}</div>
+<button z-on-click="hide()">Hide</button>
+<script>
+    var view = zam(document.body);
+    view.me = { name: 'Bob' };
+    view.showMe = true;
+    view.hide = function () {
+        view.showMe = false;
+    };
+</script>
+```
+
+`z-skip` - Skip compilation of this element
 
 ```html
 <div z-skip>{{ this will appear as it is (including curly braces) }}</div>
@@ -252,6 +224,44 @@ Directives have access to their parent scopes through `$parent`:
     bar.drink = 'coffee';
 </script>
 ```
+
+`z-style-*` - Style value
+```html
+<h1 z-style-font-weight="big ? 'bold' : 'normal'"></h1>
+<script>
+    var view = zam(document.body);
+    view.big = true;
+</script>
+```
+
+_Shorthand:_ `style-` may be omitted for standard CSS properties, such as such as `font-weight`, `top`, and `background`:
+```html
+<h1 z-font-weight="big ? 'bold' : 'normal'"></h1>
+```
+
+`z-text` and `z-html`  - Set text or HTML content
+
+Note: HTML is not parsed for directives.
+
+```html
+<div>My name is {{ me.name }}</div>
+<div>My friend's name is <div z-text="alice.name"></div></div>
+<div>Some HTML: {{{ boldName }}}</div>
+<div>Even more HTML: <span z-html="italicName"></span></div>
+<script>
+    var view = zam(document.body);
+    view.me = { name: 'Bob' };
+    view.alice = { name: 'Alice' };
+    view.boldName = '<strong>Bob</strong>';
+    view.italicName = '<em>Bob</em>';
+</script>
+```
+
+Warning: Be aware that binding HTML can cause
+[XSS](https://en.wikipedia.org/wiki/Cross-site_scripting). You should not use
+user-entered content without sanitisation.
+
+[//]: # (DOC1!)
 
 ## Custom directives
 

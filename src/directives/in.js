@@ -22,49 +22,58 @@ Note: this is roughly equivelant to ng-repeat.
 'use strict';
 
 import zam from '../zam';
+import virtualdom from '../virtualdom';
 import { arrayRemove } from '../utils';
 
 export default {
 	attribute: '{prefix}(.+)-in',
 	order: 2,
 	block: true, // do not continue traversing through this dom element (separate zam will be created)
-	create(scope, el, attr) {
+	initialize(el) { // dom manipulation shouldn't happen in init as it will interfere with the virtualdom
 		this.items = [];
-		this.marker = document.createComment(attr);
 		this.key = item => JSON.stringify(item); // TODO: allow specifying key
+		this.vnode = virtualdom(el.cloneNode(true));
+	},
+	create(scope, el, val, attr) {
+		this.marker = document.createComment(attr);
 		el.parentNode.replaceChild(this.marker, el);
-	},	
-	update(scope, el, attr, varname) {
-		let array = this.eval() || [],
-			fragment = document.createDocumentFragment();
-		//console.log('[d] in.update(' + this.items.length + ' to ' + array.length + ')');
+		scope.$on('update', () => this.items.forEach(item => item.view.$()));
+	},
+	update(scope, el, val, attr, varname) {
+		let array = val() || [],
+			fragment;
 		// remove old nodes
 		this.items.forEach(item => {
-			let exists = array.find(el => this.key(el) === this.key(item.data));
+			let exists = array.find(o => this.key(o) === this.key(item.data));
 			if (!exists) {
-				//console.log('[e] remove el');
+				try {
+					this.marker.parentNode.removeChild(item.vnode.node);
+				} catch (e) {
+					// FIXME
+					//console.log('something is wrong')
+				}
 				item.view.$destroy();
-				this.marker.parentNode.removeChild(item.el);
 				arrayRemove(this.items, item);
 			}
 		});
 		// create new nodes / update existing nodes
 		array.forEach(data => {
 			let item = this.items.find(item_ => this.key(item_.data) === this.key(data));
+
 			if (!item) {
-				//console.log('******* DOUBLE NO ********', this.items, data)
-				item = { el: el.cloneNode(true), data };
-				this.items.push(item);
-				fragment.appendChild(item.el);
+				let vnode = this.vnode.clone();
+				this.items.push({ vnode, data });
+				if (!fragment) { fragment = document.createDocumentFragment(); }
+				fragment.appendChild(vnode.node);
 			}
 			// todo: sorting (this mean that markers of child directives (e.g. exist) fall out of place)
 		});
-		this.marker.parentNode.insertBefore(fragment, this.marker);
-
-		// create any views (this needs to happen after dom insertion)
+		if (fragment) {
+			this.marker.parentNode.insertBefore(fragment, this.marker); // TODO: only if there are changes
+		}
 		this.items.forEach(item => {
 			if (!item.view) {
-				item.view = zam(item.el, { [varname]: item.data }, scope);
+				item.view = zam(item.vnode, { [varname]: item.data }, scope); // wait until vnodes have been added before creating the view
 			}
 		});
 	}
