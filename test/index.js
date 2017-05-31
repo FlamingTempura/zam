@@ -55,8 +55,13 @@ test('z-*-in (stress)', function (t) { // Iterate through an array
 	var nRepeats = 3,
 		nLists = 100,
 		nItems = 5,
+		//nRepeats = 1,
+		//nLists = 2,
+		//nItems = 2,
 		count = 0,
-		time = 0;
+		totalTime1 = 0,
+		totalTime2 = 0,
+		totalTime3 = 0;
 	t.plan(1 + nRepeats * 2);
 	new Array(nRepeats).fill(1).forEach(function () {
 		up(`<div z-list-in="lists">
@@ -64,6 +69,7 @@ test('z-*-in (stress)', function (t) { // Iterate through an array
 			</div>`);
 		var t1 = Date.now();
 		var view = zam(document.body);
+		totalTime1 += Date.now() - t1;
 		view.lists = new Array(nLists).fill(1).map(function () {
 			return {
 				items: new Array(nItems).fill(1).map(function () {
@@ -71,18 +77,25 @@ test('z-*-in (stress)', function (t) { // Iterate through an array
 				})
 			};
 		});
+		totalTime2 += Date.now() - t1;
+		//console.log('-------- SET ---------')
 		view.$();
+		totalTime3 += Date.now() - t1;
+		//console.log('-------- UPDATED ---------')
 		t.equal($$('div').length, nLists);
 		t.equal($$('span').length, nLists * nItems);
 		count++;
-		time += Date.now() - t1;
 		if (count === nRepeats) {
-			t.equal(time < 30000, true);
-			console.log('AVG TIME TAKEN OVER', nRepeats, 'REPEATS:', (time / nRepeats / 1000).toFixed(3) + 's');
+			t.equal(totalTime3 < 30000, true);
+
+			console.log('AVG TIME TAKEN OVER', nRepeats, 'REPEATS:', (totalTime3 / nRepeats / 1000).toFixed(3) + 's');
+			console.log(' -> INIT:  ', (totalTime1 / nRepeats / 1000).toFixed(3) + 's');
+			console.log(' -> SET:   ', ((totalTime2 - totalTime1) / nRepeats / 1000).toFixed(3) + 's');
+			console.log(' -> UPDATE:', ((totalTime3 - totalTime2) / nRepeats / 1000).toFixed(3) + 's');
 		}
 	});
 });
-return;
+//return;
 /*
 test('template', function (t) {
 	t.plan(3);

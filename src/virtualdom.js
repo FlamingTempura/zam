@@ -8,7 +8,7 @@ import prefix from './prefix';
 
 class VirtualNode {
 	constructor(node, template, override = false) {
-		Object.assign(this, template);
+		//Object.assign(this, template);
 		this.node = node;
 		this.type = node.nodeType; // 1 = ELEMENT_NODE, 3 = TEXT_NODE
 		this.id = Math.floor(1000 + Math.random() * 9000).toString(16);
@@ -29,7 +29,15 @@ class VirtualNode {
 			}
 		} else if (template) {
 			node.vnode = this;
-			template.binds.map(bind => this.binds.push(Object.assign({}, bind)));
+			this.blocked = template.blocked;
+			template.binds.forEach(bind => {
+				this.bind({ ast: bind.ast, directive: bind.directive, args: bind.args });
+			});
+			if (template.tagName) { this.tag = template.tagName; }
+			if (template.attributes) {
+				this.attributes = template.attributes.map(attr => ({ name: attr.name, value: attr.value }));
+				this.removedAttrs = template.removedAttrs.map(attr => ({ name: attr.name, value: attr.value }));
+			}
 			if (template.children) {
 				let childNodes = Array.from(node.childNodes).filter(cnode => cnode.nodeType === 1 || cnode.nodeType === 3);
 				template.children.forEach(vnode => {
@@ -79,7 +87,7 @@ class VirtualNode {
 			}
 		} else
 
-		if (this.type === 3/* && node.nodeValue.indexOf('{{') > -1*/) {
+		if (this.type === 3 && node.nodeValue.indexOf('{{') > -1) {
 			let parts = parse(node.nodeValue, 'Text');
 			if (parts.length === 1) {
 				if (typeof parts[0] !== 'string') {
@@ -161,7 +169,7 @@ class VirtualNode {
 		delete this.scope;
 		delete this.node.vnode;
 	}
-	print(indent = '') {
+	/*print(indent = '') {
 		log(indent + this.toString());
 		if (this.children) {
 			this.children.forEach(vnode => vnode.print(indent + ' '));
@@ -177,7 +185,7 @@ class VirtualNode {
 		} else {
 			return '[' + this.id + '] TEXT ' + (this.node.nodeValue || 'undef').trim() + (this.binds.length > 0 ? ' BIND' : '');
 		}
-	}
+	}*/
 }
 
 let bindExec = (bind, method, scope, vnode) => {
