@@ -16,6 +16,17 @@ Note: this is roughly equivelant to ng-repeat.
     ];
 </script>
 ```
+
+Use z-key to specify a key for identifying each item in the array. If none is used, the JSON.stringify is used.
+<div z-product-in="basket" z-key="product.id">{{ product.name }}
+<script>
+	var view = zam(document.body);
+    view.basket = [
+        { id: 1, name: 'Chair' },
+        { id: 2, name: 'Table' }, // this won't show because the item below has the same id and will override this
+        { id: 2, name: 'Table' } 
+    ];
+</script>
 */
 
 /* jshint node: true, browser: true, esversion: 6, unused: true */
@@ -23,16 +34,22 @@ Note: this is roughly equivelant to ng-repeat.
 
 import zam from '../zam';
 import virtualdom from '../virtualdom';
+import { parse, evaluate } from '../expression';
 
 export default {
 	attribute: '{prefix}(.+)-in',
 	order: 2,
 	block: true, // do not continue traversing through this dom element (separate zam will be created)
-	initialize(el) { // dom manipulation shouldn't happen in init as it will interfere with the virtualdom
+	initialize(el, attr, varname) { // dom manipulation shouldn't happen in init as it will interfere with the virtualdom
 		this.items = [];
-		this.key = item => JSON.stringify(item); // TODO: allow specifying key
 		//this.key = item => item;
 		this.vnode = virtualdom(el.cloneNode(true));
+		if (el.getAttribute('z-key')) {
+			let keyAST = parse(el.getAttribute('z-key'));
+			this.key = data => evaluate(keyAST, { [varname]: data }).value;
+		} else {
+			this.key = data => JSON.stringify(data);
+		}
 	},
 	create(scope, el, val, attr) {
 		this.marker = document.createComment(attr);

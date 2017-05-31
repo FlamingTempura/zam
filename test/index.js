@@ -73,7 +73,7 @@ test('z-*-in (stress)', function (t) { // Iterate through an array
 		view.lists = new Array(nLists).fill(1).map(function () {
 			return {
 				items: new Array(nItems).fill(1).map(function () {
-					return { message: Math.round(Math.random() * 100000000).toString(16) };
+					return { message: Math.round(Math.random() * 10).toString(16) };
 				})
 			};
 		});
@@ -493,7 +493,7 @@ test('z-exist', function (t) { // Conditional existance
 
 test('z-*-in', function (t) { // Iterate through an array
 	t.plan(14);
-	up(`<div z-todo-in="todos">{{ todo.message }}</div>
+	up(`<div z-todo-in="todos" z-key="todo.message">{{ todo.message }}</div>
 		<span z-todo-in="plob"></span>`);
 	var view = zam(document.body);
 	frames(

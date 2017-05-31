@@ -128,7 +128,7 @@
             }
             function h() {
                 var e, t = 32 * Sr + 3, r = Rr[t];
-                return r ? (Sr = r.nextPos, r.result) : ((e = C()) === I && (e = w()), Rr[t] = {
+                return r ? (Sr = r.nextPos, r.result) : ((e = C()) === I && (e = k()), Rr[t] = {
                     nextPos: Sr,
                     result: e
                 }, e);
@@ -138,7 +138,7 @@
                 return u ? (Sr = u.nextPos, u.result) : (e = Sr, r = v(), r !== I && U() !== I ? (63 === t.charCodeAt(Sr) ? (n = xe, 
                 Sr++) : (n = I, 0 === Mr && c(Ae)), n !== I && U() !== I && (i = p()) !== I && U() !== I ? (58 === t.charCodeAt(Sr) ? (o = Pe, 
                 Sr++) : (o = I, 0 === Mr && c(Ce)), o !== I && U() !== I && (a = p()) !== I ? (Or = e, 
-                e = r = we(r, i, a)) : (Sr = e, e = I)) : (Sr = e, e = I)) : (Sr = e, e = I), e === I && (e = v()), 
+                e = r = ke(r, i, a)) : (Sr = e, e = I)) : (Sr = e, e = I)) : (Sr = e, e = I), e === I && (e = v()), 
                 Rr[s] = {
                     nextPos: Sr,
                     result: e
@@ -148,9 +148,9 @@
                 var e, r, n, i, o, a, s = 32 * Sr + 5, u = Rr[s];
                 if (u) return Sr = u.nextPos, u.result;
                 if (e = Sr, (r = m()) !== I) {
-                    for (n = [], i = Sr, U() !== I ? (t.substr(Sr, 2) === ke ? (o = ke, Sr += 2) : (o = I, 
+                    for (n = [], i = Sr, U() !== I ? (t.substr(Sr, 2) === we ? (o = we, Sr += 2) : (o = I, 
                     0 === Mr && c(Ee)), o !== I && U() !== I && (a = m()) !== I ? (Or = i, i = $e(r, a)) : (Sr = i, 
-                    i = I)) : (Sr = i, i = I); i !== I; ) n.push(i), i = Sr, U() !== I ? (t.substr(Sr, 2) === ke ? (o = ke, 
+                    i = I)) : (Sr = i, i = I); i !== I; ) n.push(i), i = Sr, U() !== I ? (t.substr(Sr, 2) === we ? (o = we, 
                     Sr += 2) : (o = I, 0 === Mr && c(Ee)), o !== I && U() !== I && (a = m()) !== I ? (Or = i, 
                     i = $e(r, a)) : (Sr = i, i = I)) : (Sr = i, i = I);
                     n !== I ? (Or = e, e = r = Ne(r, n)) : (Sr = e, e = I);
@@ -275,25 +275,25 @@
             }
             function C() {
                 var e, t, r, n, i = 32 * Sr + 13, o = Rr[i];
-                return o ? (Sr = o.nextPos, o.result) : (e = Sr, t = Sr, r = w(), r !== I && U() !== I && (n = $()) !== I ? (Or = t, 
-                t = r = ut(r, n)) : (Sr = t, t = I), t !== I && (r = k()) !== I ? (Or = e, e = t = ct(t, r)) : (Sr = e, 
+                return o ? (Sr = o.nextPos, o.result) : (e = Sr, t = Sr, r = k(), r !== I && U() !== I && (n = $()) !== I ? (Or = t, 
+                t = r = ut(r, n)) : (Sr = t, t = I), t !== I && (r = w()) !== I ? (Or = e, e = t = ct(t, r)) : (Sr = e, 
                 e = I), Rr[i] = {
                     nextPos: Sr,
                     result: e
                 }, e);
             }
-            function w() {
+            function k() {
                 var e, r, n, i, o, a = 32 * Sr + 14, s = Rr[a];
                 return s ? (Sr = s.nextPos, s.result) : (e = Sr, (r = E()) === I && (r = N()) === I && (r = O()) === I && (r = j()) === I && (r = L()) === I && (r = Sr, 
                 40 === t.charCodeAt(Sr) ? (n = lt, Sr++) : (n = I, 0 === Mr && c(ft)), n !== I && U() !== I && (i = d()) !== I && U() !== I ? (41 === t.charCodeAt(Sr) ? (o = dt, 
                 Sr++) : (o = I, 0 === Mr && c(ht)), o !== I ? (Or = r, r = n = pt(i)) : (Sr = r, 
-                r = I)) : (Sr = r, r = I)), r !== I && (n = k()) !== I ? (Or = e, e = r = vt(r, n)) : (Sr = e, 
+                r = I)) : (Sr = r, r = I)), r !== I && (n = w()) !== I ? (Or = e, e = r = vt(r, n)) : (Sr = e, 
                 e = I), Rr[a] = {
                     nextPos: Sr,
                     result: e
                 }, e);
             }
-            function k() {
+            function w() {
                 var e, r, n, i, o, a = 32 * Sr + 15, s = Rr[a];
                 if (s) return Sr = s.nextPos, s.result;
                 for (e = [], r = Sr, U() !== I ? (91 === t.charCodeAt(Sr) ? (n = mt, Sr++) : (n = I, 
@@ -315,8 +315,8 @@
             }
             function E() {
                 var e, r, n, i, o, a = 32 * Sr + 16, s = Rr[a];
-                return s ? (Sr = s.nextPos, s.result) : (e = Sr, t.substr(Sr, 3) === wt ? (r = wt, 
-                Sr += 3) : (r = I, 0 === Mr && c(kt)), r !== I && q() !== I && (n = w()) !== I ? (i = Sr, 
+                return s ? (Sr = s.nextPos, s.result) : (e = Sr, t.substr(Sr, 3) === kt ? (r = kt, 
+                Sr += 3) : (r = I, 0 === Mr && c(wt)), r !== I && q() !== I && (n = k()) !== I ? (i = Sr, 
                 U() !== I && (o = $()) !== I ? (Or = i, i = Et(n, o)) : (Sr = i, i = I), i === I && (i = null), 
                 i !== I ? (Or = e, e = r = $t(n, i)) : (Sr = e, e = I)) : (Sr = e, e = I), Rr[a] = {
                     nextPos: Sr,
@@ -518,14 +518,14 @@
                     n !== I ? (34 === t.charCodeAt(Sr) ? (i = mr, Sr++) : (i = I, 0 === Mr && c(br)), 
                     i !== I ? (Or = e, e = r = Cr(n)) : (Sr = e, e = I)) : (Sr = e, e = I);
                 } else Sr = e, e = I;
-                if (e === I) if (e = Sr, 39 === t.charCodeAt(Sr) ? (r = wr, Sr++) : (r = I, 0 === Mr && c(kr)), 
+                if (e === I) if (e = Sr, 39 === t.charCodeAt(Sr) ? (r = kr, Sr++) : (r = I, 0 === Mr && c(wr)), 
                 r !== I) {
                     for (n = [], i = Sr, t.substr(Sr, 2) === Er ? (o = Er, Sr += 2) : (o = I, 0 === Mr && c($r)), 
                     o !== I && (Or = i, o = Nr()), (i = o) === I && (jr.test(t.charAt(Sr)) ? (i = t.charAt(Sr), 
                     Sr++) : (i = I, 0 === Mr && c(zr))); i !== I; ) n.push(i), i = Sr, t.substr(Sr, 2) === Er ? (o = Er, 
                     Sr += 2) : (o = I, 0 === Mr && c($r)), o !== I && (Or = i, o = Nr()), (i = o) === I && (jr.test(t.charAt(Sr)) ? (i = t.charAt(Sr), 
                     Sr++) : (i = I, 0 === Mr && c(zr)));
-                    n !== I ? (39 === t.charCodeAt(Sr) ? (i = wr, Sr++) : (i = I, 0 === Mr && c(kr)), 
+                    n !== I ? (39 === t.charCodeAt(Sr) ? (i = kr, Sr++) : (i = I, 0 === Mr && c(wr)), 
                     i !== I ? (Or = e, e = r = Cr(n)) : (Sr = e, e = I)) : (Sr = e, e = I);
                 } else Sr = e, e = I;
                 return Mr--, e === I && (r = I, 0 === Mr && c(vr)), Rr[a] = {
@@ -578,14 +578,14 @@
                     left: e,
                     right: r
                 };
-            }, xe = "?", Ae = i("?", !1), Pe = ":", Ce = i(":", !1), we = function(e, t, r) {
+            }, xe = "?", Ae = i("?", !1), Pe = ":", Ce = i(":", !1), ke = function(e, t, r) {
                 return {
                     type: "Conditional",
                     test: e,
                     consequent: t,
                     alternate: r
                 };
-            }, ke = "||", Ee = i("||", !1), $e = function(e, t) {
+            }, we = "||", Ee = i("||", !1), $e = function(e, t) {
                 return {
                     operator: "||",
                     arg: t
@@ -649,7 +649,7 @@
                     type: "Literal",
                     value: e.name
                 };
-            }, wt = "new", kt = i("new", !1), Et = function(e, t) {
+            }, kt = "new", wt = i("new", !1), Et = function(e, t) {
                 return t;
             }, $t = function(e, t) {
                 return {
@@ -725,7 +725,7 @@
                     type: "Literal",
                     value: e.join("")
                 };
-            }, wr = "'", kr = i("'", !1), Er = "\\'", $r = i("\\'", !1), Nr = function() {
+            }, kr = "'", wr = i("'", !1), Er = "\\'", $r = i("\\'", !1), Nr = function() {
                 return "'";
             }, jr = /^[^'']/, zr = o([ "'", "'" ], !0, !1), Lr = /^[\t ]/, Vr = o([ "\t", " " ], !1, !1), Sr = 0, Or = 0, Tr = [ {
                 line: 1,
@@ -1207,10 +1207,16 @@
         attribute: "{prefix}(.+)-in",
         order: 2,
         block: !0,
-        initialize: function(e) {
-            this.items = [], this.key = function(e) {
+        initialize: function(e, t, r) {
+            if (this.items = [], this.vnode = h(e.cloneNode(!0)), e.getAttribute("z-key")) {
+                var n = o(e.getAttribute("z-key"));
+                this.key = function(e) {
+                    var t;
+                    return a(n, (t = {}, t[r] = e, t)).value;
+                };
+            } else this.key = function(e) {
                 return JSON.stringify(e);
-            }, this.vnode = h(e.cloneNode(!0));
+            };
         },
         create: function(e, t, r, n) {
             this.marker = document.createComment(n), t.parentNode.replaceChild(this.marker, t);

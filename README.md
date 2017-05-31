@@ -142,6 +142,17 @@ Note: this is roughly equivelant to ng-repeat.
 </script>
 ```
 
+Use z-key to specify a key for identifying each item in the array. If none is used, the JSON.stringify is used.
+<div z-product-in="basket" z-key="product.id">{{ product.name }}
+<script>
+	var view = zam(document.body);
+    view.basket = [
+        { id: 1, name: 'Chair' },
+        { id: 2, name: 'Table' }, // this won't show because the item below has the same id and will override this
+        { id: 2, name: 'Table' } 
+    ];
+</script>
+
 `z-model` - Bind input
 
 Two way binding with input element value. The input value will be set to the value of z-model. When the input value is changed by the user, the data will also change, and the view will be kept up to date.
