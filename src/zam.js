@@ -74,16 +74,14 @@ const zam = (el, data, parent) => {
 		view = Object.assign({
 			$id: id++,
 			$(defer) { // update binds. use defer to wait until end of execution cycle (these will be collapsed into one update)
-				if (destroyed) { return; }
-				if (defer) {
-					//log('view#' + view.$id + '.deferUpdate');
-					if (deferringUpdate) { return; }
-					deferringUpdate = nextTick(() => view.$());
-				} else {
+				if (!defer) {
 					if (deferringUpdate) { deferringUpdate = deferringUpdate(); } // cancel
 					//log('view#' + view.$id + '.update');
 					vnode.updateBinds(view);
 					emit(events, 'update');
+				} else if (!deferringUpdate) {
+					//log('view#' + view.$id + '.deferUpdate');
+					deferringUpdate = nextTick(() => view.$());
 				}
 			},
 			$destroy() {
@@ -112,7 +110,7 @@ const zam = (el, data, parent) => {
 
 	view.$on('update', () => {
 		//log('view#' + view.$id + '.event.update');
-		var updateChildren = children => {
+		/*var updateChildren = children => {
 			children.forEach(vchild => {
 				if (vchild.pointer) {
 					if (vchild.pointer.scope && vchild.pointer.scope !== view) {
@@ -122,8 +120,8 @@ const zam = (el, data, parent) => {
 					updateChildren(vchild.children);
 				}
 			});
-		};
-		updateChildren(vnode.children);
+		};*/
+		//updateChildren(vnode.children);
 		watchers.forEach(watcher => {
 			const val = evaluate(watcher.syntax, view).value;
 			if (val !== watcher.val) {

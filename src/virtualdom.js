@@ -103,7 +103,7 @@ class VirtualNode {
 						args: ['', parts[0].html ? 'html' : 'text']
 					});
 				}
-			} else if (parts.length > 1) {
+			} else {
 				let fragment = document.createDocumentFragment();
 				this.fragment = true;
 
@@ -156,6 +156,7 @@ class VirtualNode {
 		this.scope = scope;
 		this.binds.forEach(bind => bindExec(bind, 'update', scope, this));
 		this.children.forEach(vnode => vnode.updateBinds(scope));
+		if (this.pointer) { this.pointer.updateBinds(this.pointer.scope); }
 	}
 	destroyBinds(scope) {
 		this.scope = scope;

@@ -5,6 +5,7 @@ const pegjs = require('rollup-plugin-pegjs'),
       uglify = require('rollup-plugin-uglify'),
       json = require('rollup-plugin-json'),
       babel = require('rollup-plugin-babel'),
+      esformatter = require('rollup-plugin-esformatter'),
       fs = require('fs');
 
 let generateDocs = function () {
@@ -30,7 +31,7 @@ export default {
 		json(),
 		babel({
 			'presets': [
-				['es2015', { modules: false }]
+				['es2015', { modules: false, loose: true }]
 			],
 			plugins: ['external-helpers']
 		}),
@@ -51,7 +52,17 @@ export default {
 				//max_line_len: 80
 				//preserve_line: true
 			}
-		}/*, harmony.minify*/)
+		}/*, harmony.minify*/),
+		/*esformatter ({
+			indent: {
+				value: '	',
+			},
+			whiteSpace: {
+				after: {
+					ConditionalExpressionAlternate: 1
+				}
+			}
+		})*/
 	],
 	//sourceMap: true,
 	moduleName: 'zam',
@@ -59,3 +70,5 @@ export default {
 	//indent: false,
 	dest: 'zam.js'
 };
+
+// linebreak after :

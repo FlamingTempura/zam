@@ -23,7 +23,6 @@ Note: this is roughly equivelant to ng-repeat.
 
 import zam from '../zam';
 import virtualdom from '../virtualdom';
-import { arrayRemove } from '../utils';
 
 export default {
 	attribute: '{prefix}(.+)-in',
@@ -38,39 +37,47 @@ export default {
 	create(scope, el, val, attr) {
 		this.marker = document.createComment(attr);
 		el.parentNode.replaceChild(this.marker, el);
-		scope.$on('update', () => this.items.forEach(item => item.view.$()));
 	},
 	update(scope, el, val, attr, varname) {
-		let newData = val() || [],
-			existingItems = [].concat(this.items),
-			newItems = [],
-			fragment;
-		// create new nodes / update existing nodes
-		newData.forEach(data => {
-			let existing = existingItems.findIndex(item_ => this.key(item_.data) === this.key(data));
-			if (existing > -1) {
-				existingItems.splice(existing, 1);
-				//existing.view.$();
+		let newData = [].concat(val() || []);
+		this.items = this.items.filter(item => {
+			let toUpdate = newData.findIndex(data => this.key(data) === this.key(item.data));
+			if (toUpdate > -1) {
+				// update existing node
+				newData.splice(toUpdate, 1);
+				item.view.$();
+				return true;
 			} else {
-				let vnode = this.vnode.clone();
-				newItems.push({ vnode, data });
-				if (!fragment) { fragment = document.createDocumentFragment(); }
-				fragment.appendChild(vnode.node);
+				// remove old node
+				this.marker.parentNode.removeChild(item.vnode.node);
+				item.view.$destroy();
+				return false;
 			}
+		});
+		// create new nodes
+		/*if (newData.length > 0) {
+			let fragment = document.createDocumentFragment(),
+				newItems = newData.map(data => {
+					let vnode = this.vnode.clone();
+					fragment.appendChild(vnode.node);
+					return { vnode, data };
+				});
 			// todo: sorting (this mean that markers of child directives (e.g. exist) fall out of place)
-		});
-		// remove old nodes
-		existingItems.forEach(item => {
-			this.marker.parentNode.removeChild(item.vnode.node);
-			item.view.$destroy();
-			arrayRemove(this.items, item);
-		});
-		if (fragment) {
-			this.marker.parentNode.insertBefore(fragment, this.marker); // TODO: only if there are changes
+			this.marker.parentNode.insertBefore(fragment, this.marker);
 			newItems.forEach(item => {
 				item.view = zam(item.vnode, { [varname]: item.data }, scope); // wait until vnodes have been added before creating the view
+				item.view.$();
 				this.items.push(item);
 			});
-		}
+		}*/
+		newData.map(data => {
+			let vnode = this.vnode.clone(),
+				item = { vnode, data };
+			this.marker.parentNode.insertBefore(vnode.node, this.marker);
+			item.view = zam(item.vnode, { [varname]: item.data }, scope); // wait until vnodes have been added before creating the view
+			item.view.$();
+			this.items.push(item);
+		});
+		// todo: sorting (this mean that markers of child directives (e.g. exist) fall out of place)
 	}
 };
