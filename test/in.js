@@ -7,9 +7,9 @@ var test = require('tap').test,
 	$ = require('./test-utils').$,
 	$$ = require('./test-utils').$$;
 
-test('z-*-in', function (t) { // Iterate through an array
+test('z-*-in array', function (t) { // Iterate through an array
 	t.plan(14);
-	up(`<div z-todo-in="todos" z-key="todo.message">{{ todo.message }}</div>
+	up(`<div z-todo-in="todos" z-key="todo.message">{{ $index }}: {{ todo.message }}</div>
 		<span z-todo-in="plob"></span>`);
 	var view = zam(document.body);
 	frames(
@@ -24,7 +24,7 @@ test('z-*-in', function (t) { // Iterate through an array
 			var els = $$('div');
 			t.equal(els.length, 3);
 			view.todos.forEach(function (todo, i) {
-				t.equal(els[i].textContent, todo.message);
+				t.equal(els[i].textContent, i + ': ' + todo.message);
 			});
 			view.todos.push({ message: 'Wash car' });
 		},
@@ -32,7 +32,7 @@ test('z-*-in', function (t) { // Iterate through an array
 			var els = $$('div');
 			t.equal(els.length, 4);
 			view.todos.forEach(function (todo, i) {
-				t.equal(els[i].textContent, todo.message);
+				t.equal(els[i].textContent, i + ': ' + todo.message);
 			});
 			view.todos.splice(2, 1);
 		},
@@ -40,13 +40,50 @@ test('z-*-in', function (t) { // Iterate through an array
 			var els = $$('div');
 			t.equal(els.length, 3);
 			view.todos.forEach(function (todo, i) {
-				t.equal(els[i].textContent, todo.message);
+				t.equal(els[i].textContent, i + ': ' + todo.message);
 			});
 			t.equal($('span'), null);
 		}
 	);
 });
 
+test('z-*-in object', function (t) { // Iterate through an array
+	t.plan(13);
+	up(`The apple:
+		<div z-info-in="apple">{{ $index }}: {{ info }}</div>`);
+	var view = zam(document.body);
+	view.apple = {
+		type: 'granny smith',
+		color: 'green',
+		weight: '0.1kg'
+	};
+	frames(
+		function () {
+			var els = $$('div');
+			t.equal(els.length, 3);
+			Object.keys(view.apple).forEach(function (key, i) {
+				t.equal(els[i].textContent, key + ': ' + view.apple[key]);
+			});
+			view.apple.price = '30p';
+		},
+		function () {
+			var els = $$('div');
+			t.equal(els.length, 4);
+			Object.keys(view.apple).forEach(function (key, i) {
+				t.equal(els[i].textContent, key + ': ' + view.apple[key]);
+			});
+			delete view.apple.weight;
+		},
+		function () {
+			var els = $$('div');
+			t.equal(els.length, 3);
+			Object.keys(view.apple).forEach(function (key, i) {
+				t.equal(els[i].textContent, key + ': ' + view.apple[key]);
+			});
+		}
+	);
+});
+return;
 test('z-*-in (stress)', function (t) { // Iterate through an array
 	var nRepeats = 3,
 		nLists = 100,

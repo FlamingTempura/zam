@@ -56,13 +56,16 @@ export default {
 		el.parentNode.replaceChild(this.marker, el);
 	},
 	update(scope, el, val, attr, varname) {
-		let newData = [].concat(val() || []);
+		let data = val() || [],
+			indexes = Object.keys(data);
+			//newData = [].concat(val() || []);
 		this.items = this.items.filter(item => {
-			let toUpdate = newData.findIndex(data => this.key(data) === this.key(item.data));
+			let toUpdate = indexes.findIndex(i => this.key(data[i]) === this.key(item.datum));
 			if (toUpdate > -1) {
 				// update existing node
-				newData.splice(toUpdate, 1);
+				item.view.$index = indexes[toUpdate];
 				item.view.$();
+				indexes.splice(toUpdate, 1);
 				return true;
 			} else {
 				// remove old node
@@ -87,11 +90,14 @@ export default {
 				this.items.push(item);
 			});
 		}*/
-		newData.map(data => {
+		indexes.map(index => {
 			let vnode = this.vnode.clone(),
-				item = { vnode, data };
+				item = { vnode, datum: data[index] };
 			this.marker.parentNode.insertBefore(vnode.node, this.marker);
-			item.view = zam(item.vnode, { [varname]: item.data }, scope); // wait until vnodes have been added before creating the view
+			item.view = zam(item.vnode, {
+				[varname]: item.datum,
+				$index: index
+			}, scope); // wait until vnodes have been added before creating the view
 			item.view.$();
 			this.items.push(item);
 		});
