@@ -1,11 +1,10 @@
 /*
 `z-*-in` - Iterate through an array
 
-Render the element for each item in an array. Each item is assigned to a variable name specified in the attribute name (see example below). This directive occurs before anything else.
+Render the element for each item in an array or object. Each item is assigned
+to a variable name specified in the attribute name (see example below).
 
-Note: this is roughly equivelant to ng-repeat.
-
-```html
+@CODE
 <div z-todo-in="todos">{{ todo.message }}</div>
 <script>
     var view = zam(document.body);
@@ -15,10 +14,13 @@ Note: this is roughly equivelant to ng-repeat.
         { message: 'Wash clothes' }
     ];
 </script>
-```
+@RESULT
 
-Use z-key to specify a key for identifying each item in the array. If none is used, the JSON.stringify is used.
-<div z-product-in="basket" z-key="product.id">{{ product.name }}
+Use `z-key` to specify a key for identifying each item in the array. If none
+is used, the JSON.stringify is used.
+
+@CODE
+<div z-product-in="basket" z-key="product.id">{{ product.name }}</div>
 <script>
 	var view = zam(document.body);
     view.basket = [
@@ -27,6 +29,23 @@ Use z-key to specify a key for identifying each item in the array. If none is us
         { id: 2, name: 'Table' } 
     ];
 </script>
+@RESULT
+
+The index number of the element (if an array) or property name (if an object)
+can be accessed via `$index`.
+
+@CODE
+<div z-todo-in="todos">{{ $index }}: {{ todo }}</div>
+<div z-info-in="apple">{{ $index }}: {{ info }}</div>
+<script>
+    var view = zam(document.body);
+    view.todos = ['food', 'code', 'clothes'];
+    view.apple = { type: 'granny smith', color: 'green' };
+</script>
+@RESULT
+
+Note: This directive occurs before anything else.
+
 */
 
 /* jshint node: true, browser: true, esversion: 6, unused: true */
@@ -35,6 +54,7 @@ Use z-key to specify a key for identifying each item in the array. If none is us
 import zam from '../zam';
 import virtualdom from '../virtualdom';
 import { parse, evaluate } from '../expression';
+import directive from '../directive';
 
 export default {
 	attribute: '{prefix}(.+)-in',
@@ -42,14 +62,16 @@ export default {
 	block: true, // do not continue traversing through this dom element (separate zam will be created)
 	initialize(el, attr, varname) { // dom manipulation shouldn't happen in init as it will interfere with the virtualdom
 		this.items = [];
-		//this.key = item => item;
-		this.vnode = virtualdom(el.cloneNode(true));
-		if (el.getAttribute('z-key')) {
-			let keyAST = parse(el.getAttribute('z-key'));
+		const zKey = el.getAttribute(directive.prefix + 'key');
+		if (zKey) {
+			console.log('YESHHHH')
+			let keyAST = parse(zKey);
+			el.removeAttribute(directive.prefix + 'key');
 			this.key = data => evaluate(keyAST, { [varname]: data }).value;
 		} else {
 			this.key = data => JSON.stringify(data);
 		}
+		this.vnode = virtualdom(el.cloneNode(true));
 	},
 	create(scope, el, val, attr) {
 		this.marker = document.createComment(attr);

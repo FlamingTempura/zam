@@ -10,9 +10,10 @@ else.
 
 Note: this is equivelant to `ng-if` in angular.
 
-```html
+@CODE
 <div z-exist="showMe">My name is {{ me.name }}</div>
-<button z-on-click="hide()">Hide</button>
+<div z-exist="!showMe">I'm not here</div>
+<button z-click="hide()">Hide</button>
 <script>
     var view = zam(document.body);
     view.me = { name: 'Bob' };
@@ -21,7 +22,7 @@ Note: this is equivelant to `ng-if` in angular.
         view.showMe = false;
     };
 </script>
-```
+@RESULT
 */
 
 /* jshint node: true, browser: true, esversion: 6, unused: true */

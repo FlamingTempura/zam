@@ -1,20 +1,18 @@
 /*
 `z-attr-*` - Attribute value
 
-```html
-<button z-attr-disabled="showMe"></button>
+@CODE
+<img z-attr-src="pic">
+<img z-src="pic"><!-- you can omit 'attr-' for standard HTML attributes -->
+<input z-disabled="!showMe"></input>
+<button z-disabled="showMe"></button>
 <script>
     var view = zam(document.body);
     view.showMe = false;
+    view.pic = 'photo.png';
 </script>
-```
-
-_Shorthand:_ `attr-` may be omitted for standard HTML attributes, such as such as `disabled`, `title`, and `src`:
-```html
-<button z-disabled="showMe"></button>
-```
+@RESULT
 */
-
 /* jshint node: true, browser: true, esversion: 6, unused: true */
 'use strict';
 

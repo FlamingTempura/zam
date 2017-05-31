@@ -1,13 +1,13 @@
 /*
 `z-class-*` - Conditional class name
 
-```html
-<h4 z-class-red="warning"></h4>
+@CODE
+<h4 z-class-red="warning" z-class-green="!warning"></h4>
 <script>
     var view = zam(document.body);
     view.warning = true;
 </script>
-```
+@RESULT
 
 */
 /* jshint node: true, browser: true, esversion: 6, unused: true */

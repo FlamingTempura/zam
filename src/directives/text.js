@@ -3,7 +3,7 @@
 
 Note: HTML is not parsed for directives.
 
-```html
+@CODE
 <div>My name is {{ me.name }}</div>
 <div>My friend's name is <div z-text="alice.name"></div></div>
 <div>Some HTML: {{{ boldName }}}</div>
@@ -15,7 +15,7 @@ Note: HTML is not parsed for directives.
     view.boldName = '<strong>Bob</strong>';
     view.italicName = '<em>Bob</em>';
 </script>
-```
+@RESULT
 
 Warning: Be aware that binding HTML can cause
 [XSS](https://en.wikipedia.org/wiki/Cross-site_scripting). You should not use

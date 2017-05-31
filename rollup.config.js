@@ -6,17 +6,78 @@ const pegjs = require('rollup-plugin-pegjs'),
       json = require('rollup-plugin-json'),
       babel = require('rollup-plugin-babel'),
       esformatter = require('rollup-plugin-esformatter'),
+      jsdom = require('jsdom'),
+      tidy = require('htmltidy2').tidy,
       fs = require('fs');
+
+const zamscript = fs.readFileSync('./zam.js', 'utf8');
+const renderExample = function (html, cb) { // set global document to new dom
+	try {
+		let window = (new jsdom.JSDOM(html, { runScripts: 'outside-only' })).window;
+		let document = window.document;
+		var script = document.querySelector('script');
+		script.parentNode.removeChild(script);
+		window.eval(zamscript);
+		window.eval(script.textContent);
+		window.setTimeout(() => {
+			/*tidy(document.body.innerHTML, {
+				'show-body-only': true,
+				'hide-comments': true,
+				indent: 'yes',
+				'indent-spaces': 4,
+				doctype: 'html5',
+				'drop-empty-elements': false,
+				'merge-divs': false,
+				'merge-emphasis': false,
+				'merge-spans': false,
+				'output-html': true,
+				'preserve-entities': true
+			}, cb);*/
+			var html = document.body.innerHTML;
+			//html = html.replace('<', '    <');
+			//html = html.replace('    </', '</');
+			html = html.replace(/<!--[^>]*-->/g, '')
+			           .replace(/\n+/, '\n');
+			cb(null, html);
+		});
+	} catch (e) {
+		cb(e);
+	}
+};
 
 let generateDocs = function () {
 	var readme = fs.readFileSync('README.md', 'utf8'),
 		docs = fs.readdirSync('src/directives').map(function (file) {
 			var src = fs.readFileSync('src/directives/' + file, 'utf8');
-			return src.slice(src.indexOf('/*') + 2, src.indexOf('*/')).trim();
+			return '#### ' + src.slice(src.indexOf('/*') + 2, src.indexOf('*/')).trim();
 		});
 	readme = readme.replace(/\[\/\/\]: # \(DOC1\)[\w\W]*\[\/\/\]: # \(DOC1!\)/m,
 		'[//]: # (DOC1)\n\n' + docs.join('\n\n') + '\n\n[//]: # (DOC1!)');
-	fs.writeFileSync('README.md', readme, 'utf8');
+	var waiting = 0,
+		newreadme = [];
+	readme.split('@CODE').forEach(function (part, i) { // this renders all example code in the docs
+		var parts_ = part.split('@RESULT');
+		if (parts_.length === 1) {
+			newreadme[i * 2] = parts_[0];
+		} else {
+			let code = parts_[0];
+			waiting++;
+			renderExample(code, function (err, html) {
+				if (err) {
+					console.error(err);
+					console.error(code);
+					html = '';
+				}
+				newreadme[i * 2] = '```html' + code + '```\n\n' +
+					'Result:\n\n```html\n' + html + '```\n';
+				waiting--;
+				if (waiting === 0) {
+					fs.writeFileSync('README.md', newreadme.join(''), 'utf8');
+				}
+			});
+			newreadme[i * 2 + 1] = parts_[1];
+		}
+	});
 };
 
 export default {

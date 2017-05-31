@@ -75,32 +75,49 @@ Directives are specific instructions on how to display the view
 
 [//]: # (DOC1)
 
-`z-attr-*` - Attribute value
+#### `z-attr-*` - Attribute value
 
 ```html
-<button z-attr-disabled="showMe"></button>
+<img z-attr-src="pic">
+<img z-src="pic"><!-- you can omit 'attr-' for standard HTML attributes -->
+<input z-disabled="!showMe"></input>
+<button z-disabled="showMe"></button>
 <script>
     var view = zam(document.body);
     view.showMe = false;
+    view.pic = 'photo.png';
 </script>
 ```
 
-_Shorthand:_ `attr-` may be omitted for standard HTML attributes, such as such as `disabled`, `title`, and `src`:
+Result:
+
 ```html
-<button z-disabled="showMe"></button>
+<img src="photo.png">
+<img src="photo.png">
+<input disabled="disabled">
+<button></button>
+
 ```
 
-`z-class-*` - Conditional class name
+
+#### `z-class-*` - Conditional class name
 
 ```html
-<h4 z-class-red="warning"></h4>
+<h4 z-class-red="warning" z-class-green="!warning"></h4>
 <script>
     var view = zam(document.body);
     view.warning = true;
 </script>
 ```
 
-`z-exist` - Conditional existance
+Result:
+
+```html
+<h4 class="red"></h4>
+```
+
+
+#### `z-exist` - Conditional existance
 
 Render the element only if the result of the expression is
 [truthy](https://developer.mozilla.org/en/docs/Glossary/Truthy) (e.g. true,
@@ -113,7 +130,8 @@ Note: this is equivelant to `ng-if` in angular.
 
 ```html
 <div z-exist="showMe">My name is {{ me.name }}</div>
-<button z-on-click="hide()">Hide</button>
+<div z-exist="!showMe">I'm not here</div>
+<button z-click="hide()">Hide</button>
 <script>
     var view = zam(document.body);
     view.me = { name: 'Bob' };
@@ -124,11 +142,19 @@ Note: this is equivelant to `ng-if` in angular.
 </script>
 ```
 
-`z-*-in` - Iterate through an array
+Result:
 
-Render the element for each item in an array. Each item is assigned to a variable name specified in the attribute name (see example below). This directive occurs before anything else.
+```html
+<div>My name is Bob</div>
+<button>Hide</button>
 
-Note: this is roughly equivelant to ng-repeat.
+```
+
+
+#### `z-*-in` - Iterate through an array
+
+Render the element for each item in an array or object. Each item is assigned
+to a variable name specified in the attribute name (see example below).
 
 ```html
 <div z-todo-in="todos">{{ todo.message }}</div>
@@ -142,8 +168,18 @@ Note: this is roughly equivelant to ng-repeat.
 </script>
 ```
 
-Use z-key to specify a key for identifying each item in the array. If none is used, the JSON.stringify is used.
-<div z-product-in="basket" z-key="product.id">{{ product.name }}
+Result:
+
+```html
+<div>Buy food</div><div>Fix code</div><div>Wash clothes</div>
+```
+
+
+Use `z-key` to specify a key for identifying each item in the array. If none
+is used, the JSON.stringify is used.
+
+```html
+<div z-product-in="basket" z-key="product.id">{{ product.name }}</div>
 <script>
 	var view = zam(document.body);
     view.basket = [
@@ -152,8 +188,40 @@ Use z-key to specify a key for identifying each item in the array. If none is us
         { id: 2, name: 'Table' } 
     ];
 </script>
+```
 
-`z-model` - Bind input
+Result:
+
+```html
+<div z-key="product.id">Chair</div><div z-key="product.id">Table</div><div z-key="product.id">Table</div>
+```
+
+
+The index number of the element (if an array) or property name (if an object)
+can be accessed via `$index`.
+
+```html
+<div z-todo-in="todos">{{ $index }}: {{ todo }}</div>
+<div z-info-in="apple">{{ $index }}: {{ info }}</div>
+<script>
+    var view = zam(document.body);
+    view.todos = ['food', 'code', 'clothes'];
+    view.apple = { type: 'granny smith', color: 'green' };
+</script>
+```
+
+Result:
+
+```html
+<div>0: food</div><div>1: code</div><div>2: clothes</div>
+<div>type: granny smith</div><div>color: green</div>
+
+```
+
+
+Note: This directive occurs before anything else.
+
+#### `z-model` - Bind input
 
 Two way binding with input element value. The input value will be set to the value of z-model. When the input value is changed by the user, the data will also change, and the view will be kept up to date.
 
@@ -170,7 +238,17 @@ Two way binding with input element value. The input value will be set to the val
 </script>
 ```
 
-`z-on-*` - Event handler
+Result:
+
+```html
+<input type="text">
+foo 
+<input type="button">
+
+```
+
+
+#### `z-on-*` - Event handler
 
 Execute an expression when an event happens. Event data is available in `$event`.
 
@@ -184,13 +262,35 @@ Execute an expression when an event happens. Event data is available in `$event`
 </script>
 ```
 
+Result:
+
+```html
+<input type="button">
+```
+
+
 _Shorthand:_ `on-` may be omitted for standard DOM events, such as `click`, `mousemove`, and `mousedown`:
 ```html
 <input type="button" z-click="doSomething($event)">
 <form z-submit="doSomething($event)"></form>
+<script>
+    var view = zam(document.body);
+    view.doSomething = function (e) {
+        console.log('click!', e.clientX, e.clientY);
+    }
+</script>
 ```
 
-`z-show` - Conditional visibility
+Result:
+
+```html
+<input type="button">
+<form></form>
+
+```
+
+
+#### `z-show` - Conditional visibility
 
 Conditionally display the element. Equivelant to `z-attr-display="thing ? '' : 'none'"`.
 
@@ -207,11 +307,85 @@ Conditionally display the element. Equivelant to `z-attr-display="thing ? '' : '
 </script>
 ```
 
-`z-skip` - Skip compilation of this element
+Result:
+
+```html
+<div>My name is Bob</div>
+<button>Hide</button>
+
+```
+
+
+#### `z-skip` - Skip compilation of this element
 
 ```html
 <div z-skip>{{ this will appear as it is (including curly braces) }}</div>
+<script>
+    zam(document.body);
+</script>
 ```
+
+Result:
+
+```html
+<div>{{ this will appear as it is (including curly braces) }}</div>
+```
+
+
+#### `z-style-*` - Style value
+```html
+<h1 z-style-font-weight="big ? 'bold' : 'normal'"></h1>
+<h1 z-font-size="big ? '20pt' : '10px'"></h1> <!-- `style-` may be omitted for standard CSS properties -->
+<script>
+    var view = zam(document.body);
+    view.big = true;
+</script>
+```
+
+Result:
+
+```html
+<h1 style="font-weight: bold;"></h1>
+<h1 style="font-size: 20pt;"></h1> 
+
+```
+
+
+#### `z-text` and `z-html`  - Set text or HTML content
+
+Note: HTML is not parsed for directives.
+
+```html
+<div>My name is {{ me.name }}</div>
+<div>My friend's name is <div z-text="alice.name"></div></div>
+<div>Some HTML: {{{ boldName }}}</div>
+<div>Even more HTML: <span z-html="italicName"></span></div>
+<script>
+    var view = zam(document.body);
+    view.me = { name: 'Bob' };
+    view.alice = { name: 'Alice' };
+    view.boldName = '<strong>Bob</strong>';
+    view.italicName = '<em>Bob</em>';
+</script>
+```
+
+Result:
+
+```html
+<div>My name is Bob</div>
+<div>My friend's name is <div>Alice</div></div>
+<div>Some HTML: <span><strong>Bob</strong></span></div>
+<div>Even more HTML: <span><em>Bob</em></span></div>
+
+```
+
+
+Warning: Be aware that binding HTML can cause
+[XSS](https://en.wikipedia.org/wiki/Cross-site_scripting). You should not use
+user-entered content without sanitisation.
+
+[//]: # (DOC1!)
+
 
 ## Scope
 
@@ -236,43 +410,15 @@ Directives have access to their parent scopes through `$parent`:
 </script>
 ```
 
-`z-style-*` - Style value
-```html
-<h1 z-style-font-weight="big ? 'bold' : 'normal'"></h1>
-<script>
-    var view = zam(document.body);
-    view.big = true;
-</script>
-```
-
-_Shorthand:_ `style-` may be omitted for standard CSS properties, such as such as `font-weight`, `top`, and `background`:
-```html
-<h1 z-font-weight="big ? 'bold' : 'normal'"></h1>
-```
-
-`z-text` and `z-html`  - Set text or HTML content
-
-Note: HTML is not parsed for directives.
+Result:
 
 ```html
-<div>My name is {{ me.name }}</div>
-<div>My friend's name is <div z-text="alice.name"></div></div>
-<div>Some HTML: {{{ boldName }}}</div>
-<div>Even more HTML: <span z-html="italicName"></span></div>
-<script>
-    var view = zam(document.body);
-    view.me = { name: 'Bob' };
-    view.alice = { name: 'Alice' };
-    view.boldName = '<strong>Bob</strong>';
-    view.italicName = '<em>Bob</em>';
-</script>
+<div class="foo">chips  tea 
+<div class="bar">chips  coffee  tea </div>
+</div>
+
 ```
 
-Warning: Be aware that binding HTML can cause
-[XSS](https://en.wikipedia.org/wiki/Cross-site_scripting). You should not use
-user-entered content without sanitisation.
-
-[//]: # (DOC1!)
 
 ## Custom directives
 

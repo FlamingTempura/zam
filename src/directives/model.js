@@ -3,7 +3,7 @@
 
 Two way binding with input element value. The input value will be set to the value of z-model. When the input value is changed by the user, the data will also change, and the view will be kept up to date.
 
-```html
+@CODE
 <input type="text" z-model="blah">
 {{ blah }} <!-- this will always display the value entered in the text input -->
 <input type="button" z-click="thing()">
@@ -14,7 +14,7 @@ Two way binding with input element value. The input value will be set to the val
         console.log(view.blah); // will print whatever the user entered into the input
     }
 </script>
-```
+@RESULT
 */
 
 /* jshint node: true, browser: true, esversion: 6, unused: true */
@@ -22,6 +22,7 @@ Two way binding with input element value. The input value will be set to the val
 
 import { stringify, hash } from '../utils';
 import { parse } from '../expression';
+import directive from '../directive';
 
 export default {
 	attribute: '{prefix}model',
@@ -40,7 +41,7 @@ export default {
 			el.setAttribute('name', hash(scope.$id + JSON.stringify(this.ast))); // group radios by their model and scope
 		}
 		this.getValue = option => {
-			var valExpr = option.getAttribute('z-value');
+			var valExpr = option.getAttribute(directive.prefix + 'value');
 			return valExpr ?
 				val(parse(valExpr)) :
 				option.getAttribute('value');

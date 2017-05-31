@@ -3,7 +3,7 @@
 
 Conditionally display the element. Equivelant to `z-attr-display="thing ? '' : 'none'"`.
 
-```html
+@CODE
 <div z-show="showMe">My name is {{ me.name }}</div>
 <button z-on-click="hide()">Hide</button>
 <script>
@@ -14,7 +14,7 @@ Conditionally display the element. Equivelant to `z-attr-display="thing ? '' : '
         view.showMe = false;
     };
 </script>
-```
+@RESULT
 */
 
 /* jshint node: true, browser: true, esversion: 6, unused: true */

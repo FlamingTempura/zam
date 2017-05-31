@@ -1,17 +1,13 @@
 /*
 `z-style-*` - Style value
-```html
+@CODE
 <h1 z-style-font-weight="big ? 'bold' : 'normal'"></h1>
+<h1 z-font-size="big ? '20pt' : '10px'"></h1> <!-- `style-` may be omitted for standard CSS properties -->
 <script>
     var view = zam(document.body);
     view.big = true;
 </script>
-```
-
-_Shorthand:_ `style-` may be omitted for standard CSS properties, such as such as `font-weight`, `top`, and `background`:
-```html
-<h1 z-font-weight="big ? 'bold' : 'normal'"></h1>
-```
+@RESULT
 */
 
 /* jshint node: true, browser: true, esversion: 6, unused: true */

@@ -3,7 +3,7 @@
 
 Execute an expression when an event happens. Event data is available in `$event`.
 
-```html
+@CODE
 <input type="button" z-on-click="doSomething($event)">
 <script>
     var view = zam(document.body);
@@ -11,13 +11,19 @@ Execute an expression when an event happens. Event data is available in `$event`
         console.log('click!', e.clientX, e.clientY);
     }
 </script>
-```
+@RESULT
 
 _Shorthand:_ `on-` may be omitted for standard DOM events, such as `click`, `mousemove`, and `mousedown`:
-```html
+@CODE
 <input type="button" z-click="doSomething($event)">
 <form z-submit="doSomething($event)"></form>
-```
+<script>
+    var view = zam(document.body);
+    view.doSomething = function (e) {
+        console.log('click!', e.clientX, e.clientY);
+    }
+</script>
+@RESULT
 
 */
 /* jshint node: true, browser: true, esversion: 6, unused: true */

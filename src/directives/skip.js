@@ -1,32 +1,12 @@
 /*
 `z-skip` - Skip compilation of this element
 
-```html
+@CODE
 <div z-skip>{{ this will appear as it is (including curly braces) }}</div>
-```
-
-## Scope
-
-Directives have access to their parent scopes through `$parent`:
-
-```html
-<div class="foo">
-    {{ food }} <!-- chips -->
-    {{ drink }} <!-- tea -->
-    <div class="bar">
-        {{ food }} <!-- chips -->
-        {{ drink }} <!-- coffee -->
-        {{ $parent.drink }} <!-- tea -->
-    </div>
-</div>
 <script>
-    var foo = zam('.foo'),
-        bar = zam('.bar');
-    foo.food = 'chips';
-    foo.drink = 'tea';
-    bar.drink = 'coffee';
+    zam(document.body);
 </script>
-```
+@RESULT
 
 */
 
