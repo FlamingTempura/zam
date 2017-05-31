@@ -1,10 +1,9 @@
 /* jshint node: true, browser: true, esversion: 6, unused: true */
 'use strict';
 
-import { directives, inlineParser } from './directive';
+import createDirective from './directive';
 import { parse, evaluate } from './expression';
-import { log } from './utils';
-import prefix from './prefix';
+//import { log } from './utils';
 
 class VirtualNode {
 	constructor(node, template, override = false) {
@@ -59,10 +58,10 @@ class VirtualNode {
 			this.attributes = Array.from(node.attributes).map(attr => ({ name: attr.name, value: attr.value }));
 			this.removedAttrs = [];
 
-			directives.forEach(directive => {
+			createDirective.directives.forEach(directive => {
 				if (this.blocked) { return; }
 				if (directive.tag) {
-					let args = this.tag.match(new RegExp('^'+ directive.tag.replace('{prefix}', prefix) + '$', 'i'));
+					let args = this.tag.match(new RegExp('^'+ directive.tag.replace('{prefix}', createDirective.prefix) + '$', 'i'));
 					if (args) {
 						this.bind({ directive, args });
 					}
@@ -70,7 +69,7 @@ class VirtualNode {
 				if (directive.attribute) {
 					this.attributes = this.attributes.filter(attr => {
 						if (this.blocked) { return; }
-						let args = attr.name.match(new RegExp('^'+ directive.attribute.replace('{prefix}', prefix) + '$', 'i'));
+						let args = attr.name.match(new RegExp('^'+ directive.attribute.replace('{prefix}', createDirective.prefix) + '$', 'i'));
 						if (!args) { return true; }
 						let ast = parse(attr.value || 'undefined');
 						this.removedAttrs.push(attr);
@@ -99,7 +98,7 @@ class VirtualNode {
 						this.node.textContent = '';
 					}
 					this.bind({
-						directive: inlineParser,
+						directive: createDirective.inlineParser,
 						ast: parts[0].expression,
 						args: ['', parts[0].html ? 'html' : 'text']
 					});
@@ -115,7 +114,7 @@ class VirtualNode {
 						newVNode = createVNode(newNode);
 					if (typeof part !== 'string') {
 						newVNode.bind({
-							directive: inlineParser,
+							directive: createDirective.inlineParser,
 							ast: part.expression,
 							args: ['', part.html ? 'html' : 'text']
 						});

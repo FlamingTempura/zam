@@ -5,8 +5,7 @@ import { arrayRemove, nextTick, log } from './utils';
 import { parse, evaluate } from './expression';
 import { version } from '../package.json';
 import virtualdom from './virtualdom';
-import { directive } from './directive';
-import prefix from './prefix';
+import createDirective from './directive';
 
 let id = 0;
 
@@ -143,13 +142,16 @@ const zam = (el, data, parent) => {
 
 Object.assign(zam, {
 	version, parse, evaluate,
-	prefix: prefix,
-	directive: directive,
+	directive: createDirective,
 	root: {
 		$parent: typeof global !== 'undefined' ? global : window,
 		number: (num, dec = 2) => Number(num).toFixed(dec),
 		percent: (num, dec = 2) => Number(num * 100).toFixed(dec) + '%'
 	}
+});
+Object.defineProperty(zam, 'prefix', {
+	get() { return createDirective.prefix; },
+	set (prefix) { createDirective.prefix = prefix; }
 });
 
 export default zam;

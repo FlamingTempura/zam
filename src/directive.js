@@ -2,11 +2,9 @@
 'use strict';
 
 let directives = [];
-let inlineParser;
-
-const directive = (directive) => {
+let createDirective = (directive) => {
 	if (directive.inline) {
-		inlineParser = directive;
+		createDirective.inlineParser = directive;
 	}
 	if (directive.template) {
 		directive.block = true;
@@ -17,5 +15,8 @@ const directive = (directive) => {
 	directives.sort((a, b) => a.order - b.order);
 	return directive;
 };
+createDirective.forEach = directives.forEach.bind(directives);
+createDirective.directives = directives;
+createDirective.prefix = 'z-';
 
-export { directives, inlineParser, directive };
+export default createDirective;

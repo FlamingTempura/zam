@@ -1252,7 +1252,7 @@ test('$watch', function (t) {
 		}
 	);
 });
-/*
+
 test('prefix', function (t) {
 	t.plan(1);
 	up(`<div foo-text="bar"></div>`);
@@ -1266,7 +1266,7 @@ test('prefix', function (t) {
 	);
 	zam.prefix = 'z-';
 });
-
+/*
 
 test('$destroy', function (t) {
 	t.plan(4);
