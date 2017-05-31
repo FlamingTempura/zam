@@ -7,8 +7,8 @@
   "module": "src/index.js",
   "name": "zam",
   "scripts": {
-    "test": "tap test/*.js",
-    "cover": "tap test/*.js --cov --coverage-report=lcov",
+    "test": "find test -type f -not -iname test-utils.js -exec tap -j6 {} +",
+    "cover": "find test -type f -not -iname test-utils.js -exec tap -j6 --cov --coverage-report=lcov {} +",
     "build": "rollup -c",
     "watch": "rollup -c -w"
   },

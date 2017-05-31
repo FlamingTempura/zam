@@ -26,6 +26,7 @@ import { parse } from '../expression';
 export default {
 	attribute: '{prefix}model',
 	block: true,
+	order: 3, // must happen before z-attr-* binds with z-value on radio inputs
 	create(scope, el, val) {
 		let tag = el.tagName.toLowerCase(),
 			inputType = (el.getAttribute('type') || '').toLowerCase();

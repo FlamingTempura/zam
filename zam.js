@@ -1164,6 +1164,7 @@
     }, {
         attribute: "{prefix}model",
         block: !0,
+        order: 3,
         create: function(e, t, n) {
             var i = this, a = t.tagName.toLowerCase(), s = (t.getAttribute("type") || "").toLowerCase();
             this.type = "checkbox" === s ? "checkbox" : "select" === a ? "select" : "radio" === s ? "radio" : [ "range", "number" ].indexOf(s) > -1 ? "number" : [ "date", "datetime-local", "time", "month", "week" ].indexOf(s) > -1 ? "date" : "text", 
