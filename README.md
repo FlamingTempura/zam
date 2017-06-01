@@ -96,7 +96,8 @@ Result:
 My name is <div>Bob</div>
 My name is <div>Bob</div>
 Some HTML: <span><span><em>Bob</em></span></span>
-Some HTML: <span><em>Bob</em></span>```
+Some HTML: <span><em>Bob</em></span>
+```
 
 
 HTML will not be checked for directives.
@@ -127,7 +128,8 @@ Result:
 
 ```html
 <div>My name is Bob</div>
-<button>Hide</button>```
+<button>Hide</button>
+```
 
 
 #### `z-exist` - Conditional existance
@@ -160,7 +162,8 @@ Result:
 
 ```html
 <div>My name is Bob</div>
-<button>Hide</button>```
+<button>Hide</button>
+```
 
 
 #### `z-*-in` - Iterate through an array
@@ -208,7 +211,8 @@ Result:
 <ul>
 	<li>type: granny smith</li>
 	<li>color: green</li>
-</ul>```
+</ul>
+```
 
 
 If `z-key` is not specified, `JSON.stringify` is used.
@@ -236,7 +240,8 @@ Result:
 <img src="photo.png">
 <img src="photo.png">
 <input disabled="disabled">
-<button></button>```
+<button></button>
+```
 
 
 #### `z-class-*` - Conditional class name
@@ -253,7 +258,8 @@ Result:
 Result:
 
 ```html
-<h4 class="red"></h4>```
+<h4 class="red"></h4>
+```
 
 
 #### `z-style-*` - Style value
@@ -276,7 +282,8 @@ Result:
 ```html
 <h1 style="font-weight: bold;"></h1>
 <em style="font-weight: bold;"></em>
-<p style="color: red; font-size: 12pt;"></p>```
+<p style="color: red; font-size: 12pt;"></p>
+```
 
 
 #### `z-model` - Bind input
@@ -302,7 +309,8 @@ Result:
 ```html
 <input type="text">
 foo 
-<input type="button">```
+<input type="button">
+```
 
 
 #### `z-on-*` - Event handler
@@ -323,7 +331,8 @@ Execute an expression when an event happens. Event data is available in `$event`
 Result:
 
 ```html
-<input type="button">```
+<input type="button">
+```
 
 
 _Shorthand:_ `on-` may be omitted for standard DOM events, such as `click`, `mousemove`, and `mousedown`:
@@ -342,7 +351,8 @@ Result:
 
 ```html
 <input type="button">
-<form></form>```
+<form></form>
+```
 
 
 #### `z-skip` - Skip compilation of this element
@@ -364,7 +374,8 @@ Result:
 <div>
 	{{ this will appear as it is (including curly braces) }}
 	<div z-font-size="'12pt'">Directives will not be parsed</div>
-</div>```
+</div>
+```
 
 
 [//]: # (DOC1!)

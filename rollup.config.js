@@ -82,7 +82,7 @@ let generateDocs = function () {
 					html = '';
 				}
 				newreadme[i * 2] = '```html' + code + '```\n\n' +
-					'Result:\n\n```html\n' + html + '```\n';
+					'Result:\n\n```html\n' + html.trim() + '\n```\n';
 				waiting--;
 				if (waiting === 0) {
 					fs.writeFileSync('README.md', newreadme.join(''), 'utf8');
