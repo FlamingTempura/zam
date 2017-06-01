@@ -1,5 +1,6 @@
 /*
 `z-show` - Conditional visibility
+@ORDER 2
 
 Conditionally display the element. Equivelant to `z-attr-display="thing ? '' : 'none'"`.
 

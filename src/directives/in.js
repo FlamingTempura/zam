@@ -1,5 +1,6 @@
 /*
 `z-*-in` - Iterate through an array
+@ORDER 4
 
 Renders the element for each item in an array or object. Each value in the
 array/object is assigned to a variable name specified in the attribute name
@@ -41,6 +42,7 @@ Note: This directive occurs before anything else.
 import zam from '../zam';
 import virtualdom from '../virtualdom';
 import { parse, evaluate } from '../expression';
+import { arrayRemove } from '../utils';
 import directive from '../directive';
 
 export default {
@@ -65,49 +67,33 @@ export default {
 	},
 	update(scope, el, val, attr, varname) {
 		let data = val() || [],
-			indexes = Object.keys(data);
-			//newData = [].concat(val() || []);
-		this.items = this.items.filter(item => {
-			let toUpdate = indexes.findIndex(i => this.key(data[i]) === this.key(item.datum));
-			if (toUpdate > -1) {
-				// update existing node
-				item.view.$index = indexes[toUpdate];
-				item.view.$();
-				indexes.splice(toUpdate, 1);
-				return true;
-			} else {
-				// remove old node
+			keys = Object.keys(data).map(k => ({ index: k, computed: this.key(data[k]), datum: data[k] }));
+
+		// recompute keys of existing nodes and remove old nodes
+		[].concat(this.items).forEach(item => {
+			item.key = this.key(item.datum);
+			let update = keys.find(k => k.computed === item.key);
+			if (!update) {
 				this.marker.parentNode.removeChild(item.vnode.node);
 				item.view.$destroy();
-				return false;
+				arrayRemove(this.items, item);
 			}
 		});
-		// create new nodes
-		/*if (newData.length > 0) {
-			let fragment = document.createDocumentFragment(),
-				newItems = newData.map(data => {
-					let vnode = this.vnode.clone();
-					fragment.appendChild(vnode.node);
-					return { vnode, data };
-				});
-			// todo: sorting (this mean that markers of child directives (e.g. exist) fall out of place)
-			this.marker.parentNode.insertBefore(fragment, this.marker);
-			newItems.forEach(item => {
-				item.view = zam(item.vnode, { [varname]: item.data }, scope); // wait until vnodes have been added before creating the view
-				item.view.$();
-				this.items.push(item);
-			});
-		}*/
-		indexes.map(i => {
-			let existing = this.items.find(item => this.key(data[i]) === this.key(item.datum));
-			if (existing) { return; }
-			let vnode = this.vnode.clone(),
-				item = { vnode, datum: data[i] };
-			this.marker.parentNode.insertBefore(vnode.node, this.marker);
-			item.view = zam(item.vnode, {
-				[varname]: item.datum,
-				$index: i
-			}, scope); // wait until vnodes have been added before creating the view
+		// create new nodes and update existing nodes
+		keys.forEach(k => {
+			let item = this.items.find(item_ => k.computed === item_.key),
+				existing = !!item;
+			if (!existing) {
+				let vnode = this.vnode.clone();
+				item = { key: k.computed, vnode, datum: k.datum };
+			} else {
+				arrayRemove(this.items, item);
+			}
+			this.marker.parentNode.insertBefore(item.vnode.node, this.marker);
+			if (!existing) { // wait until vnodes have been added before creating the view
+				item.view = zam(item.vnode, { [varname]: item.datum, }, scope);
+			}
+			item.view.$index = k.index;
 			item.view.$();
 			this.items.push(item);
 		});

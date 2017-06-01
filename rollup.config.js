@@ -49,10 +49,19 @@ const renderExample = function (html, cb) { // set global document to new dom
 
 let generateDocs = function () {
 	var readme = fs.readFileSync('README.md', 'utf8'),
-		docs = fs.readdirSync('src/directives').map(function (file) {
-			var src = fs.readFileSync('src/directives/' + file, 'utf8');
-			return '#### ' + src.slice(src.indexOf('/*') + 2, src.indexOf('*/')).trim();
-		});
+		docs = fs.readdirSync('src/directives')
+			.map(function (file) {
+				var src = fs.readFileSync('src/directives/' + file, 'utf8'),
+					text = '#### ' + src.slice(src.indexOf('/*') + 2, src.indexOf('*/')).trim(),
+					m = text.match(/@ORDER (\d+)/),
+					order = m ? Number(m[1]) : Infinity;
+				return {
+					order: order,
+					text: text.replace(/@ORDER (\d+)/, '')
+				};
+			})
+			.sort((a, b) => a.order - b.order)
+			.map(file => file.text);
 	readme = readme.replace(/\[\/\/\]: # \(DOC1\)[\w\W]*\[\/\/\]: # \(DOC1!\)/m,
 		'[//]: # (DOC1)\n\n' + docs.join('\n\n') + '\n\n[//]: # (DOC1!)');
 	var waiting = 0,

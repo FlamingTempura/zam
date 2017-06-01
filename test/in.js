@@ -7,8 +7,25 @@ var test = require('tap').test,
 	$ = require('./test-utils').$,
 	$$ = require('./test-utils').$$;
 
+test('z-*-in', function (t) { // Iterate through an array
+	t.plan(7);
+	up(`<div z-todo-in="todos">{{ $index }}: {{ todo }}</div>`);
+	var view = zam(document.body);
+	view.todos = ['Buy food', 'Fix code', 'Wash clothes'];
+	frames(
+		function () {
+			var els = $$('div');
+			t.equal(els.length, 3);
+			view.todos.forEach(function (todo, i) {
+				t.equal(els[i].getAttribute('z-key'), null);
+				t.equal(els[i].textContent, i + ': ' + todo);
+			});
+		}
+	);
+});
+
 test('z-*-in array', function (t) { // Iterate through an array
-	t.plan(17);
+	t.plan(21);
 	up(`<div z-todo-in="todos" z-key="todo.message">{{ $index }}: {{ todo.message }}</div>
 		<span z-todo-in="plob"></span>`);
 	var view = zam(document.body);
@@ -17,16 +34,17 @@ test('z-*-in array', function (t) { // Iterate through an array
 			view.todos = [
 				{ message: 'Buy food' },
 				{ message: 'Fix code' },
-				{ message: 'Wash clothes' },
-				{ message: 'Wash clothes' } // duplicate shouldn't show
+				{ message: 'Wash clothes' }, // this should get overriden by next element
+				{ message: 'Wash clothes' }
 			];
+			t.equal($('span'), null);
 		},
 		function () {
 			var els = $$('div');
 			t.equal(els.length, 3);
 			view.todos.slice(0, -1).forEach(function (todo, i) {
 				t.equal(els[i].getAttribute('z-key'), null);
-				t.equal(els[i].textContent, i + ': ' + todo.message);
+				t.equal(els[i].textContent, (i === 2 ? 3 : i) + ': ' + todo.message); // duplicate shouldn't show, so index will be overridden
 			});
 			view.todos.splice(3, 1); // remove the duplicate
 			view.todos.push({ message: 'Wash car' });
@@ -45,7 +63,14 @@ test('z-*-in array', function (t) { // Iterate through an array
 			view.todos.forEach(function (todo, i) {
 				t.equal(els[i].textContent, i + ': ' + todo.message);
 			});
-			t.equal($('span'), null);
+			view.todos.unshift(view.todos.pop()); // test that re-ordering works
+		},
+		function () {
+			var els = $$('div');
+			t.equal(els.length, 3);
+			view.todos.forEach(function (todo, i) {
+				t.equal(els[i].textContent, i + ': ' + todo.message);
+			});
 		}
 	);
 });
@@ -86,14 +111,11 @@ test('z-*-in object', function (t) { // Iterate through an array
 		}
 	);
 });
-return;
+
 test('z-*-in (stress)', function (t) { // Iterate through an array
 	var nRepeats = 3,
 		nLists = 100,
-		nItems = 5,
-		//nRepeats = 1,
-		//nLists = 2,
-		//nItems = 2,
+		nItems = 50,
 		count = 0,
 		totalTime1 = 0,
 		totalTime2 = 0,
@@ -109,15 +131,13 @@ test('z-*-in (stress)', function (t) { // Iterate through an array
 		view.lists = new Array(nLists).fill(1).map(function () {
 			return {
 				items: new Array(nItems).fill(1).map(function () {
-					return { message: Math.round(Math.random() * 10).toString(16) };
+					return { message: Math.round(Math.random() * 1000000).toString(16) };
 				})
 			};
 		});
 		totalTime2 += Date.now() - t1;
-		//console.log('-------- SET ---------')
 		view.$();
 		totalTime3 += Date.now() - t1;
-		//console.log('-------- UPDATED ---------')
 		t.equal($$('div').length, nLists);
 		t.equal($$('span').length, nLists * nItems);
 		count++;
@@ -131,39 +151,3 @@ test('z-*-in (stress)', function (t) { // Iterate through an array
 		}
 	});
 });
-
-
-/*var repeats = 3,
-	count = 0,
-	time = 0;*/
-//var n1 = 100, n2 = 100;
-//var n1 = 5, n2 = 5;
-/*new Array(repeats).fill(1).forEach(function () {
-	test('z-*-in (stress)', function (t) { // Iterate through an array
-		var t1 = Date.now();
-		t.plan(2);
-		up(`<div z-list-in="lists"><span z-itaem-in="list.items">{{ item.message }}</span></div>`);
-		var view = zam(document.body);
-		//view.lists = [1, 2, 3];
-		view.lists = new Array(n1).fill(1).map(function () {
-			return {
-				items: new Array(n2).fill(1).map(function () {
-					return { message: String(Math.round(Math.random() * 10000)) };
-				})
-			};
-		});
-		frames(
-			function () {
-				t.equal($$('div').length, n1);
-				t.equal($$('span').length, n1 * n2);
-				time += Date.now() - t1;
-				count++;
-				if (count === repeats) {
-					console.log('AVG TIME TAKEN OVER', repeats, 'REPEATS:', (time / repeats / 1000).toFixed(3) + 's');
-				}
-			}
-		);
-	});
-});*/
-
-

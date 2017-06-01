@@ -1,5 +1,7 @@
 /*
 `z-style-*` - Style value
+@ORDER 7
+
 @CODE
 <h1 z-style-font-weight="big ? 'bold' : 'normal'"></h1>
 <em z-font-weight="big ? 'bold' : 'normal'"></em><!-- `style-` may be omitted for standard CSS properties -->

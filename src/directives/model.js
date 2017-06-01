@@ -1,5 +1,6 @@
 /*
 `z-model` - Bind input
+@ORDER 8
 
 Two way binding with input element value. The input value will be set to the value of z-model. When the input value is changed by the user, the data will also change, and the view will be kept up to date.
 

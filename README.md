@@ -75,46 +75,63 @@ Directives are specific instructions on how to display the view
 
 [//]: # (DOC1)
 
-#### `z-attr-*` - Attribute value
+#### `z-text` and `z-html`  - Set text or HTML content
+
 
 ```html
-<img z-attr-src="pic">
-<img z-src="pic"><!-- you can omit 'attr-' for standard HTML attributes -->
-<input z-disabled="!showMe"></input>
-<button z-disabled="showMe"></button>
+My name is <div>{{ me.name }}</div>
+My name is <div z-text="me.name"></div><!-- equivalent to above -->
+Some HTML: <span>{{{ boldName }}}</span>
+Some HTML: <span z-html="boldName"></span>
 <script>
     var view = zam(document.body);
-    view.showMe = false;
-    view.pic = 'photo.png';
+    view.me = { name: 'Bob' };
+    view.boldName = '<em>Bob</em>';
 </script>
 ```
 
 Result:
 
 ```html
-<img src="photo.png">
-<img src="photo.png">
-<input disabled="disabled">
-<button></button>```
+My name is <div>Bob</div>
+My name is <div>Bob</div>
+Some HTML: <span><span><em>Bob</em></span></span>
+Some HTML: <span><em>Bob</em></span>```
 
 
-#### `z-class-*` - Conditional class name
+HTML will not be checked for directives.
+
+Warning: Be aware that binding HTML can cause
+[XSS](https://en.wikipedia.org/wiki/Cross-site_scripting). You should not use
+user-entered content without sanitisation.
+
+#### `z-show` - Conditional visibility
+
+
+Conditionally display the element. Equivelant to `z-attr-display="thing ? '' : 'none'"`.
 
 ```html
-<h4 z-class-red="warning" z-class-green="!warning"></h4>
+<div z-show="showMe">My name is {{ me.name }}</div>
+<button z-on-click="hide()">Hide</button>
 <script>
     var view = zam(document.body);
-    view.warning = true;
+    view.me = { name: 'Bob' };
+    view.showMe = true;
+    view.hide = function () {
+        view.showMe = false;
+    };
 </script>
 ```
 
 Result:
 
 ```html
-<h4 class="red"></h4>```
+<div>My name is Bob</div>
+<button>Hide</button>```
 
 
 #### `z-exist` - Conditional existance
+
 
 Render the element only if the result of the expression is
 [truthy](https://developer.mozilla.org/en/docs/Glossary/Truthy) (e.g. true,
@@ -147,6 +164,7 @@ Result:
 
 
 #### `z-*-in` - Iterate through an array
+
 
 Renders the element for each item in an array or object. Each value in the
 array/object is assigned to a variable name specified in the attribute name
@@ -197,7 +215,72 @@ If `z-key` is not specified, `JSON.stringify` is used.
 
 Note: This directive occurs before anything else.
 
+#### `z-attr-*` - Attribute value
+
+
+```html
+<img z-attr-src="pic">
+<img z-src="pic"><!-- you can omit 'attr-' for standard HTML attributes -->
+<input z-disabled="!showMe"></input>
+<button z-disabled="showMe"></button>
+<script>
+    var view = zam(document.body);
+    view.showMe = false;
+    view.pic = 'photo.png';
+</script>
+```
+
+Result:
+
+```html
+<img src="photo.png">
+<img src="photo.png">
+<input disabled="disabled">
+<button></button>```
+
+
+#### `z-class-*` - Conditional class name
+
+
+```html
+<h4 z-class-red="warning" z-class-green="!warning"></h4>
+<script>
+    var view = zam(document.body);
+    view.warning = true;
+</script>
+```
+
+Result:
+
+```html
+<h4 class="red"></h4>```
+
+
+#### `z-style-*` - Style value
+
+
+```html
+<h1 z-style-font-weight="big ? 'bold' : 'normal'"></h1>
+<em z-font-weight="big ? 'bold' : 'normal'"></em><!-- `style-` may be omitted for standard CSS properties -->
+<p z-color="color" z-font-size="fontsize + 'pt'"></p> 
+<script>
+    var view = zam(document.body);
+    view.big = true;
+    view.color = 'red';
+    view.fontsize = 12
+</script>
+```
+
+Result:
+
+```html
+<h1 style="font-weight: bold;"></h1>
+<em style="font-weight: bold;"></em>
+<p style="color: red; font-size: 12pt;"></p>```
+
+
 #### `z-model` - Bind input
+
 
 Two way binding with input element value. The input value will be set to the value of z-model. When the input value is changed by the user, the data will also change, and the view will be kept up to date.
 
@@ -223,6 +306,7 @@ foo
 
 
 #### `z-on-*` - Event handler
+
 
 Execute an expression when an event happens. Event data is available in `$event`.
 
@@ -261,31 +345,8 @@ Result:
 <form></form>```
 
 
-#### `z-show` - Conditional visibility
-
-Conditionally display the element. Equivelant to `z-attr-display="thing ? '' : 'none'"`.
-
-```html
-<div z-show="showMe">My name is {{ me.name }}</div>
-<button z-on-click="hide()">Hide</button>
-<script>
-    var view = zam(document.body);
-    view.me = { name: 'Bob' };
-    view.showMe = true;
-    view.hide = function () {
-        view.showMe = false;
-    };
-</script>
-```
-
-Result:
-
-```html
-<div>My name is Bob</div>
-<button>Hide</button>```
-
-
 #### `z-skip` - Skip compilation of this element
+
 
 ```html
 <div z-skip>
@@ -305,56 +366,6 @@ Result:
 	<div z-font-size="'12pt'">Directives will not be parsed</div>
 </div>```
 
-
-#### `z-style-*` - Style value
-```html
-<h1 z-style-font-weight="big ? 'bold' : 'normal'"></h1>
-<em z-font-weight="big ? 'bold' : 'normal'"></em><!-- `style-` may be omitted for standard CSS properties -->
-<p z-color="color" z-font-size="fontsize + 'pt'"></p> 
-<script>
-    var view = zam(document.body);
-    view.big = true;
-    view.color = 'red';
-    view.fontsize = 12
-</script>
-```
-
-Result:
-
-```html
-<h1 style="font-weight: bold;"></h1>
-<em style="font-weight: bold;"></em>
-<p style="color: red; font-size: 12pt;"></p>```
-
-
-#### `z-text` and `z-html`  - Set text or HTML content
-
-```html
-My name is <div>{{ me.name }}</div>
-My name is <div z-text="me.name"></div><!-- equivalent to above -->
-Some HTML: <span>{{{ boldName }}}</span>
-Some HTML: <span z-html="boldName"></span>
-<script>
-    var view = zam(document.body);
-    view.me = { name: 'Bob' };
-    view.boldName = '<em>Bob</em>';
-</script>
-```
-
-Result:
-
-```html
-My name is <div>Bob</div>
-My name is <div>Bob</div>
-Some HTML: <span><span><em>Bob</em></span></span>
-Some HTML: <span><em>Bob</em></span>```
-
-
-HTML will not be checked for directives.
-
-Warning: Be aware that binding HTML can cause
-[XSS](https://en.wikipedia.org/wiki/Cross-site_scripting). You should not use
-user-entered content without sanitisation.
 
 [//]: # (DOC1!)
 

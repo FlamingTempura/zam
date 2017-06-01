@@ -1,5 +1,6 @@
 /*
 `z-class-*` - Conditional class name
+@ORDER 6
 
 @CODE
 <h4 z-class-red="warning" z-class-green="!warning"></h4>

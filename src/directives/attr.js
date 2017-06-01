@@ -1,5 +1,6 @@
 /*
 `z-attr-*` - Attribute value
+@ORDER 5
 
 @CODE
 <img z-attr-src="pic">

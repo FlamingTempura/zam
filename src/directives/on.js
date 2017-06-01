@@ -1,5 +1,6 @@
 /*
 `z-on-*` - Event handler
+@ORDER 9
 
 Execute an expression when an event happens. Event data is available in `$event`.
 

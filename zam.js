@@ -128,7 +128,7 @@
             }
             function h() {
                 var e, t = 32 * Or + 3, r = Rr[t];
-                return r ? (Or = r.nextPos, r.result) : ((e = C()) === I && (e = k()), Rr[t] = {
+                return r ? (Or = r.nextPos, r.result) : ((e = k()) === I && (e = C()), Rr[t] = {
                     nextPos: Or,
                     result: e
                 }, e);
@@ -137,8 +137,8 @@
                 var e, r, n, i, o, a, s = 32 * Or + 4, u = Rr[s];
                 return u ? (Or = u.nextPos, u.result) : (e = Or, r = v(), r !== I && U() !== I ? (63 === t.charCodeAt(Or) ? (n = xe, 
                 Or++) : (n = I, 0 === Mr && c(Ae)), n !== I && U() !== I && (i = p()) !== I && U() !== I ? (58 === t.charCodeAt(Or) ? (o = Pe, 
-                Or++) : (o = I, 0 === Mr && c(Ce)), o !== I && U() !== I && (a = p()) !== I ? (Sr = e, 
-                e = r = ke(r, i, a)) : (Or = e, e = I)) : (Or = e, e = I)) : (Or = e, e = I), e === I && (e = v()), 
+                Or++) : (o = I, 0 === Mr && c(ke)), o !== I && U() !== I && (a = p()) !== I ? (Sr = e, 
+                e = r = Ce(r, i, a)) : (Or = e, e = I)) : (Or = e, e = I)) : (Or = e, e = I), e === I && (e = v()), 
                 Rr[s] = {
                     nextPos: Or,
                     result: e
@@ -149,11 +149,11 @@
                 if (u) return Or = u.nextPos, u.result;
                 if (e = Or, (r = m()) !== I) {
                     for (n = [], i = Or, U() !== I ? (t.substr(Or, 2) === we ? (o = we, Or += 2) : (o = I, 
-                    0 === Mr && c(Ee)), o !== I && U() !== I && (a = m()) !== I ? (Sr = i, i = $e(r, a)) : (Or = i, 
+                    0 === Mr && c(Ee)), o !== I && U() !== I && (a = m()) !== I ? (Sr = i, i = Ne(r, a)) : (Or = i, 
                     i = I)) : (Or = i, i = I); i !== I; ) n.push(i), i = Or, U() !== I ? (t.substr(Or, 2) === we ? (o = we, 
                     Or += 2) : (o = I, 0 === Mr && c(Ee)), o !== I && U() !== I && (a = m()) !== I ? (Sr = i, 
-                    i = $e(r, a)) : (Or = i, i = I)) : (Or = i, i = I);
-                    n !== I ? (Sr = e, e = r = Ne(r, n)) : (Or = e, e = I);
+                    i = Ne(r, a)) : (Or = i, i = I)) : (Or = i, i = I);
+                    n !== I ? (Sr = e, e = r = $e(r, n)) : (Or = e, e = I);
                 } else Or = e, e = I;
                 return Rr[s] = {
                     nextPos: Or,
@@ -169,7 +169,7 @@
                     i = I)) : (Or = i, i = I); i !== I; ) n.push(i), i = Or, U() !== I ? (t.substr(Or, 2) === je ? (o = je, 
                     Or += 2) : (o = I, 0 === Mr && c(Le)), o !== I && U() !== I && (a = b()) !== I ? (Sr = i, 
                     i = ze(r, a)) : (Or = i, i = I)) : (Or = i, i = I);
-                    n !== I ? (Sr = e, e = r = Ne(r, n)) : (Or = e, e = I);
+                    n !== I ? (Sr = e, e = r = $e(r, n)) : (Or = e, e = I);
                 } else Or = e, e = I;
                 return Rr[s] = {
                     nextPos: Or,
@@ -273,18 +273,18 @@
                     result: e
                 }, e);
             }
-            function C() {
+            function k() {
                 var e, t, r, n, i = 32 * Or + 13, o = Rr[i];
-                return o ? (Or = o.nextPos, o.result) : (e = Or, t = Or, r = k(), r !== I && U() !== I && (n = $()) !== I ? (Sr = t, 
+                return o ? (Or = o.nextPos, o.result) : (e = Or, t = Or, r = C(), r !== I && U() !== I && (n = N()) !== I ? (Sr = t, 
                 t = r = ut(r, n)) : (Or = t, t = I), t !== I && (r = w()) !== I ? (Sr = e, e = t = ct(t, r)) : (Or = e, 
                 e = I), Rr[i] = {
                     nextPos: Or,
                     result: e
                 }, e);
             }
-            function k() {
+            function C() {
                 var e, r, n, i, o, a = 32 * Or + 14, s = Rr[a];
-                return s ? (Or = s.nextPos, s.result) : (e = Or, (r = E()) === I && (r = N()) === I && (r = S()) === I && (r = j()) === I && (r = z()) === I && (r = Or, 
+                return s ? (Or = s.nextPos, s.result) : (e = Or, (r = E()) === I && (r = $()) === I && (r = S()) === I && (r = j()) === I && (r = z()) === I && (r = Or, 
                 40 === t.charCodeAt(Or) ? (n = lt, Or++) : (n = I, 0 === Mr && c(ft)), n !== I && U() !== I && (i = d()) !== I && U() !== I ? (41 === t.charCodeAt(Or) ? (o = dt, 
                 Or++) : (o = I, 0 === Mr && c(ht)), o !== I ? (Sr = r, r = n = pt(i)) : (Or = r, 
                 r = I)) : (Or = r, r = I)), r !== I && (n = w()) !== I ? (Sr = e, e = r = vt(r, n)) : (Or = e, 
@@ -300,14 +300,14 @@
                 0 === Mr && c(bt)), n !== I && U() !== I && (i = d()) !== I && U() !== I ? (93 === t.charCodeAt(Or) ? (o = yt, 
                 Or++) : (o = I, 0 === Mr && c(gt)), o !== I ? (Sr = r, r = xt(i)) : (Or = r, r = I)) : (Or = r, 
                 r = I)) : (Or = r, r = I), r === I && (r = Or, U() !== I ? (46 === t.charCodeAt(Or) ? (n = At, 
-                Or++) : (n = I, 0 === Mr && c(Pt)), n !== I && U() !== I && (i = N()) !== I ? (Sr = r, 
-                r = Ct(i)) : (Or = r, r = I)) : (Or = r, r = I)); r !== I; ) e.push(r), r = Or, 
+                Or++) : (n = I, 0 === Mr && c(Pt)), n !== I && U() !== I && (i = $()) !== I ? (Sr = r, 
+                r = kt(i)) : (Or = r, r = I)) : (Or = r, r = I)); r !== I; ) e.push(r), r = Or, 
                 U() !== I ? (91 === t.charCodeAt(Or) ? (n = mt, Or++) : (n = I, 0 === Mr && c(bt)), 
                 n !== I && U() !== I && (i = d()) !== I && U() !== I ? (93 === t.charCodeAt(Or) ? (o = yt, 
                 Or++) : (o = I, 0 === Mr && c(gt)), o !== I ? (Sr = r, r = xt(i)) : (Or = r, r = I)) : (Or = r, 
                 r = I)) : (Or = r, r = I), r === I && (r = Or, U() !== I ? (46 === t.charCodeAt(Or) ? (n = At, 
-                Or++) : (n = I, 0 === Mr && c(Pt)), n !== I && U() !== I && (i = N()) !== I ? (Sr = r, 
-                r = Ct(i)) : (Or = r, r = I)) : (Or = r, r = I));
+                Or++) : (n = I, 0 === Mr && c(Pt)), n !== I && U() !== I && (i = $()) !== I ? (Sr = r, 
+                r = kt(i)) : (Or = r, r = I)) : (Or = r, r = I));
                 return Rr[a] = {
                     nextPos: Or,
                     result: e
@@ -315,20 +315,20 @@
             }
             function E() {
                 var e, r, n, i, o, a = 32 * Or + 16, s = Rr[a];
-                return s ? (Or = s.nextPos, s.result) : (e = Or, t.substr(Or, 3) === kt ? (r = kt, 
-                Or += 3) : (r = I, 0 === Mr && c(wt)), r !== I && q() !== I && (n = k()) !== I ? (i = Or, 
-                U() !== I && (o = $()) !== I ? (Sr = i, i = Et(n, o)) : (Or = i, i = I), i === I && (i = null), 
-                i !== I ? (Sr = e, e = r = $t(n, i)) : (Or = e, e = I)) : (Or = e, e = I), Rr[a] = {
+                return s ? (Or = s.nextPos, s.result) : (e = Or, t.substr(Or, 3) === Ct ? (r = Ct, 
+                Or += 3) : (r = I, 0 === Mr && c(wt)), r !== I && q() !== I && (n = C()) !== I ? (i = Or, 
+                U() !== I && (o = N()) !== I ? (Sr = i, i = Et(n, o)) : (Or = i, i = I), i === I && (i = null), 
+                i !== I ? (Sr = e, e = r = Nt(n, i)) : (Or = e, e = I)) : (Or = e, e = I), Rr[a] = {
                     nextPos: Or,
                     result: e
                 }, e);
             }
-            function $() {
+            function N() {
                 var e, r, n, i, o, a, s, u, l = 32 * Or + 17, f = Rr[l];
                 if (f) return Or = f.nextPos, f.result;
                 if (e = Or, 40 === t.charCodeAt(Or) ? (r = lt, Or++) : (r = I, 0 === Mr && c(ft)), 
                 r !== I && U() !== I ? (41 === t.charCodeAt(Or) ? (n = dt, Or++) : (n = I, 0 === Mr && c(ht)), 
-                n !== I ? (Sr = e, e = r = Nt()) : (Or = e, e = I)) : (Or = e, e = I), e === I) if (e = Or, 
+                n !== I ? (Sr = e, e = r = $t()) : (Or = e, e = I)) : (Or = e, e = I), e === I) if (e = Or, 
                 40 === t.charCodeAt(Or) ? (r = lt, Or++) : (r = I, 0 === Mr && c(ft)), r !== I) if (U() !== I) if ((n = d()) !== I) {
                     for (i = [], o = Or, (a = U()) !== I ? (44 === t.charCodeAt(Or) ? (s = jt, Or++) : (s = I, 
                     0 === Mr && c(Lt)), s !== I && U() !== I && (u = d()) !== I ? (Sr = o, o = a = zt(n, u)) : (Or = o, 
@@ -344,7 +344,7 @@
                     result: e
                 }, e;
             }
-            function N() {
+            function $() {
                 var e, r, n, i, o, a = 32 * Or + 18, s = Rr[a];
                 if (s) return Or = s.nextPos, s.result;
                 if (Mr++, e = Or, r = Or, Mr++, n = T(), Mr--, n === I ? r = void 0 : (Or = r, r = I), 
@@ -421,8 +421,8 @@
             }
             function O() {
                 var e, r, n, i, o = 32 * Or + 23, a = Rr[o];
-                return a ? (Or = a.nextPos, a.result) : (e = Or, (r = N()) === I && (r = R()) === I && (r = B()), 
-                r !== I && U() !== I ? (58 === t.charCodeAt(Or) ? (n = Pe, Or++) : (n = I, 0 === Mr && c(Ce)), 
+                return a ? (Or = a.nextPos, a.result) : (e = Or, (r = $()) === I && (r = R()) === I && (r = B()), 
+                r !== I && U() !== I ? (58 === t.charCodeAt(Or) ? (n = Pe, Or++) : (n = I, 0 === Mr && c(ke)), 
                 n !== I && U() !== I && (i = d()) !== I ? (Sr = e, e = r = Qt(r, i)) : (Or = e, 
                 e = I)) : (Or = e, e = I), Rr[o] = {
                     nextPos: Or,
@@ -516,17 +516,17 @@
                     Or += 2) : (o = I, 0 === Mr && c(gr)), o !== I && (Sr = i, o = xr()), (i = o) === I && (Ar.test(t.charAt(Or)) ? (i = t.charAt(Or), 
                     Or++) : (i = I, 0 === Mr && c(Pr)));
                     n !== I ? (34 === t.charCodeAt(Or) ? (i = mr, Or++) : (i = I, 0 === Mr && c(br)), 
-                    i !== I ? (Sr = e, e = r = Cr(n)) : (Or = e, e = I)) : (Or = e, e = I);
+                    i !== I ? (Sr = e, e = r = kr(n)) : (Or = e, e = I)) : (Or = e, e = I);
                 } else Or = e, e = I;
-                if (e === I) if (e = Or, 39 === t.charCodeAt(Or) ? (r = kr, Or++) : (r = I, 0 === Mr && c(wr)), 
+                if (e === I) if (e = Or, 39 === t.charCodeAt(Or) ? (r = Cr, Or++) : (r = I, 0 === Mr && c(wr)), 
                 r !== I) {
-                    for (n = [], i = Or, t.substr(Or, 2) === Er ? (o = Er, Or += 2) : (o = I, 0 === Mr && c($r)), 
-                    o !== I && (Sr = i, o = Nr()), (i = o) === I && (jr.test(t.charAt(Or)) ? (i = t.charAt(Or), 
+                    for (n = [], i = Or, t.substr(Or, 2) === Er ? (o = Er, Or += 2) : (o = I, 0 === Mr && c(Nr)), 
+                    o !== I && (Sr = i, o = $r()), (i = o) === I && (jr.test(t.charAt(Or)) ? (i = t.charAt(Or), 
                     Or++) : (i = I, 0 === Mr && c(Lr))); i !== I; ) n.push(i), i = Or, t.substr(Or, 2) === Er ? (o = Er, 
-                    Or += 2) : (o = I, 0 === Mr && c($r)), o !== I && (Sr = i, o = Nr()), (i = o) === I && (jr.test(t.charAt(Or)) ? (i = t.charAt(Or), 
+                    Or += 2) : (o = I, 0 === Mr && c(Nr)), o !== I && (Sr = i, o = $r()), (i = o) === I && (jr.test(t.charAt(Or)) ? (i = t.charAt(Or), 
                     Or++) : (i = I, 0 === Mr && c(Lr)));
-                    n !== I ? (39 === t.charCodeAt(Or) ? (i = kr, Or++) : (i = I, 0 === Mr && c(wr)), 
-                    i !== I ? (Sr = e, e = r = Cr(n)) : (Or = e, e = I)) : (Or = e, e = I);
+                    n !== I ? (39 === t.charCodeAt(Or) ? (i = Cr, Or++) : (i = I, 0 === Mr && c(wr)), 
+                    i !== I ? (Sr = e, e = r = kr(n)) : (Or = e, e = I)) : (Or = e, e = I);
                 } else Or = e, e = I;
                 return Mr--, e === I && (r = I, 0 === Mr && c(vr)), Rr[a] = {
                     nextPos: Or,
@@ -578,19 +578,19 @@
                     left: e,
                     right: r
                 };
-            }, xe = "?", Ae = i("?", !1), Pe = ":", Ce = i(":", !1), ke = function(e, t, r) {
+            }, xe = "?", Ae = i("?", !1), Pe = ":", ke = i(":", !1), Ce = function(e, t, r) {
                 return {
                     type: "Conditional",
                     test: e,
                     consequent: t,
                     alternate: r
                 };
-            }, we = "||", Ee = i("||", !1), $e = function(e, t) {
+            }, we = "||", Ee = i("||", !1), Ne = function(e, t) {
                 return {
                     operator: "||",
                     arg: t
                 };
-            }, Ne = function(e, t) {
+            }, $e = function(e, t) {
                 return Ur("Logical", e, t);
             }, je = "&&", Le = i("&&", !1), ze = function(e, t) {
                 return {
@@ -644,20 +644,20 @@
                 }, e);
             }, mt = "[", bt = i("[", !1), yt = "]", gt = i("]", !1), xt = function(e) {
                 return e;
-            }, At = ".", Pt = i(".", !1), Ct = function(e) {
+            }, At = ".", Pt = i(".", !1), kt = function(e) {
                 return {
                     type: "Literal",
                     value: e.name
                 };
-            }, kt = "new", wt = i("new", !1), Et = function(e, t) {
+            }, Ct = "new", wt = i("new", !1), Et = function(e, t) {
                 return t;
-            }, $t = function(e, t) {
+            }, Nt = function(e, t) {
                 return {
                     type: "NewExpression",
                     callee: e,
                     arguments: t || []
                 };
-            }, Nt = function() {
+            }, $t = function() {
                 return [];
             }, jt = ",", Lt = i(",", !1), zt = function(e, t) {
                 return t;
@@ -720,12 +720,12 @@
                 };
             }, cr = "0", lr = i("0", !1), fr = /^[1-9]/, dr = o([ [ "1", "9" ] ], !1, !1), hr = "e", pr = i("e", !0), vr = a("string"), mr = '"', br = i('"', !1), yr = '\\"', gr = i('\\"', !1), xr = function() {
                 return '"';
-            }, Ar = /^[^"]/, Pr = o([ '"' ], !0, !1), Cr = function(e) {
+            }, Ar = /^[^"]/, Pr = o([ '"' ], !0, !1), kr = function(e) {
                 return {
                     type: "Literal",
                     value: e.join("")
                 };
-            }, kr = "'", wr = i("'", !1), Er = "\\'", $r = i("\\'", !1), Nr = function() {
+            }, Cr = "'", wr = i("'", !1), Er = "\\'", Nr = i("\\'", !1), $r = function() {
                 return "'";
             }, jr = /^[^'']/, Lr = o([ "'", "'" ], !0, !1), zr = /^[\t ]/, Vr = o([ "\t", " " ], !1, !1), Or = 0, Sr = 0, Tr = [ {
                 line: 1,
@@ -1231,26 +1231,35 @@
         create: function(e, t, r, n) {
             this.marker = document.createComment(n), t.parentNode.replaceChild(this.marker, t);
         },
-        update: function(e, t, r, n, i) {
-            var o = this, a = r() || [], s = Object.keys(a);
-            this.items = this.items.filter(function(e) {
-                var t = s.findIndex(function(t) {
-                    return o.key(a[t]) === o.key(e.datum);
-                });
-                return t > -1 ? (e.view.$index = s[t], e.view.$(), s.splice(t, 1), !0) : (o.marker.parentNode.removeChild(e.vnode.node), 
-                e.view.$destroy(), !1);
-            }), s.map(function(t) {
-                var r;
-                if (!o.items.find(function(e) {
-                    return o.key(a[t]) === o.key(e.datum);
-                })) {
-                    var n = o.vnode.clone(), s = {
-                        vnode: n,
-                        datum: a[t]
+        update: function(e, r, n, i, o) {
+            var a = this, s = n() || [], u = Object.keys(s).map(function(e) {
+                return {
+                    index: e,
+                    computed: a.key(s[e]),
+                    datum: s[e]
+                };
+            });
+            [].concat(this.items).forEach(function(e) {
+                e.key = a.key(e.datum), u.find(function(t) {
+                    return t.computed === e.key;
+                }) || (a.marker.parentNode.removeChild(e.vnode.node), e.view.$destroy(), t(a.items, e));
+            }), u.forEach(function(r) {
+                var n = a.items.find(function(e) {
+                    return r.computed === e.key;
+                }), i = !!n;
+                if (i) t(a.items, n); else {
+                    var s = a.vnode.clone();
+                    n = {
+                        key: r.computed,
+                        vnode: s,
+                        datum: r.datum
                     };
-                    o.marker.parentNode.insertBefore(n.node, o.marker), s.view = g(s.vnode, (r = {}, 
-                    r[i] = s.datum, r.$index = t, r), e), s.view.$(), o.items.push(s);
                 }
+                if (a.marker.parentNode.insertBefore(n.vnode.node, a.marker), !i) {
+                    var u;
+                    n.view = g(n.vnode, (u = {}, u[o] = n.datum, u), e);
+                }
+                n.view.$index = r.index, n.view.$(), a.items.push(n);
             });
         }
     }, {

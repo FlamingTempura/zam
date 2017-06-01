@@ -1,5 +1,6 @@
 /*
 `z-exist` - Conditional existance
+@ORDER 3
 
 Render the element only if the result of the expression is
 [truthy](https://developer.mozilla.org/en/docs/Glossary/Truthy) (e.g. true,
