@@ -128,7 +128,7 @@
             }
             function h() {
                 var e, t = 32 * Or + 3, r = Rr[t];
-                return r ? (Or = r.nextPos, r.result) : ((e = k()) === I && (e = C()), Rr[t] = {
+                return r ? (Or = r.nextPos, r.result) : ((e = P()) === I && (e = C()), Rr[t] = {
                     nextPos: Or,
                     result: e
                 }, e);
@@ -136,8 +136,8 @@
             function p() {
                 var e, r, n, i, o, a, s = 32 * Or + 4, u = Rr[s];
                 return u ? (Or = u.nextPos, u.result) : (e = Or, r = v(), r !== I && U() !== I ? (63 === t.charCodeAt(Or) ? (n = xe, 
-                Or++) : (n = I, 0 === Mr && c(Ae)), n !== I && U() !== I && (i = p()) !== I && U() !== I ? (58 === t.charCodeAt(Or) ? (o = Pe, 
-                Or++) : (o = I, 0 === Mr && c(ke)), o !== I && U() !== I && (a = p()) !== I ? (Sr = e, 
+                Or++) : (n = I, 0 === Mr && c(Ae)), n !== I && U() !== I && (i = p()) !== I && U() !== I ? (58 === t.charCodeAt(Or) ? (o = ke, 
+                Or++) : (o = I, 0 === Mr && c(Pe)), o !== I && U() !== I && (a = p()) !== I ? (Sr = e, 
                 e = r = Ce(r, i, a)) : (Or = e, e = I)) : (Or = e, e = I)) : (Or = e, e = I), e === I && (e = v()), 
                 Rr[s] = {
                     nextPos: Or,
@@ -153,7 +153,7 @@
                     i = I)) : (Or = i, i = I); i !== I; ) n.push(i), i = Or, U() !== I ? (t.substr(Or, 2) === we ? (o = we, 
                     Or += 2) : (o = I, 0 === Mr && c(Ee)), o !== I && U() !== I && (a = m()) !== I ? (Sr = i, 
                     i = Ne(r, a)) : (Or = i, i = I)) : (Or = i, i = I);
-                    n !== I ? (Sr = e, e = r = $e(r, n)) : (Or = e, e = I);
+                    n !== I ? (Sr = e, e = r = je(r, n)) : (Or = e, e = I);
                 } else Or = e, e = I;
                 return Rr[s] = {
                     nextPos: Or,
@@ -164,12 +164,12 @@
                 var e, r, n, i, o, a, s = 32 * Or + 6, u = Rr[s];
                 if (u) return Or = u.nextPos, u.result;
                 if (e = Or, (r = b()) !== I) {
-                    for (n = [], i = Or, U() !== I ? (t.substr(Or, 2) === je ? (o = je, Or += 2) : (o = I, 
+                    for (n = [], i = Or, U() !== I ? (t.substr(Or, 2) === $e ? (o = $e, Or += 2) : (o = I, 
                     0 === Mr && c(Le)), o !== I && U() !== I && (a = b()) !== I ? (Sr = i, i = ze(r, a)) : (Or = i, 
-                    i = I)) : (Or = i, i = I); i !== I; ) n.push(i), i = Or, U() !== I ? (t.substr(Or, 2) === je ? (o = je, 
+                    i = I)) : (Or = i, i = I); i !== I; ) n.push(i), i = Or, U() !== I ? (t.substr(Or, 2) === $e ? (o = $e, 
                     Or += 2) : (o = I, 0 === Mr && c(Le)), o !== I && U() !== I && (a = b()) !== I ? (Sr = i, 
                     i = ze(r, a)) : (Or = i, i = I)) : (Or = i, i = I);
-                    n !== I ? (Sr = e, e = r = $e(r, n)) : (Or = e, e = I);
+                    n !== I ? (Sr = e, e = r = je(r, n)) : (Or = e, e = I);
                 } else Or = e, e = I;
                 return Rr[s] = {
                     nextPos: Or,
@@ -254,7 +254,7 @@
             }
             function A() {
                 var e, r, n, i = 32 * Or + 11, o = Rr[i];
-                return o ? (Or = o.nextPos, o.result) : ((e = P()) === I && (e = Or, t.substr(Or, 2) === et ? (r = et, 
+                return o ? (Or = o.nextPos, o.result) : ((e = k()) === I && (e = Or, t.substr(Or, 2) === et ? (r = et, 
                 Or += 2) : (r = I, 0 === Mr && c(tt)), r === I && (t.substr(Or, 2) === rt ? (r = rt, 
                 Or += 2) : (r = I, 0 === Mr && c(nt)), r === I && (it.test(t.charAt(Or)) ? (r = t.charAt(Or), 
                 Or++) : (r = I, 0 === Mr && c(ot)))), r !== I && U() !== I && (n = A()) !== I ? (Sr = e, 
@@ -263,7 +263,7 @@
                     result: e
                 }, e);
             }
-            function P() {
+            function k() {
                 var e, r, n, i = 32 * Or + 12, o = Rr[i];
                 return o ? (Or = o.nextPos, o.result) : (e = Or, r = h(), r !== I && U() !== I ? (t.substr(Or, 2) === et ? (n = et, 
                 Or += 2) : (n = I, 0 === Mr && c(tt)), n === I && (t.substr(Or, 2) === rt ? (n = rt, 
@@ -273,7 +273,7 @@
                     result: e
                 }, e);
             }
-            function k() {
+            function P() {
                 var e, t, r, n, i = 32 * Or + 13, o = Rr[i];
                 return o ? (Or = o.nextPos, o.result) : (e = Or, t = Or, r = C(), r !== I && U() !== I && (n = N()) !== I ? (Sr = t, 
                 t = r = ut(r, n)) : (Or = t, t = I), t !== I && (r = w()) !== I ? (Sr = e, e = t = ct(t, r)) : (Or = e, 
@@ -284,7 +284,7 @@
             }
             function C() {
                 var e, r, n, i, o, a = 32 * Or + 14, s = Rr[a];
-                return s ? (Or = s.nextPos, s.result) : (e = Or, (r = E()) === I && (r = $()) === I && (r = S()) === I && (r = j()) === I && (r = z()) === I && (r = Or, 
+                return s ? (Or = s.nextPos, s.result) : (e = Or, (r = E()) === I && (r = j()) === I && (r = S()) === I && (r = $()) === I && (r = z()) === I && (r = Or, 
                 40 === t.charCodeAt(Or) ? (n = lt, Or++) : (n = I, 0 === Mr && c(ft)), n !== I && U() !== I && (i = d()) !== I && U() !== I ? (41 === t.charCodeAt(Or) ? (o = dt, 
                 Or++) : (o = I, 0 === Mr && c(ht)), o !== I ? (Sr = r, r = n = pt(i)) : (Or = r, 
                 r = I)) : (Or = r, r = I)), r !== I && (n = w()) !== I ? (Sr = e, e = r = vt(r, n)) : (Or = e, 
@@ -300,14 +300,14 @@
                 0 === Mr && c(bt)), n !== I && U() !== I && (i = d()) !== I && U() !== I ? (93 === t.charCodeAt(Or) ? (o = yt, 
                 Or++) : (o = I, 0 === Mr && c(gt)), o !== I ? (Sr = r, r = xt(i)) : (Or = r, r = I)) : (Or = r, 
                 r = I)) : (Or = r, r = I), r === I && (r = Or, U() !== I ? (46 === t.charCodeAt(Or) ? (n = At, 
-                Or++) : (n = I, 0 === Mr && c(Pt)), n !== I && U() !== I && (i = $()) !== I ? (Sr = r, 
-                r = kt(i)) : (Or = r, r = I)) : (Or = r, r = I)); r !== I; ) e.push(r), r = Or, 
+                Or++) : (n = I, 0 === Mr && c(kt)), n !== I && U() !== I && (i = j()) !== I ? (Sr = r, 
+                r = Pt(i)) : (Or = r, r = I)) : (Or = r, r = I)); r !== I; ) e.push(r), r = Or, 
                 U() !== I ? (91 === t.charCodeAt(Or) ? (n = mt, Or++) : (n = I, 0 === Mr && c(bt)), 
                 n !== I && U() !== I && (i = d()) !== I && U() !== I ? (93 === t.charCodeAt(Or) ? (o = yt, 
                 Or++) : (o = I, 0 === Mr && c(gt)), o !== I ? (Sr = r, r = xt(i)) : (Or = r, r = I)) : (Or = r, 
                 r = I)) : (Or = r, r = I), r === I && (r = Or, U() !== I ? (46 === t.charCodeAt(Or) ? (n = At, 
-                Or++) : (n = I, 0 === Mr && c(Pt)), n !== I && U() !== I && (i = $()) !== I ? (Sr = r, 
-                r = kt(i)) : (Or = r, r = I)) : (Or = r, r = I));
+                Or++) : (n = I, 0 === Mr && c(kt)), n !== I && U() !== I && (i = j()) !== I ? (Sr = r, 
+                r = Pt(i)) : (Or = r, r = I)) : (Or = r, r = I));
                 return Rr[a] = {
                     nextPos: Or,
                     result: e
@@ -328,11 +328,11 @@
                 if (f) return Or = f.nextPos, f.result;
                 if (e = Or, 40 === t.charCodeAt(Or) ? (r = lt, Or++) : (r = I, 0 === Mr && c(ft)), 
                 r !== I && U() !== I ? (41 === t.charCodeAt(Or) ? (n = dt, Or++) : (n = I, 0 === Mr && c(ht)), 
-                n !== I ? (Sr = e, e = r = $t()) : (Or = e, e = I)) : (Or = e, e = I), e === I) if (e = Or, 
+                n !== I ? (Sr = e, e = r = jt()) : (Or = e, e = I)) : (Or = e, e = I), e === I) if (e = Or, 
                 40 === t.charCodeAt(Or) ? (r = lt, Or++) : (r = I, 0 === Mr && c(ft)), r !== I) if (U() !== I) if ((n = d()) !== I) {
-                    for (i = [], o = Or, (a = U()) !== I ? (44 === t.charCodeAt(Or) ? (s = jt, Or++) : (s = I, 
+                    for (i = [], o = Or, (a = U()) !== I ? (44 === t.charCodeAt(Or) ? (s = $t, Or++) : (s = I, 
                     0 === Mr && c(Lt)), s !== I && U() !== I && (u = d()) !== I ? (Sr = o, o = a = zt(n, u)) : (Or = o, 
-                    o = I)) : (Or = o, o = I); o !== I; ) i.push(o), o = Or, (a = U()) !== I ? (44 === t.charCodeAt(Or) ? (s = jt, 
+                    o = I)) : (Or = o, o = I); o !== I; ) i.push(o), o = Or, (a = U()) !== I ? (44 === t.charCodeAt(Or) ? (s = $t, 
                     Or++) : (s = I, 0 === Mr && c(Lt)), s !== I && U() !== I && (u = d()) !== I ? (Sr = o, 
                     o = a = zt(n, u)) : (Or = o, o = I)) : (Or = o, o = I);
                     i !== I && (o = U()) !== I ? (41 === t.charCodeAt(Or) ? (a = dt, Or++) : (a = I, 
@@ -344,7 +344,7 @@
                     result: e
                 }, e;
             }
-            function $() {
+            function j() {
                 var e, r, n, i, o, a = 32 * Or + 18, s = Rr[a];
                 if (s) return Or = s.nextPos, s.result;
                 if (Mr++, e = Or, r = Or, Mr++, n = T(), Mr--, n === I ? r = void 0 : (Or = r, r = I), 
@@ -359,7 +359,7 @@
                     result: e
                 }, e;
             }
-            function j() {
+            function $() {
                 var e, r, n, i, o = 32 * Or + 19, a = Rr[o];
                 return a ? (Or = a.nextPos, a.result) : (e = Or, 91 === t.charCodeAt(Or) ? (r = mt, 
                 Or++) : (r = I, 0 === Mr && c(bt)), r !== I && U() !== I ? (93 === t.charCodeAt(Or) ? (n = yt, 
@@ -376,9 +376,9 @@
                 var e, r, n, i, o, a, s = 32 * Or + 20, u = Rr[s];
                 if (u) return Or = u.nextPos, u.result;
                 if (e = Or, (r = d()) !== I) {
-                    for (n = [], i = Or, U() !== I ? (44 === t.charCodeAt(Or) ? (o = jt, Or++) : (o = I, 
+                    for (n = [], i = Or, U() !== I ? (44 === t.charCodeAt(Or) ? (o = $t, Or++) : (o = I, 
                     0 === Mr && c(Lt)), o !== I && U() !== I && (a = d()) !== I ? (Sr = i, i = qt(r, a)) : (Or = i, 
-                    i = I)) : (Or = i, i = I); i !== I; ) n.push(i), i = Or, U() !== I ? (44 === t.charCodeAt(Or) ? (o = jt, 
+                    i = I)) : (Or = i, i = I); i !== I; ) n.push(i), i = Or, U() !== I ? (44 === t.charCodeAt(Or) ? (o = $t, 
                     Or++) : (o = I, 0 === Mr && c(Lt)), o !== I && U() !== I && (a = d()) !== I ? (Sr = i, 
                     i = qt(r, a)) : (Or = i, i = I)) : (Or = i, i = I);
                     n !== I ? (Sr = e, e = r = Vt(r, n)) : (Or = e, e = I);
@@ -395,7 +395,7 @@
                 Or++) : (n = I, 0 === Mr && c(Ht)), n !== I ? (Sr = e, e = r = Jt()) : (Or = e, 
                 e = I)) : (Or = e, e = I), e === I && (e = Or, 123 === t.charCodeAt(Or) ? (r = Dt, 
                 Or++) : (r = I, 0 === Mr && c(It)), r !== I && U() !== I && (n = V()) !== I && U() !== I ? (i = Or, 
-                44 === t.charCodeAt(Or) ? (o = jt, Or++) : (o = I, 0 === Mr && c(Lt)), o !== I && (a = U()) !== I ? i = o = [ o, a ] : (Or = i, 
+                44 === t.charCodeAt(Or) ? (o = $t, Or++) : (o = I, 0 === Mr && c(Lt)), o !== I && (a = U()) !== I ? i = o = [ o, a ] : (Or = i, 
                 i = I), i === I && (i = null), i !== I ? (125 === t.charCodeAt(Or) ? (o = _t, Or++) : (o = I, 
                 0 === Mr && c(Ht)), o !== I ? (Sr = e, e = r = Gt(n)) : (Or = e, e = I)) : (Or = e, 
                 e = I)) : (Or = e, e = I)), Rr[s] = {
@@ -407,9 +407,9 @@
                 var e, r, n, i, o, a, s = 32 * Or + 22, u = Rr[s];
                 if (u) return Or = u.nextPos, u.result;
                 if (e = Or, (r = O()) !== I) {
-                    for (n = [], i = Or, U() !== I ? (44 === t.charCodeAt(Or) ? (o = jt, Or++) : (o = I, 
+                    for (n = [], i = Or, U() !== I ? (44 === t.charCodeAt(Or) ? (o = $t, Or++) : (o = I, 
                     0 === Mr && c(Lt)), o !== I && U() !== I && (a = O()) !== I ? (Sr = i, i = Kt(r, a)) : (Or = i, 
-                    i = I)) : (Or = i, i = I); i !== I; ) n.push(i), i = Or, U() !== I ? (44 === t.charCodeAt(Or) ? (o = jt, 
+                    i = I)) : (Or = i, i = I); i !== I; ) n.push(i), i = Or, U() !== I ? (44 === t.charCodeAt(Or) ? (o = $t, 
                     Or++) : (o = I, 0 === Mr && c(Lt)), o !== I && U() !== I && (a = O()) !== I ? (Sr = i, 
                     i = Kt(r, a)) : (Or = i, i = I)) : (Or = i, i = I);
                     n !== I ? (Sr = e, e = r = Vt(r, n)) : (Or = e, e = I);
@@ -421,8 +421,8 @@
             }
             function O() {
                 var e, r, n, i, o = 32 * Or + 23, a = Rr[o];
-                return a ? (Or = a.nextPos, a.result) : (e = Or, (r = $()) === I && (r = R()) === I && (r = B()), 
-                r !== I && U() !== I ? (58 === t.charCodeAt(Or) ? (n = Pe, Or++) : (n = I, 0 === Mr && c(ke)), 
+                return a ? (Or = a.nextPos, a.result) : (e = Or, (r = j()) === I && (r = R()) === I && (r = B()), 
+                r !== I && U() !== I ? (58 === t.charCodeAt(Or) ? (n = ke, Or++) : (n = I, 0 === Mr && c(Pe)), 
                 n !== I && U() !== I && (i = d()) !== I ? (Sr = e, e = r = Qt(r, i)) : (Or = e, 
                 e = I)) : (Or = e, e = I), Rr[o] = {
                     nextPos: Or,
@@ -452,14 +452,14 @@
                 var e, r, n, i, o, a = 32 * Or + 26, s = Rr[a];
                 if (s) return Or = s.nextPos, s.result;
                 if (Mr++, e = Or, (r = F()) !== I) if (46 === t.charCodeAt(Or) ? (n = At, Or++) : (n = I, 
-                0 === Mr && c(Pt)), n !== I) {
+                0 === Mr && c(kt)), n !== I) {
                     for (i = [], ar.test(t.charAt(Or)) ? (o = t.charAt(Or), Or++) : (o = I, 0 === Mr && c(sr)); o !== I; ) i.push(o), 
                     ar.test(t.charAt(Or)) ? (o = t.charAt(Or), Or++) : (o = I, 0 === Mr && c(sr));
                     i !== I ? ((o = M()) === I && (o = null), o !== I ? (Sr = e, e = r = ur()) : (Or = e, 
                     e = I)) : (Or = e, e = I);
                 } else Or = e, e = I; else Or = e, e = I;
                 if (e === I) {
-                    if (e = Or, 46 === t.charCodeAt(Or) ? (r = At, Or++) : (r = I, 0 === Mr && c(Pt)), 
+                    if (e = Or, 46 === t.charCodeAt(Or) ? (r = At, Or++) : (r = I, 0 === Mr && c(kt)), 
                     r !== I) {
                         if (n = [], ar.test(t.charAt(Or)) ? (i = t.charAt(Or), Or++) : (i = I, 0 === Mr && c(sr)), 
                         i !== I) for (;i !== I; ) n.push(i), ar.test(t.charAt(Or)) ? (i = t.charAt(Or), 
@@ -512,21 +512,21 @@
                 r !== I) {
                     for (n = [], i = Or, t.substr(Or, 2) === yr ? (o = yr, Or += 2) : (o = I, 0 === Mr && c(gr)), 
                     o !== I && (Sr = i, o = xr()), (i = o) === I && (Ar.test(t.charAt(Or)) ? (i = t.charAt(Or), 
-                    Or++) : (i = I, 0 === Mr && c(Pr))); i !== I; ) n.push(i), i = Or, t.substr(Or, 2) === yr ? (o = yr, 
+                    Or++) : (i = I, 0 === Mr && c(kr))); i !== I; ) n.push(i), i = Or, t.substr(Or, 2) === yr ? (o = yr, 
                     Or += 2) : (o = I, 0 === Mr && c(gr)), o !== I && (Sr = i, o = xr()), (i = o) === I && (Ar.test(t.charAt(Or)) ? (i = t.charAt(Or), 
-                    Or++) : (i = I, 0 === Mr && c(Pr)));
+                    Or++) : (i = I, 0 === Mr && c(kr)));
                     n !== I ? (34 === t.charCodeAt(Or) ? (i = mr, Or++) : (i = I, 0 === Mr && c(br)), 
-                    i !== I ? (Sr = e, e = r = kr(n)) : (Or = e, e = I)) : (Or = e, e = I);
+                    i !== I ? (Sr = e, e = r = Pr(n)) : (Or = e, e = I)) : (Or = e, e = I);
                 } else Or = e, e = I;
                 if (e === I) if (e = Or, 39 === t.charCodeAt(Or) ? (r = Cr, Or++) : (r = I, 0 === Mr && c(wr)), 
                 r !== I) {
                     for (n = [], i = Or, t.substr(Or, 2) === Er ? (o = Er, Or += 2) : (o = I, 0 === Mr && c(Nr)), 
-                    o !== I && (Sr = i, o = $r()), (i = o) === I && (jr.test(t.charAt(Or)) ? (i = t.charAt(Or), 
+                    o !== I && (Sr = i, o = jr()), (i = o) === I && ($r.test(t.charAt(Or)) ? (i = t.charAt(Or), 
                     Or++) : (i = I, 0 === Mr && c(Lr))); i !== I; ) n.push(i), i = Or, t.substr(Or, 2) === Er ? (o = Er, 
-                    Or += 2) : (o = I, 0 === Mr && c(Nr)), o !== I && (Sr = i, o = $r()), (i = o) === I && (jr.test(t.charAt(Or)) ? (i = t.charAt(Or), 
+                    Or += 2) : (o = I, 0 === Mr && c(Nr)), o !== I && (Sr = i, o = jr()), (i = o) === I && ($r.test(t.charAt(Or)) ? (i = t.charAt(Or), 
                     Or++) : (i = I, 0 === Mr && c(Lr)));
                     n !== I ? (39 === t.charCodeAt(Or) ? (i = Cr, Or++) : (i = I, 0 === Mr && c(wr)), 
-                    i !== I ? (Sr = e, e = r = kr(n)) : (Or = e, e = I)) : (Or = e, e = I);
+                    i !== I ? (Sr = e, e = r = Pr(n)) : (Or = e, e = I)) : (Or = e, e = I);
                 } else Or = e, e = I;
                 return Mr--, e === I && (r = I, 0 === Mr && c(vr)), Rr[a] = {
                     nextPos: Or,
@@ -578,7 +578,7 @@
                     left: e,
                     right: r
                 };
-            }, xe = "?", Ae = i("?", !1), Pe = ":", ke = i(":", !1), Ce = function(e, t, r) {
+            }, xe = "?", Ae = i("?", !1), ke = ":", Pe = i(":", !1), Ce = function(e, t, r) {
                 return {
                     type: "Conditional",
                     test: e,
@@ -590,9 +590,9 @@
                     operator: "||",
                     arg: t
                 };
-            }, $e = function(e, t) {
+            }, je = function(e, t) {
                 return Ur("Logical", e, t);
-            }, je = "&&", Le = i("&&", !1), ze = function(e, t) {
+            }, $e = "&&", Le = i("&&", !1), ze = function(e, t) {
                 return {
                     operator: "&&",
                     arg: t
@@ -644,7 +644,7 @@
                 }, e);
             }, mt = "[", bt = i("[", !1), yt = "]", gt = i("]", !1), xt = function(e) {
                 return e;
-            }, At = ".", Pt = i(".", !1), kt = function(e) {
+            }, At = ".", kt = i(".", !1), Pt = function(e) {
                 return {
                     type: "Literal",
                     value: e.name
@@ -657,9 +657,9 @@
                     callee: e,
                     arguments: t || []
                 };
-            }, $t = function() {
+            }, jt = function() {
                 return [];
-            }, jt = ",", Lt = i(",", !1), zt = function(e, t) {
+            }, $t = ",", Lt = i(",", !1), zt = function(e, t) {
                 return t;
             }, Vt = function(e, t) {
                 return [ e ].concat(t);
@@ -720,14 +720,14 @@
                 };
             }, cr = "0", lr = i("0", !1), fr = /^[1-9]/, dr = o([ [ "1", "9" ] ], !1, !1), hr = "e", pr = i("e", !0), vr = a("string"), mr = '"', br = i('"', !1), yr = '\\"', gr = i('\\"', !1), xr = function() {
                 return '"';
-            }, Ar = /^[^"]/, Pr = o([ '"' ], !0, !1), kr = function(e) {
+            }, Ar = /^[^"]/, kr = o([ '"' ], !0, !1), Pr = function(e) {
                 return {
                     type: "Literal",
                     value: e.join("")
                 };
-            }, Cr = "'", wr = i("'", !1), Er = "\\'", Nr = i("\\'", !1), $r = function() {
+            }, Cr = "'", wr = i("'", !1), Er = "\\'", Nr = i("\\'", !1), jr = function() {
                 return "'";
-            }, jr = /^[^'']/, Lr = o([ "'", "'" ], !0, !1), zr = /^[\t ]/, Vr = o([ "\t", " " ], !1, !1), Or = 0, Sr = 0, Tr = [ {
+            }, $r = /^[^'']/, Lr = o([ "'", "'" ], !0, !1), zr = /^[\t ]/, Vr = o([ "\t", " " ], !1, !1), Or = 0, Sr = 0, Tr = [ {
                 line: 1,
                 column: 1
             } ], Br = 0, Fr = [], Mr = 0, Rr = {};
@@ -873,7 +873,12 @@
         return e && "function" == typeof Symbol && e.constructor === Symbol && e !== Symbol.prototype ? "symbol" : typeof e;
     }, l = function(e, t) {
         if (!(e instanceof t)) throw new TypeError("Cannot call a class as a function");
-    }, f = function() {
+    }, f = function(e) {
+        return {
+            name: e.name,
+            value: e.value
+        };
+    }, d = function() {
         function e(t, r) {
             var n = this, i = arguments.length > 2 && void 0 !== arguments[2] && arguments[2];
             if (l(this, e), this.node = t, this.type = t.nodeType, this.id = Math.floor(1e3 + 9e3 * Math.random()).toString(16), 
@@ -885,36 +890,24 @@
                         ast: e.ast,
                         directive: e.directive,
                         args: e.args,
-                        key: e.key
+                        key: e.key,
+                        template: e.template
                     });
-                }), r.tagName && (this.tag = r.tagName), r.attributes && (this.attributes = r.attributes.map(function(e) {
-                    return {
-                        name: e.name,
-                        value: e.value
-                    };
-                }), this.removedAttrs = r.removedAttrs.map(function(e) {
-                    return {
-                        name: e.name,
-                        value: e.value
-                    };
-                })), r.children) {
+                }), r.tagName && (this.tag = r.tagName), r.attributes && (this.attributes = r.attributes.map(f), 
+                this.removedAttrs = r.removedAttrs.map(f)), r.children) {
                     var o = Array.from(t.childNodes).filter(function(e) {
                         return 1 === e.nodeType || 3 === e.nodeType;
                     });
                     r.children.forEach(function(e) {
-                        n.children.push(e.fragment ? h(t, e) : h(o.shift(), e));
+                        n.children.push(e.fragment ? p(t, e) : p(o.shift(), e));
                     });
                 }
             } else t.vnode = this, this.initialize();
         }
         return e.prototype.initialize = function() {
             var e = this, t = this.node;
-            if (1 === this.type) this.tag = t.tagName, this.attributes = Array.from(t.attributes).map(function(e) {
-                return {
-                    name: e.name,
-                    value: e.value
-                };
-            }), this.removedAttrs = [], u.directives.forEach(function(r) {
+            if (1 === this.type) this.tag = t.tagName, this.attributes = Array.from(t.attributes).map(f), 
+            this.removedAttrs = [], u.directives.forEach(function(r) {
                 if (!e.blocked) if (r.tag) {
                     var n = e.tag.match(new RegExp("^" + r.tag.replace("{prefix}", u.prefix) + "$", "i"));
                     n && e.bind({
@@ -926,7 +919,7 @@
                         var i = n.name.match(new RegExp("^" + r.attribute.replace("{prefix}", u.prefix) + "$", "i"));
                         if (!i) return !0;
                         var a = o(n.value || "undefined");
-                        e.removedAttrs.push(n), t.removeAttribute(n.name), e.bind({
+                        e.removedAttrs.push(f(n)), t.removeAttribute(n.name), e.bind({
                             directive: r,
                             ast: a,
                             args: i
@@ -936,7 +929,7 @@
             }), !this.blocked && t.childNodes && Array.from(t.childNodes).filter(function(e) {
                 return 1 === e.nodeType || 3 === e.nodeType;
             }).map(function(t) {
-                return e.children.push(h(t));
+                return e.children.push(p(t));
             }); else if (3 === this.type && t.nodeValue.indexOf("{{") > -1) {
                 var r = o(t.nodeValue, "Text");
                 if (1 === r.length) {
@@ -954,7 +947,7 @@
                 } else {
                     var i = document.createDocumentFragment();
                     this.fragment = !0, r.forEach(function(t) {
-                        var r = "string" == typeof t ? document.createTextNode(t) : t.html ? document.createElement("span") : document.createTextNode(""), n = h(r);
+                        var r = "string" == typeof t ? document.createTextNode(t) : t.html ? document.createElement("span") : document.createTextNode(""), n = p(r);
                         "string" != typeof t && n.bind({
                             directive: u.inlineParser,
                             ast: t.expression,
@@ -969,34 +962,35 @@
                 t.innerHTML = e.directive.template, t = t.childNodes[0], Array.from(this.attributes).forEach(function(e) {
                     return t.setAttribute(e.name, e.value);
                 }), this.node.parentNode.replaceChild(t, this.node), this.node = t, this.tag = t.tagName;
-            }
-            d(e, "initialize", void 0, this);
+            } else h(e, "initialize", void 0, this);
         }, e.prototype.clone = function() {
             var e = this.node.cloneNode(!0);
-            return delete e.vnode, h(e, this);
+            return delete e.vnode, p(e, this);
         }, e.prototype.createBinds = function(e) {
             var t = this;
             this.scope = e, this.binds.forEach(function(r) {
-                return d(r, "create", e, t);
+                return h(r, "create", e, t);
             }), this.children.forEach(function(t) {
                 return t.createBinds(e);
             });
-        }, e.prototype.updateBinds = function(e) {
-            var t = this;
-            this.scope = e, this.binds.forEach(function(r) {
-                return d(r, "update", e, t);
-            }), this.children.forEach(function(t) {
-                return t.updateBinds(e);
+        }, e.prototype.updateBinds = function() {
+            var e = this;
+            this.binds.forEach(function(t) {
+                return h(t, "update", e.scope, e);
+            }), this.children.forEach(function(e) {
+                return e.updateBinds();
             }), this.pointer && this.pointer.updateBinds(this.pointer.scope);
-        }, e.prototype.destroyBinds = function(e) {
-            var t = this;
-            this.scope = e, this.binds.forEach(function(r) {
-                d(r, "destroy", e, t), t.removedAttrs && t.removedAttrs.forEach(function(e) {
-                    return t.node.setAttribute(e.name, e.value);
-                });
+        }, e.prototype.destroyBinds = function() {
+            var e = this;
+            this.binds.forEach(function(t) {
+                return h(t, "destroy", e.scope, e);
+            }), this.children.forEach(function(e) {
+                return e.destroyBinds();
+            }), this.removedAttrs && this.removedAttrs.forEach(function(t) {
+                return e.node.setAttribute(t.name, t.value);
             }), delete this.scope, delete this.node.vnode;
         }, e;
-    }(), d = function(e, t, r, n) {
+    }(), h = function(e, t, r, n) {
         if (e.directive[t]) {
             var i = function(t) {
                 return a(t || e.ast, r).value;
@@ -1009,32 +1003,32 @@
                 (s = e.directive[t]).call.apply(s, [ e, r, n.node, i ].concat(e.args));
             }
         }
-    }, h = function(e, t, r) {
-        return e instanceof f ? e : ("string" == typeof e ? e = document.querySelector(e) : e[0] && (e = e[0]), 
-        new f(e, t, r));
-    }, p = 0, v = void 0, m = function(e, t) {
+    }, p = function(e, t, r) {
+        return e instanceof d ? e : ("string" == typeof e ? e = document.querySelector(e) : e[0] && (e = e[0]), 
+        new d(e, t, r));
+    }, v = 0, m = void 0, b = function(e, t) {
         e[t] && e[t].forEach(function(e) {
             return e();
         });
-    }, b = function(e, t, r) {
+    }, y = function(e, t, r) {
         var n = Reflect.get(e, t, r);
         return e instanceof Array || "function" != typeof n ? n : n.bind(e);
-    }, y = function e(t, r) {
+    }, g = function e(t, r) {
         var n = arguments.length > 2 && void 0 !== arguments[2] ? arguments[2] : [];
         if (!(n.indexOf(r) > -1)) {
             n = n.concat([ r ]);
             var i = new Proxy(r, {
-                get: b,
+                get: y,
                 set: function(r, i, o, a) {
-                    v || ("object" !== (void 0 === o ? "undefined" : c(o)) || null === o || o instanceof Date || (o = e(t, o, n)), 
-                    t.$(!0)), v = !0;
+                    m || ("object" !== (void 0 === o ? "undefined" : c(o)) || null === o || o instanceof Date || (o = e(t, o, n)), 
+                    t.$(!0)), m = !0;
                     var s = Reflect.set(r, i, o, a);
-                    return v = !1, s;
+                    return m = !1, s;
                 },
                 deleteProperty: function(e, r) {
-                    v || t.$(!0), v = !0;
+                    m || t.$(!0), m = !0;
                     var n = Reflect.deleteProperty(e, r);
-                    return v = !1, n;
+                    return m = !1, n;
                 }
             });
             return r instanceof Array ? r.forEach(function(e, t) {
@@ -1044,16 +1038,16 @@
                 "object" !== (void 0 === n ? "undefined" : c(n)) || n instanceof Date || r === t && "$" === e.charAt(0) || (i[e] = n);
             }), i;
         }
-    }, g = function e(r, i, s) {
-        var u = h(r, null, !0), c = {}, l = [], f = void 0, d = void 0, v = Object.assign({
-            $id: p++,
+    }, x = function e(r, i, s) {
+        var u = p(r, null, !0), c = {}, l = [], f = void 0, d = void 0, h = Object.assign({
+            $id: v++,
             $: function(e) {
                 e ? f || (f = n(function() {
-                    return v.$();
-                })) : (f && (f = f()), u.updateBinds(v), m(c, "update"));
+                    return h.$();
+                })) : (f && (f = f()), u.updateBinds(h), b(c, "update"));
             },
             $destroy: function() {
-                u.destroyBinds(v), d = !0, m(c, "destroy");
+                u.destroyBinds(h), d = !0, b(c, "destroy");
             },
             $on: function(e, t) {
                 c[e] || (c[e] = []), c[e].push(t);
@@ -1078,14 +1072,14 @@
                 return s || u.parent && u.parent.scope || e.root;
             }
         }, i);
-        return v.$on("update", function() {
+        return h.$on("update", function() {
             l.forEach(function(e) {
-                var t = a(e.syntax, v).value;
+                var t = a(e.syntax, h).value;
                 t !== e.val && (e.val = t, e.cb(t));
             });
-        }), u.createBinds(v), v.$(!0), y(v, v);
+        }), u.createBinds(h), h.$(!0), g(h, h);
     };
-    Object.assign(g, {
+    Object.assign(x, {
         version: "0.2.1",
         parse: o,
         evaluate: a,
@@ -1101,7 +1095,7 @@
                 return Number(100 * e).toFixed(t) + "%";
             }
         }
-    }), Object.defineProperty(g, "prefix", {
+    }), Object.defineProperty(x, "prefix", {
         get: function() {
             return u.prefix;
         },
@@ -1109,7 +1103,7 @@
             u.prefix = e;
         }
     });
-    var x = [ "selected", "checked", "disabled", "readonly", "multiple", "ismap", "defer", "noresize" ];
+    var A = [ "selected", "checked", "disabled", "readonly", "multiple", "ismap", "defer", "noresize" ];
     return [ {
         attribute: "{prefix}(text|html)",
         block: !0,
@@ -1132,7 +1126,7 @@
         update: function(e, t, r, n, i, o) {
             i = i || o;
             var a = r();
-            a !== this.prevValue && (this.prevValue = a, x.indexOf(i) > -1 && (a = a ? i : void 0), 
+            a !== this.prevValue && (this.prevValue = a, A.indexOf(i) > -1 && (a = a ? i : void 0), 
             void 0 === a ? t.removeAttribute(i) : t.setAttribute(i, a));
         }
     }, {
@@ -1146,20 +1140,17 @@
         order: 3,
         block: !0,
         initialize: function(e) {
-            this.template = h(e.cloneNode(!0));
+            this.template = p(e.cloneNode(!0));
         },
         create: function(e, t, r, n) {
-            var i = this;
-            this.marker = document.createComment(n), t.parentNode.replaceChild(this.marker, t), 
-            e.$on("update", function() {
-                i.view && i.view.$();
-            });
+            this.marker = document.createComment(n), t.parentNode.replaceChild(this.marker, t);
         },
         update: function(e, t, r) {
             var n = !!r();
             n !== this.prevValue && (n ? (this.vnode = this.template.clone(), this.marker.parentNode.insertBefore(this.vnode.node, this.marker), 
-            this.view = g(this.vnode, void 0, e)) : this.view && (this.marker.parentNode.removeChild(this.vnode.node), 
-            this.view.$destroy(), delete this.vnode, delete this.view), this.prevValue = n);
+            this.view = x(this.vnode, void 0, e), this.view.$()) : this.view && (this.view.$destroy(), 
+            this.marker.parentNode.removeChild(this.vnode.node), delete this.vnode, delete this.view), 
+            this.prevValue = n);
         }
     }, {
         attribute: "{prefix}(?:style-(.+)|(" + [ "align-.*", "all", "animation", "animation-.*", "backface-visibility", "background", "background-.*", "border", "border-.*", "bottom", "box-.*", "break-.*", "caption-side", "caret-color", "clear", "clip", "clip-path", "color", "column-.*", "columns", "content", "counter-.*", "cursor", "direction", "display", "empty-cells", "filter", "flex-.*", "float", "font", "font-.*", "grid", "grid-.*", "height", "hyphens", "image-.*", "ime-mode", "inline-size", "isolation", "justify-content", "left", "letter-spacing", "line-.*", "list-.*", "margin", "margin-.*", "mask", "mask-.*", "max-height", "max-width", "min-block-size", "min-height", "min-inline-size", "min-width", "mix-blend-mode", "object-fit", "object-position", "offset-.*", "opacity", "order", "orphans", "outline", "outline-.*", "overflow", "overflow-.*", "padding", "padding-.*", "page-break-.*", "perspective", "perspective-origin", "pointer-events", "position", "quotes", "resize", "right", "scroll-.*", "shape-.*", "tab-size", "table-layout", "text-.*", "top", "touch-action", "transform", "transform-.*", "transition", "transition-.*", "unicode-bidi", "unset", "vertical-align", "visibility", "white-space", "widows", "width", "will-change", "word-.*", "writing-mode", "z-index" ].join("|") + "))",
@@ -1226,7 +1217,7 @@
             } else this.key = function(e) {
                 return JSON.stringify(e);
             };
-            this.vnode = h(e.cloneNode(!0));
+            this.template = p(e.cloneNode(!0));
         },
         create: function(e, t, r, n) {
             this.marker = document.createComment(n), t.parentNode.replaceChild(this.marker, t);
@@ -1242,22 +1233,19 @@
             [].concat(this.items).forEach(function(e) {
                 e.key = a.key(e.datum), u.find(function(t) {
                     return t.computed === e.key;
-                }) || (a.marker.parentNode.removeChild(e.vnode.node), e.view.$destroy(), t(a.items, e));
+                }) || (a.marker.parentNode.removeChild(e.node), e.view.$destroy(), t(a.items, e));
             }), u.forEach(function(r) {
                 var n = a.items.find(function(e) {
                     return r.computed === e.key;
-                }), i = !!n;
-                if (i) t(a.items, n); else {
-                    var s = a.vnode.clone();
+                });
+                if (n) t(a.items, n), a.marker.parentNode.insertBefore(n.node, a.marker); else {
+                    var i, s = a.template.clone();
                     n = {
                         key: r.computed,
-                        vnode: s,
-                        datum: r.datum
-                    };
-                }
-                if (a.marker.parentNode.insertBefore(n.vnode.node, a.marker), !i) {
-                    var u;
-                    n.view = g(n.vnode, (u = {}, u[o] = n.datum, u), e);
+                        datum: r.datum,
+                        node: s.node
+                    }, a.marker.parentNode.insertBefore(n.node, a.marker), n.view = x(s, (i = {}, i[o] = n.datum, 
+                    i), e);
                 }
                 n.view.$index = r.index, n.view.$(), a.items.push(n);
             });
@@ -1276,5 +1264,5 @@
         attribute: "{prefix}skip",
         order: 1,
         block: !0
-    } ].forEach(u), g;
+    } ].forEach(u), x;
 });

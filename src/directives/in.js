@@ -42,7 +42,7 @@ Note: This directive occurs before anything else.
 import zam from '../zam';
 import virtualdom from '../virtualdom';
 import { parse, evaluate } from '../expression';
-import { arrayRemove } from '../utils';
+import { arrayRemove, log } from '../utils';
 import directive from '../directive';
 
 export default {
@@ -50,6 +50,7 @@ export default {
 	order: 2,
 	block: true, // do not continue traversing through this dom element (separate zam will be created)
 	initialize(el, attr, varname) { // dom manipulation shouldn't happen in init as it will interfere with the virtualdom
+		log('in.init');
 		this.items = [];
 		const zKey = el.getAttribute(directive.prefix + 'key');
 		if (zKey) {
@@ -59,13 +60,16 @@ export default {
 		} else {
 			this.key = data => JSON.stringify(data);
 		}
-		this.vnode = virtualdom(el.cloneNode(true));
+		this.template = virtualdom(el.cloneNode(true));
+		log('in.template', this.template.node.outerHTML);
 	},
 	create(scope, el, val, attr) {
+		log('in.create');
 		this.marker = document.createComment(attr);
 		el.parentNode.replaceChild(this.marker, el);
 	},
 	update(scope, el, val, attr, varname) {
+		log('in.update');
 		let data = val() || [],
 			keys = Object.keys(data).map(k => ({ index: k, computed: this.key(data[k]), datum: data[k] }));
 
@@ -74,24 +78,24 @@ export default {
 			item.key = this.key(item.datum);
 			let update = keys.find(k => k.computed === item.key);
 			if (!update) {
-				this.marker.parentNode.removeChild(item.vnode.node);
+				this.marker.parentNode.removeChild(item.node);
 				item.view.$destroy();
 				arrayRemove(this.items, item);
 			}
 		});
 		// create new nodes and update existing nodes
 		keys.forEach(k => {
-			let item = this.items.find(item_ => k.computed === item_.key),
-				existing = !!item;
-			if (!existing) {
-				let vnode = this.vnode.clone();
-				item = { key: k.computed, vnode, datum: k.datum };
+			let item = this.items.find(item_ => k.computed === item_.key);
+			if (!item) {
+				log('in.clone');
+				let vnode = this.template.clone();
+				item = { key: k.computed, datum: k.datum, node: vnode.node };
+				this.marker.parentNode.insertBefore(item.node, this.marker);
+				item.view = zam(vnode, { [varname]: item.datum, }, scope);
 			} else {
+				log('in.move');
 				arrayRemove(this.items, item);
-			}
-			this.marker.parentNode.insertBefore(item.vnode.node, this.marker);
-			if (!existing) { // wait until vnodes have been added before creating the view
-				item.view = zam(item.vnode, { [varname]: item.datum, }, scope);
+				this.marker.parentNode.insertBefore(item.node, this.marker);
 			}
 			item.view.$index = k.index;
 			item.view.$();

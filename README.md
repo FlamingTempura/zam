@@ -93,10 +93,7 @@ Some HTML: <span z-html="boldName"></span>
 Result:
 
 ```html
-My name is <div>Bob</div>
-My name is <div>Bob</div>
-Some HTML: <span><span><em>Bob</em></span></span>
-Some HTML: <span><em>Bob</em></span>```
+```
 
 
 HTML will not be checked for directives.
@@ -126,8 +123,7 @@ Conditionally display the element. Equivelant to `z-attr-display="thing ? '' : '
 Result:
 
 ```html
-<div>My name is Bob</div>
-<button>Hide</button>```
+```
 
 
 #### `z-exist` - Conditional existance
@@ -159,8 +155,7 @@ Note: this is equivelant to `ng-if` in angular.
 Result:
 
 ```html
-<div>My name is Bob</div>
-<button>Hide</button>```
+```
 
 
 #### `z-*-in` - Iterate through an array
@@ -197,18 +192,7 @@ array/object is assigned to a variable name specified in the attribute name
 Result:
 
 ```html
-<div>0: food</div>
-<div>1: code</div>
-<div>2: clothes</div>
-<em>Buy food</em>
-<em>Fix code</em>
-<em>Wash clothes</em>
-<p>Chair</p>
-<p>Table</p>
-<ul>
-	<li>type: granny smith</li>
-	<li>color: green</li>
-</ul>```
+```
 
 
 If `z-key` is not specified, `JSON.stringify` is used.
@@ -233,10 +217,7 @@ Note: This directive occurs before anything else.
 Result:
 
 ```html
-<img src="photo.png">
-<img src="photo.png">
-<input disabled="disabled">
-<button></button>```
+```
 
 
 #### `z-class-*` - Conditional class name
@@ -253,7 +234,7 @@ Result:
 Result:
 
 ```html
-<h4 class="red"></h4>```
+```
 
 
 #### `z-style-*` - Style value
@@ -274,9 +255,7 @@ Result:
 Result:
 
 ```html
-<h1 style="font-weight: bold;"></h1>
-<em style="font-weight: bold;"></em>
-<p style="color: red; font-size: 12pt;"></p>```
+```
 
 
 #### `z-model` - Bind input
@@ -300,9 +279,7 @@ Two way binding with input element value. The input value will be set to the val
 Result:
 
 ```html
-<input type="text">
-foo 
-<input type="button">```
+```
 
 
 #### `z-on-*` - Event handler
@@ -323,7 +300,7 @@ Execute an expression when an event happens. Event data is available in `$event`
 Result:
 
 ```html
-<input type="button">```
+```
 
 
 _Shorthand:_ `on-` may be omitted for standard DOM events, such as `click`, `mousemove`, and `mousedown`:
@@ -341,8 +318,7 @@ _Shorthand:_ `on-` may be omitted for standard DOM events, such as `click`, `mou
 Result:
 
 ```html
-<input type="button">
-<form></form>```
+```
 
 
 #### `z-skip` - Skip compilation of this element
@@ -361,151 +337,4 @@ Result:
 Result:
 
 ```html
-<div>
-	{{ this will appear as it is (including curly braces) }}
-	<div z-font-size="'12pt'">Directives will not be parsed</div>
-</div>```
-
-
-[//]: # (DOC1!)
-
-
-## Scope
-
-Directives have access to their parent scopes through `$parent`:
-
-```html
-<div class="foo">
-    {{ food }} <!-- chips -->
-    {{ drink }} <!-- tea -->
-    <div class="bar">
-        {{ food }} <!-- chips -->
-        {{ drink }} <!-- coffee -->
-        {{ $parent.drink }} <!-- tea -->
-    </div>
-</div>
-<script>
-    var foo = zam('.foo'),
-        bar = zam('.bar');
-    foo.food = 'chips';
-    foo.drink = 'tea';
-    bar.drink = 'coffee';
-</script>
 ```
-
-Result:
-
-```html
-<div class="foo">chips  tea 
-<div class="bar">chips  coffee  tea </div>
-</div>
-
-```
-
-
-## Custom directives
-
-```js
-zam.directive({
-    attribute: 'hide',
-    update: function (el) {
-        $(el).toggle(!this.eval());
-    }
-});
-
-zam.directive({
-    attribute: 'on-scroll-([xy])',
-    create: function () {},
-    update: function (el) {},
-    destroy: function (el) {}
-});
-```
-* `attribute` - elements with an attribute matching this pattern will use this directive.. This can contain regular expressions. Results from capture groups will be provided to create, update, and remove methods.
-* `tag` - elements with tag names matching this pattern will use this directive.
-* `template` - HTML to insert to replace the element with
-* `block` - whether to stop further directives in this element and it's children.
-* `order` - when to run this directive; lower numbers run first.
-* `create` - function called when directive is created.
-* `update` - function called when directive is updating.
-* `destroy` - function called when directive is destorying.
-
-## Expressions
-
-The expressions used in a directive mostly include the JavaScript language.
-```html
-{{ 1 + 1 }} <!-- shows 2 -->
-{{ a.b() }} <!-- shows the result of b() -->
-
-{{ 1 + 1; "my" + "name" }} <!-- invalid - multiple expressions are not allowed -->
-{{ "my" + "name" }} <!-- shows myname -->
-{{ Date.now() }} <!-- current unix timestamp -->
-{{ JSON.stringify({ a: 1, b: 2 }) }} <!-- shows {a:1,b:2} -->
-
-<div z-on-mousemove="b().c = d"></div>
-<div z-on-mousemove="thing++"></div>
-<div z-on-click="thing /= 7"></div>
-```
-
-## Events and watchers
-
-```js
-var view = zam(document.body);
-var oncreate = function () { console.log('hello world!'); }
-view.$on('create', oncreate); // listen for creation event (happens when view is created)
-view.$off('create', oncreate); // remove event handler
-view.$on('update', function () {}); // gets called whenever the view is updated
-view.$on('destroy', function () {}); // view destroyed
-
-var change = function (starsign) { console.log('star sign is', starsign); } 
-view.$watch('starsign', change); // watch view.starsign for changes
-view.$unwatch('starsign', change); // stop watching view.starsign
-view.$watch('thing.a + 1', change); // you can watch any expression for changes
-```
-
-## Other things
-
-#### `zam.root`
-
-The root object is provided to all views and can be used to provide methods and data which should be available to all views.
-
-```html
-{{ food }}, {{ drink }}, {{ sweet }} <!-- chips, beer, cake -->
-<script>
-    zam.root.food = 'chips';
-    zam.root.drink = 'water';
-    var view = zam(document.body);
-    view.drink = 'beer';
-    zam.root.sweet = 'cake';
-</script>
-```
-
-A couple of utility functions are included in root:
-* `number(number, decimals)` (decimals defaults to 2)
-* `percent(number, decimals)` (decimals defaults to 2)
-
-You may wish to define other utility functions in root:
-
-```html
-{{ number(1.553, 2) }} <!-- 1.55 -->
-{{ percent(0.17) }} <!-- 17.00% -->
-{{ date(d, 'DD MMM' }} <!-- 17 Jan -->
-<script>
-    zam.root.date = function (date, format) {
-        return moment(format).format(format);
-    };
-    var view = zam(document.body);
-    view.d = new Date(2017, 0, 17);
-</script>
-```
-
-#### `zam.prefix` - Directive attribute prefix
-
-Set the prefix (by default `z-`).
-```html
-<div foo-text="blah"></div>
-<script>zam.prefix = 'foo-';</script>
-```
-
-#### `zam.version` - Version
-
-Gets the version of zam (e.g. `"0.1.0"`).

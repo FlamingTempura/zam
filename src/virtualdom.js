@@ -3,10 +3,13 @@
 
 import createDirective from './directive';
 import { parse, evaluate } from './expression';
-//import { log } from './utils';
+import { log } from './utils';
+
+const cloneAttribute = attr => ({ name: attr.name, value: attr.value });
 
 class VirtualNode {
 	constructor(node, template, override = false) {
+		log('vnode.create', node.outerHTML || node.textContent);
 		//Object.assign(this, template);
 		this.node = node;
 		this.type = node.nodeType; // 1 = ELEMENT_NODE, 3 = TEXT_NODE
@@ -30,12 +33,18 @@ class VirtualNode {
 			node.vnode = this;
 			this.blocked = template.blocked;
 			template.binds.forEach(bind => {
-				this.bind({ ast: bind.ast, directive: bind.directive, args: bind.args, key: bind.key });
+				this.bind({
+					ast: bind.ast,
+					directive: bind.directive,
+					args: bind.args,
+					key: bind.key,
+					template: bind.template
+				});
 			});
 			if (template.tagName) { this.tag = template.tagName; }
 			if (template.attributes) {
-				this.attributes = template.attributes.map(attr => ({ name: attr.name, value: attr.value }));
-				this.removedAttrs = template.removedAttrs.map(attr => ({ name: attr.name, value: attr.value }));
+				this.attributes = template.attributes.map(cloneAttribute);
+				this.removedAttrs = template.removedAttrs.map(cloneAttribute);
 			}
 			if (template.children) {
 				let childNodes = Array.from(node.childNodes).filter(cnode => cnode.nodeType === 1 || cnode.nodeType === 3);
@@ -51,11 +60,12 @@ class VirtualNode {
 		}
 	}
 	initialize() {
+		log('vnode.init');
 		let node = this.node;
 		
 		if (this.type === 1) {
 			this.tag = node.tagName;
-			this.attributes = Array.from(node.attributes).map(attr => ({ name: attr.name, value: attr.value }));
+			this.attributes = Array.from(node.attributes).map(cloneAttribute);
 			this.removedAttrs = [];
 
 			createDirective.directives.forEach(directive => {
@@ -72,7 +82,7 @@ class VirtualNode {
 						let args = attr.name.match(new RegExp('^'+ directive.attribute.replace('{prefix}', createDirective.prefix) + '$', 'i'));
 						if (!args) { return true; }
 						let ast = parse(attr.value || 'undefined');
-						this.removedAttrs.push(attr);
+						this.removedAttrs.push(cloneAttribute(attr));
 						node.removeAttribute(attr.name);
 						this.bind({ directive, ast, args });
 					});
@@ -80,6 +90,7 @@ class VirtualNode {
 			});
 			
 			if (!this.blocked && node.childNodes) {
+				log('vnode.children', node.childNodes.length);
 				 Array.from(node.childNodes)
 					.filter(node => node.nodeType === 1 || node.nodeType === 3)
 					.map(node => this.children.push(createVNode(node)));
@@ -139,10 +150,13 @@ class VirtualNode {
 			this.node.parentNode.replaceChild(node_, this.node);
 			this.node = node_;
 			this.tag = node_.tagName; // TODO: possibly need to run through all directives again on new node?
+		} else {
+		//console.log('binding', this.);
+			bindExec(bind, 'initialize', undefined, this);
 		}
-		bindExec(bind, 'initialize', undefined, this);
 	}
 	clone() {
+		log('vnode.clone');
 		let node = this.node.cloneNode(true);
 		delete node.vnode;
 		return createVNode(node, this);
@@ -152,20 +166,18 @@ class VirtualNode {
 		this.binds.forEach(bind => bindExec(bind, 'create', scope, this));
 		this.children.forEach(vnode => vnode.createBinds(scope));
 	}
-	updateBinds(scope) {
-		this.scope = scope;
-		this.binds.forEach(bind => bindExec(bind, 'update', scope, this));
-		this.children.forEach(vnode => vnode.updateBinds(scope));
+	updateBinds() {
+		this.binds.forEach(bind => bindExec(bind, 'update', this.scope, this));
+		this.children.forEach(vnode => vnode.updateBinds());
 		if (this.pointer) { this.pointer.updateBinds(this.pointer.scope); }
 	}
-	destroyBinds(scope) {
-		this.scope = scope;
-		this.binds.forEach(bind => {
-			bindExec(bind, 'destroy', scope, this);
-			if (this.removedAttrs) {
-				this.removedAttrs.forEach(attr => this.node.setAttribute(attr.name, attr.value)); // restore attributes
-			}
-		});
+	destroyBinds() {
+		log('vnode.destroy');
+		this.binds.forEach(bind => bindExec(bind, 'destroy', this.scope, this));
+		this.children.forEach(vnode => vnode.destroyBinds());
+		if (this.removedAttrs) {
+			this.removedAttrs.forEach(attr => this.node.setAttribute(attr.name, attr.value)); // restore attributes
+		}
 		delete this.scope;
 		delete this.node.vnode;
 	}

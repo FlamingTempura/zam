@@ -131,7 +131,7 @@ test('z-*-in (stress)', function (t) { // Iterate through an array
 		view.lists = new Array(nLists).fill(1).map(function () {
 			return {
 				items: new Array(nItems).fill(1).map(function () {
-					return { message: Math.round(Math.random() * 1000000).toString(16) };
+					return { message: Math.round(Math.random() * 1e12).toString(16) };
 				})
 			};
 		});

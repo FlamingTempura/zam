@@ -40,6 +40,7 @@ const nextTick = function (cb) {
 	Object.keys(obj).forEach(k => { if (k.indexOf('$') === 0) { delete obj[k]; } });
 	return obj;
 };*/
-let log = (...msg) => console.log(...msg);
+const LOG = false;
+let log = (...msg) => { if (LOG) { console.log(...msg); } };
 
 export { stringify, arrayRemove, hash, nextTick, log };

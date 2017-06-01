@@ -6,6 +6,7 @@ const pegjs = require('rollup-plugin-pegjs'),
       json = require('rollup-plugin-json'),
       babel = require('rollup-plugin-babel'),
       esformatter = require('rollup-plugin-esformatter'),
+      strip = require('rollup-plugin-strip'),
       jsdom = require('jsdom'),
       tidy = require('htmltidy2').tidy,
       fs = require('fs');
@@ -106,6 +107,10 @@ export default {
 				['es2015', { modules: false, loose: true }]
 			],
 			plugins: ['external-helpers']
+		}),
+		strip({
+			functions: ['console.*', 'log'],
+			//sourceMap: true
 		}),
 		uglify({
 			compress: {
