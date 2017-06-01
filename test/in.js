@@ -8,7 +8,7 @@ var test = require('tap').test,
 	$$ = require('./test-utils').$$;
 
 test('z-*-in array', function (t) { // Iterate through an array
-	t.plan(14);
+	t.plan(17);
 	up(`<div z-todo-in="todos" z-key="todo.message">{{ $index }}: {{ todo.message }}</div>
 		<span z-todo-in="plob"></span>`);
 	var view = zam(document.body);
@@ -17,15 +17,18 @@ test('z-*-in array', function (t) { // Iterate through an array
 			view.todos = [
 				{ message: 'Buy food' },
 				{ message: 'Fix code' },
-				{ message: 'Wash clothes' }
+				{ message: 'Wash clothes' },
+				{ message: 'Wash clothes' } // duplicate shouldn't show
 			];
 		},
 		function () {
 			var els = $$('div');
 			t.equal(els.length, 3);
-			view.todos.forEach(function (todo, i) {
+			view.todos.slice(0, -1).forEach(function (todo, i) {
+				t.equal(els[i].getAttribute('z-key'), null);
 				t.equal(els[i].textContent, i + ': ' + todo.message);
 			});
+			view.todos.splice(3, 1); // remove the duplicate
 			view.todos.push({ message: 'Wash car' });
 		},
 		function () {

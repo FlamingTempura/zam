@@ -58,7 +58,6 @@ const deepProxy = (view, obj, parents = []) => { // when something in the scope 
 	if (obj instanceof Array) { // call the setter on each property/element of the object
 		obj.forEach((o, i) => {
 			if (typeof o === 'object' && !(o instanceof Date)) { // TODO date should be proxied (if it works)
-				//console.log('ahh', i);
 				proxy[i] = o;
 			}
 		});
@@ -66,7 +65,6 @@ const deepProxy = (view, obj, parents = []) => { // when something in the scope 
 		Object.keys(obj).forEach(k => {
 			let o = obj[k];
 			if (typeof o === 'object' && !(o instanceof Date) && !(obj === view && k.charAt(0) === '$')) { // TODO date should be proxied (if it works)
-				//console.log('boo!', k);
 				proxy[k] = o;
 			}
 		});

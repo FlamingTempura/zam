@@ -1,48 +1,35 @@
 /*
 `z-*-in` - Iterate through an array
 
-Render the element for each item in an array or object. Each item is assigned
-to a variable name specified in the attribute name (see example below).
+Renders the element for each item in an array or object. Each value in the
+array/object is assigned to a variable name specified in the attribute name
+(see example below). 
 
 @CODE
-<div z-todo-in="todos">{{ todo.message }}</div>
+<div z-memo-in="memos">{{ $index }}: {{ memo }}</div><!-- $index is the index number of the element in the array -->
+<em z-todo-in="todos">{{ todo.message }}</em>
+<p z-item-in="basket" z-key="item.id">{{ item.name }}</p><!-- use `z-key` to specify a key for identifying each item in the array -->
+<ul>
+	<li z-info-in="apple">{{ $index }}: {{ info }}</li><!-- $index is the property name of the object -->
+</ul>
 <script>
     var view = zam(document.body);
+    view.memos = ['food', 'code', 'clothes'];
     view.todos = [
         { message: 'Buy food' },
         { message: 'Fix code' },
         { message: 'Wash clothes' }
     ];
-</script>
-@RESULT
-
-Use `z-key` to specify a key for identifying each item in the array. If none
-is used, the JSON.stringify is used.
-
-@CODE
-<div z-product-in="basket" z-key="product.id">{{ product.name }}</div>
-<script>
-	var view = zam(document.body);
     view.basket = [
         { id: 1, name: 'Chair' },
-        { id: 2, name: 'Table' }, // this won't show because the item below has the same id and will override this
-        { id: 2, name: 'Table' } 
+        { id: 2, name: 'Table' },
+        { id: 2, name: 'Table' } // this won't show because the item above has the same id
     ];
-</script>
-@RESULT
-
-The index number of the element (if an array) or property name (if an object)
-can be accessed via `$index`.
-
-@CODE
-<div z-todo-in="todos">{{ $index }}: {{ todo }}</div>
-<div z-info-in="apple">{{ $index }}: {{ info }}</div>
-<script>
-    var view = zam(document.body);
-    view.todos = ['food', 'code', 'clothes'];
     view.apple = { type: 'granny smith', color: 'green' };
 </script>
 @RESULT
+
+If `z-key` is not specified, `JSON.stringify` is used.
 
 Note: This directive occurs before anything else.
 
@@ -64,8 +51,7 @@ export default {
 		this.items = [];
 		const zKey = el.getAttribute(directive.prefix + 'key');
 		if (zKey) {
-			console.log('YESHHHH')
-			let keyAST = parse(zKey);
+			const keyAST = parse(zKey);
 			el.removeAttribute(directive.prefix + 'key');
 			this.key = data => evaluate(keyAST, { [varname]: data }).value;
 		} else {
@@ -112,17 +98,18 @@ export default {
 				this.items.push(item);
 			});
 		}*/
-		indexes.map(index => {
+		indexes.map(i => {
+			let existing = this.items.find(item => this.key(data[i]) === this.key(item.datum));
+			if (existing) { return; }
 			let vnode = this.vnode.clone(),
-				item = { vnode, datum: data[index] };
+				item = { vnode, datum: data[i] };
 			this.marker.parentNode.insertBefore(vnode.node, this.marker);
 			item.view = zam(item.vnode, {
 				[varname]: item.datum,
-				$index: index
+				$index: i
 			}, scope); // wait until vnodes have been added before creating the view
 			item.view.$();
 			this.items.push(item);
 		});
-		// todo: sorting (this mean that markers of child directives (e.g. exist) fall out of place)
 	}
 };

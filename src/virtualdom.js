@@ -30,7 +30,7 @@ class VirtualNode {
 			node.vnode = this;
 			this.blocked = template.blocked;
 			template.binds.forEach(bind => {
-				this.bind({ ast: bind.ast, directive: bind.directive, args: bind.args });
+				this.bind({ ast: bind.ast, directive: bind.directive, args: bind.args, key: bind.key });
 			});
 			if (template.tagName) { this.tag = template.tagName; }
 			if (template.attributes) {

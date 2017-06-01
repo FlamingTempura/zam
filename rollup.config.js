@@ -10,8 +10,8 @@ const pegjs = require('rollup-plugin-pegjs'),
       tidy = require('htmltidy2').tidy,
       fs = require('fs');
 
-const zamscript = fs.readFileSync('./zam.js', 'utf8');
 const renderExample = function (html, cb) { // set global document to new dom
+	const zamscript = fs.readFileSync('./zam.js', 'utf8');
 	try {
 		let window = (new jsdom.JSDOM(html, { runScripts: 'outside-only' })).window;
 		let document = window.document;
@@ -34,10 +34,12 @@ const renderExample = function (html, cb) { // set global document to new dom
 				'preserve-entities': true
 			}, cb);*/
 			var html = document.body.innerHTML;
-			//html = html.replace('<', '    <');
-			//html = html.replace('    </', '</');
-			html = html.replace(/<!--[^>]*-->/g, '')
-			           .replace(/\n+/, '\n');
+			html = html.replace(/(\s*)(\S[^\n]*)<!--z-\w+-in-->/g, function (match, indent, line) {
+			           	   return line.replace(/(<[^/])/g, '\n' + indent + '$1');
+			           })
+			           .replace(/<!--[^>]*-->/g, '')
+			           .replace(/\n+/g, '\n')
+			           .trim();
 			cb(null, html);
 		});
 	} catch (e) {

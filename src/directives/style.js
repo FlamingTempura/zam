@@ -2,10 +2,13 @@
 `z-style-*` - Style value
 @CODE
 <h1 z-style-font-weight="big ? 'bold' : 'normal'"></h1>
-<h1 z-font-size="big ? '20pt' : '10px'"></h1> <!-- `style-` may be omitted for standard CSS properties -->
+<em z-font-weight="big ? 'bold' : 'normal'"></em><!-- `style-` may be omitted for standard CSS properties -->
+<p z-color="color" z-font-size="fontsize + 'pt'"></p> 
 <script>
     var view = zam(document.body);
     view.big = true;
+    view.color = 'red';
+    view.fontsize = 12
 </script>
 @RESULT
 */

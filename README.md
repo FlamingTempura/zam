@@ -95,9 +95,7 @@ Result:
 <img src="photo.png">
 <img src="photo.png">
 <input disabled="disabled">
-<button></button>
-
-```
+<button></button>```
 
 
 #### `z-class-*` - Conditional class name
@@ -113,8 +111,7 @@ Result:
 Result:
 
 ```html
-<h4 class="red"></h4>
-```
+<h4 class="red"></h4>```
 
 
 #### `z-exist` - Conditional existance
@@ -146,66 +143,35 @@ Result:
 
 ```html
 <div>My name is Bob</div>
-<button>Hide</button>
-
-```
+<button>Hide</button>```
 
 
 #### `z-*-in` - Iterate through an array
 
-Render the element for each item in an array or object. Each item is assigned
-to a variable name specified in the attribute name (see example below).
+Renders the element for each item in an array or object. Each value in the
+array/object is assigned to a variable name specified in the attribute name
+(see example below). 
 
 ```html
-<div z-todo-in="todos">{{ todo.message }}</div>
+<div z-memo-in="memos">{{ $index }}: {{ memo }}</div><!-- $index is the index number of the element in the array -->
+<em z-todo-in="todos">{{ todo.message }}</em>
+<p z-item-in="basket" z-key="item.id">{{ item.name }}</p><!-- use `z-key` to specify a key for identifying each item in the array -->
+<ul>
+	<li z-info-in="apple">{{ $index }}: {{ info }}</li><!-- $index is the property name of the object -->
+</ul>
 <script>
     var view = zam(document.body);
+    view.memos = ['food', 'code', 'clothes'];
     view.todos = [
         { message: 'Buy food' },
         { message: 'Fix code' },
         { message: 'Wash clothes' }
     ];
-</script>
-```
-
-Result:
-
-```html
-<div>Buy food</div><div>Fix code</div><div>Wash clothes</div>
-```
-
-
-Use `z-key` to specify a key for identifying each item in the array. If none
-is used, the JSON.stringify is used.
-
-```html
-<div z-product-in="basket" z-key="product.id">{{ product.name }}</div>
-<script>
-	var view = zam(document.body);
     view.basket = [
         { id: 1, name: 'Chair' },
-        { id: 2, name: 'Table' }, // this won't show because the item below has the same id and will override this
-        { id: 2, name: 'Table' } 
+        { id: 2, name: 'Table' },
+        { id: 2, name: 'Table' } // this won't show because the item above has the same id
     ];
-</script>
-```
-
-Result:
-
-```html
-<div z-key="product.id">Chair</div><div z-key="product.id">Table</div><div z-key="product.id">Table</div>
-```
-
-
-The index number of the element (if an array) or property name (if an object)
-can be accessed via `$index`.
-
-```html
-<div z-todo-in="todos">{{ $index }}: {{ todo }}</div>
-<div z-info-in="apple">{{ $index }}: {{ info }}</div>
-<script>
-    var view = zam(document.body);
-    view.todos = ['food', 'code', 'clothes'];
     view.apple = { type: 'granny smith', color: 'green' };
 </script>
 ```
@@ -213,11 +179,21 @@ can be accessed via `$index`.
 Result:
 
 ```html
-<div>0: food</div><div>1: code</div><div>2: clothes</div>
-<div>type: granny smith</div><div>color: green</div>
+<div>0: food</div>
+<div>1: code</div>
+<div>2: clothes</div>
+<em>Buy food</em>
+<em>Fix code</em>
+<em>Wash clothes</em>
+<p>Chair</p>
+<p>Table</p>
+<ul>
+	<li>type: granny smith</li>
+	<li>color: green</li>
+</ul>```
 
-```
 
+If `z-key` is not specified, `JSON.stringify` is used.
 
 Note: This directive occurs before anything else.
 
@@ -243,9 +219,7 @@ Result:
 ```html
 <input type="text">
 foo 
-<input type="button">
-
-```
+<input type="button">```
 
 
 #### `z-on-*` - Event handler
@@ -265,8 +239,7 @@ Execute an expression when an event happens. Event data is available in `$event`
 Result:
 
 ```html
-<input type="button">
-```
+<input type="button">```
 
 
 _Shorthand:_ `on-` may be omitted for standard DOM events, such as `click`, `mousemove`, and `mousedown`:
@@ -285,9 +258,7 @@ Result:
 
 ```html
 <input type="button">
-<form></form>
-
-```
+<form></form>```
 
 
 #### `z-show` - Conditional visibility
@@ -311,15 +282,16 @@ Result:
 
 ```html
 <div>My name is Bob</div>
-<button>Hide</button>
-
-```
+<button>Hide</button>```
 
 
 #### `z-skip` - Skip compilation of this element
 
 ```html
-<div z-skip>{{ this will appear as it is (including curly braces) }}</div>
+<div z-skip>
+	{{ this will appear as it is (including curly braces) }}
+	<div z-font-size="'12pt'">Directives will not be parsed</div>
+</div>
 <script>
     zam(document.body);
 </script>
@@ -328,17 +300,22 @@ Result:
 Result:
 
 ```html
-<div>{{ this will appear as it is (including curly braces) }}</div>
-```
+<div>
+	{{ this will appear as it is (including curly braces) }}
+	<div z-font-size="'12pt'">Directives will not be parsed</div>
+</div>```
 
 
 #### `z-style-*` - Style value
 ```html
 <h1 z-style-font-weight="big ? 'bold' : 'normal'"></h1>
-<h1 z-font-size="big ? '20pt' : '10px'"></h1> <!-- `style-` may be omitted for standard CSS properties -->
+<em z-font-weight="big ? 'bold' : 'normal'"></em><!-- `style-` may be omitted for standard CSS properties -->
+<p z-color="color" z-font-size="fontsize + 'pt'"></p> 
 <script>
     var view = zam(document.body);
     view.big = true;
+    view.color = 'red';
+    view.fontsize = 12
 </script>
 ```
 
@@ -346,39 +323,34 @@ Result:
 
 ```html
 <h1 style="font-weight: bold;"></h1>
-<h1 style="font-size: 20pt;"></h1> 
-
-```
+<em style="font-weight: bold;"></em>
+<p style="color: red; font-size: 12pt;"></p>```
 
 
 #### `z-text` and `z-html`  - Set text or HTML content
 
-Note: HTML is not parsed for directives.
-
 ```html
-<div>My name is {{ me.name }}</div>
-<div>My friend's name is <div z-text="alice.name"></div></div>
-<div>Some HTML: {{{ boldName }}}</div>
-<div>Even more HTML: <span z-html="italicName"></span></div>
+My name is <div>{{ me.name }}</div>
+My name is <div z-text="me.name"></div><!-- equivalent to above -->
+Some HTML: <span>{{{ boldName }}}</span>
+Some HTML: <span z-html="boldName"></span>
 <script>
     var view = zam(document.body);
     view.me = { name: 'Bob' };
-    view.alice = { name: 'Alice' };
-    view.boldName = '<strong>Bob</strong>';
-    view.italicName = '<em>Bob</em>';
+    view.boldName = '<em>Bob</em>';
 </script>
 ```
 
 Result:
 
 ```html
-<div>My name is Bob</div>
-<div>My friend's name is <div>Alice</div></div>
-<div>Some HTML: <span><strong>Bob</strong></span></div>
-<div>Even more HTML: <span><em>Bob</em></span></div>
+My name is <div>Bob</div>
+My name is <div>Bob</div>
+Some HTML: <span><span><em>Bob</em></span></span>
+Some HTML: <span><em>Bob</em></span>```
 
-```
 
+HTML will not be checked for directives.
 
 Warning: Be aware that binding HTML can cause
 [XSS](https://en.wikipedia.org/wiki/Cross-site_scripting). You should not use

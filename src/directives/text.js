@@ -1,21 +1,19 @@
 /*
 `z-text` and `z-html`  - Set text or HTML content
 
-Note: HTML is not parsed for directives.
-
 @CODE
-<div>My name is {{ me.name }}</div>
-<div>My friend's name is <div z-text="alice.name"></div></div>
-<div>Some HTML: {{{ boldName }}}</div>
-<div>Even more HTML: <span z-html="italicName"></span></div>
+My name is <div>{{ me.name }}</div>
+My name is <div z-text="me.name"></div><!-- equivalent to above -->
+Some HTML: <span>{{{ boldName }}}</span>
+Some HTML: <span z-html="boldName"></span>
 <script>
     var view = zam(document.body);
     view.me = { name: 'Bob' };
-    view.alice = { name: 'Alice' };
-    view.boldName = '<strong>Bob</strong>';
-    view.italicName = '<em>Bob</em>';
+    view.boldName = '<em>Bob</em>';
 </script>
 @RESULT
+
+HTML will not be checked for directives.
 
 Warning: Be aware that binding HTML can cause
 [XSS](https://en.wikipedia.org/wiki/Cross-site_scripting). You should not use
