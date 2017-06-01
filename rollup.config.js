@@ -14,9 +14,9 @@ const pegjs = require('rollup-plugin-pegjs'),
 const renderExample = function (html, cb) { // set global document to new dom
 	const zamscript = fs.readFileSync('./zam.js', 'utf8');
 	try {
-		let window = (new jsdom.JSDOM(html, { runScripts: 'outside-only' })).window;
-		let document = window.document;
-		var script = document.querySelector('script');
+		let window = (new jsdom.JSDOM(html, { runScripts: 'outside-only' })).window,
+			document = window.document,
+			script = document.querySelector('script');
 		script.parentNode.removeChild(script);
 		window.eval(zamscript);
 		window.eval(script.textContent);
@@ -35,12 +35,13 @@ const renderExample = function (html, cb) { // set global document to new dom
 				'preserve-entities': true
 			}, cb);*/
 			var html = document.body.innerHTML;
-			html = html.replace(/(\s*)(\S[^\n]*)<!--z-\w+-in-->/g, function (match, indent, line) {
-			           	   return line.replace(/(<[^/])/g, '\n' + indent + '$1');
-			           })
-			           .replace(/<!--[^>]*-->/g, '')
-			           .replace(/\n+/g, '\n')
-			           .trim();
+			html = html
+				.replace(/(\s*)(\S[^\n]*)<!--z-\w+-in-->/g, function (match, indent, line) {
+					return line.replace(/(<[^/])/g, '\n' + indent + '$1');
+				})
+				.replace(/<!--[^>]*-->/g, '')
+				.replace(/\n+/g, '\n')
+				.trim();
 			cb(null, html);
 		});
 	} catch (e) {

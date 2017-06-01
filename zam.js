@@ -1080,7 +1080,7 @@
         }), u.createBinds(h), h.$(!0), g(h, h);
     };
     Object.assign(x, {
-        version: "0.2.1",
+        version: "0.3.0",
         parse: o,
         evaluate: a,
         directive: u,
