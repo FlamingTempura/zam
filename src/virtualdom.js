@@ -3,17 +3,38 @@
 
 import createDirective from './directive';
 import { parse, evaluate } from './expression';
-import { log } from './utils';
+import { log, pick } from './utils';
 
-const cloneAttribute = attr => ({ name: attr.name, value: attr.value });
+const cloneAttribute = attr => pick(attr, 'name', 'value');
+
+const execBinds = (vnode, method, scope) => {
+	vnode.binds.forEach(bind => execBind(vnode, method, bind));
+	vnode.children.forEach(vnode => vnode[method + 'Binds'](scope));
+};
+
+const execBind = (vnode, method, bind) => {
+	if (!bind.directive[method]) { return; }
+	const val = (ast = bind.ast) => evaluate(ast, vnode.scope).value; // evaluate expression (expression in attribute value by default)
+	const args = method === 'initialize' ? [vnode.node, ...bind.args] : [vnode.scope, vnode.node, val, ...bind.args];
+	bind.directive[method].apply(bind, args);
+};
+
+const createVNode = (node, template, override) => {
+	if (node instanceof VirtualNode) {
+		return node;
+	} else if (typeof node === 'string') { // selector
+		node = document.querySelector(node);
+	} else if (node[0]) { // jquery element
+		node = node[0];
+	}
+	return new VirtualNode(node, template, override);
+};
 
 class VirtualNode {
 	constructor(node, template, override = false) {
 		log('vnode.create', node.outerHTML || node.textContent);
-		//Object.assign(this, template);
 		this.node = node;
 		this.type = node.nodeType; // 1 = ELEMENT_NODE, 3 = TEXT_NODE
-		this.id = Math.floor(1000 + Math.random() * 9000).toString(16);
 		this.children = [];
 		this.binds = [];
 
@@ -32,15 +53,7 @@ class VirtualNode {
 		} else if (template) {
 			node.vnode = this;
 			this.blocked = template.blocked;
-			template.binds.forEach(bind => {
-				this.bind({
-					ast: bind.ast,
-					directive: bind.directive,
-					args: bind.args,
-					key: bind.key,
-					template: bind.template
-				});
-			});
+			template.binds.forEach(bind => this.bind(pick(bind, 'ast', 'directive', 'args', 'key', 'template')));
 			if (template.tagName) { this.tag = template.tagName; }
 			if (template.attributes) {
 				this.attributes = template.attributes.map(cloneAttribute);
@@ -49,9 +62,7 @@ class VirtualNode {
 			if (template.children) {
 				let childNodes = Array.from(node.childNodes).filter(cnode => cnode.nodeType === 1 || cnode.nodeType === 3);
 				template.children.forEach(vnode => {
-					this.children.push(vnode.fragment ?
-						createVNode(node, vnode) :
-						createVNode(childNodes.shift(), vnode));
+					this.children.push(createVNode(vnode.fragment ? node : childNodes.shift(), vnode));
 				});
 			}
 		} else {
@@ -102,11 +113,11 @@ class VirtualNode {
 			if (parts.length === 1) {
 				if (typeof parts[0] !== 'string') {
 					if (parts[0].html) {
-						let oldNode = this.node;
+						let oldNode = node;
 						node = this.node = document.createElement('span');
-						oldNode.parentNode.replaceChild(this.node, oldNode);
+						oldNode.parentNode.replaceChild(node, oldNode);
 					} else {
-						this.node.textContent = '';
+						node.textContent = '';
 					}
 					this.bind({
 						directive: createDirective.inlineParser,
@@ -117,7 +128,6 @@ class VirtualNode {
 			} else {
 				let fragment = document.createDocumentFragment();
 				this.fragment = true;
-
 				parts.forEach(part => {
 					let newNode = typeof part === 'string' ? document.createTextNode(part) :
 					              part.html ? document.createElement('span') :
@@ -150,77 +160,30 @@ class VirtualNode {
 			this.node.parentNode.replaceChild(node_, this.node);
 			this.node = node_;
 			this.tag = node_.tagName; // TODO: possibly need to run through all directives again on new node?
-		} else {
-		//console.log('binding', this.);
-			bindExec(bind, 'initialize', undefined, this);
 		}
+		execBind(this, 'initialize', bind);
 	}
 	clone() {
 		log('vnode.clone');
-		let node = this.node.cloneNode(true);
-		delete node.vnode;
-		return createVNode(node, this);
+		return createVNode(this.node.cloneNode(true), this);
 	}
 	createBinds(scope) {
 		this.scope = scope;
-		this.binds.forEach(bind => bindExec(bind, 'create', scope, this));
-		this.children.forEach(vnode => vnode.createBinds(scope));
+		execBinds(this, 'create', scope);
 	}
 	updateBinds() {
-		this.binds.forEach(bind => bindExec(bind, 'update', this.scope, this));
-		this.children.forEach(vnode => vnode.updateBinds());
+		execBinds(this, 'update');
 		if (this.pointer) { this.pointer.updateBinds(this.pointer.scope); }
 	}
 	destroyBinds() {
 		log('vnode.destroy');
-		this.binds.forEach(bind => bindExec(bind, 'destroy', this.scope, this));
-		this.children.forEach(vnode => vnode.destroyBinds());
+		execBinds(this, 'destroy');
 		if (this.removedAttrs) {
 			this.removedAttrs.forEach(attr => this.node.setAttribute(attr.name, attr.value)); // restore attributes
 		}
 		delete this.scope;
 		delete this.node.vnode;
 	}
-	/*print(indent = '') {
-		log(indent + this.toString());
-		if (this.children) {
-			this.children.forEach(vnode => vnode.print(indent + ' '));
-		}
-	}
-	toString() {
-		if (this.pointer) {
-			return '[' + this.id + '] POINTER --> ' + this.pointer.toString();
-		} else if (this.type === 1) {
-			return '[' + this.id + '] <' + [this.tag].concat((this.removedAttrs || []).map(attr => attr.name)).join(' ') + '>';
-		} else if (this.fragment) {
-			return '[' + this.id + '] FRAGMENT';
-		} else {
-			return '[' + this.id + '] TEXT ' + (this.node.nodeValue || 'undef').trim() + (this.binds.length > 0 ? ' BIND' : '');
-		}
-	}*/
 }
-
-let bindExec = (bind, method, scope, vnode) => {
-	if (!bind.directive[method]) { return; }
-	let val = (ast) => { // evaluate expression (expression in attribute value by default)
-		return evaluate(ast || bind.ast, scope).value;
-	};
-	if (method === 'initialize') {
-		bind.directive[method].call(bind, vnode.node, ...bind.args);
-	} else {
-		bind.directive[method].call(bind, scope, vnode.node, val, ...bind.args);
-	}
-};
-
-let createVNode = (node, template, override) => {
-	if (node instanceof VirtualNode) {
-		return node;
-	} else if (typeof node === 'string') { // selector
-		node = document.querySelector(node);
-	} else if (node[0]) { // jquery element
-		node = node[0];
-	}
-	return new VirtualNode(node, template, override);
-};
 
 export default createVNode;

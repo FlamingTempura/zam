@@ -44,23 +44,19 @@ export default {
 	},
 	create(scope, el, val, attr) {
 		log('exist.create');
-		/*scope.$on('update', () => {
-			if (this.view) { this.view.$(); }
-		});*/
 		this.marker = document.createComment(attr);
 		el.parentNode.replaceChild(this.marker, el);
 	},	
 	update(scope, el, val) {
 		log('exist.update');
 		let value = !!val();
-		if (value !== this.prevValue) {
+		if (value !== this.value) {
 			if (value) {
 				log('exist.insert');
 				this.vnode = this.template.clone();
 				this.marker.parentNode.insertBefore(this.vnode.node, this.marker);
-				this.view = zam(this.vnode, undefined, scope);
-				this.view.$();
-				log('exist.inserted', this.vnode.node.outerHTML)
+				this.view = zam(this.vnode, undefined, scope).$();
+				log('exist.inserted', this.vnode.node.outerHTML);
 			} else if (this.view) {
 				log('exist.remove');
 				this.view.$destroy();
@@ -68,7 +64,7 @@ export default {
 				delete this.vnode;
 				delete this.view;
 			}
-			this.prevValue = value;
+			this.value = value;
 		}
 	}
 };

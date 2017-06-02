@@ -8,7 +8,6 @@ const pegjs = require('rollup-plugin-pegjs'),
       esformatter = require('rollup-plugin-esformatter'),
       strip = require('rollup-plugin-strip'),
       jsdom = require('jsdom'),
-      tidy = require('htmltidy2').tidy,
       fs = require('fs');
 
 const renderExample = function (html, cb) { // set global document to new dom
@@ -21,19 +20,6 @@ const renderExample = function (html, cb) { // set global document to new dom
 		window.eval(zamscript);
 		window.eval(script.textContent);
 		window.setTimeout(() => {
-			/*tidy(document.body.innerHTML, {
-				'show-body-only': true,
-				'hide-comments': true,
-				indent: 'yes',
-				'indent-spaces': 4,
-				doctype: 'html5',
-				'drop-empty-elements': false,
-				'merge-divs': false,
-				'merge-emphasis': false,
-				'merge-spans': false,
-				'output-html': true,
-				'preserve-entities': true
-			}, cb);*/
 			var html = document.body.innerHTML;
 			html = html
 				.replace(/(\s*)(\S[^\n]*)<!--z-\w+-in-->/g, function (match, indent, line) {
@@ -130,7 +116,7 @@ export default {
 				//max_line_len: 80
 				//preserve_line: true
 			}
-		}/*, harmony.minify*/),
+		}),
 		/*esformatter ({
 			indent: {
 				value: '	',

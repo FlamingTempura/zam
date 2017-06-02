@@ -55,8 +55,8 @@ export default {
 						this.type === 'number' ? Number(el.value) :
 						this.type === 'date' ? el.valueAsDate :
 						el.value;
-			if (value !== this.prevValue) {
-				this.prevValue = value;
+			if (value !== this.value) {
+				this.value = value;
 				val({ // evaluate "<expression> = <value>"
 					type: 'Assignment',
 					operator: '=',
@@ -74,7 +74,7 @@ export default {
 	},
 	update(scope, el, val) { // update dom
 		let value = val();
-		if (value !== this.prevValue) {
+		if (value !== this.value) {
 			if (this.type === 'checkbox') {
 				el.checked = !!value;
 			} else if (this.type === 'select') {
@@ -94,7 +94,7 @@ export default {
 			} else {
 				el.value = stringify(value);
 			}
-			this.prevValue = value;
+			this.value = value;
 		}
 	},
 	destroy(scope, el) {

@@ -36,13 +36,13 @@ export default {
 	},
 	update(scope, el, val, attr, type) {
 		let value = stringify(val());
-		if (value !== this.prevValue) {
+		if (value !== this.value) {
 			if (type === 'html') {
 				el.innerHTML = value;
 			} else {
 				el.textContent = value;
 			}
-			this.prevValue = value;
+			this.value = value;
 		}
 	}
 };

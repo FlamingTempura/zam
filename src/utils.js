@@ -1,10 +1,13 @@
 /* jshint node: true, browser: true, esversion: 6 */
 'use strict';
 
+const LOG = false;
+const log = (...msg) => { if (LOG) { console.log(...msg); } };
+
 const stringify = value => String(value !== null && typeof value !== 'undefined' ? value : '');
 
 const arrayRemove = (array, element) => {
-	const i = array.indexOf(element);
+	const i = array ? array.indexOf(element) : -1;
 	if (i > -1) { array.splice(i, 1); }
 };
 
@@ -35,12 +38,10 @@ const nextTick = function (cb) {
 	return () => { cancelled = true; };
 };
 
-/*var without$ = function (obj) {
-	obj = Object.assign({}, obj);
-	Object.keys(obj).forEach(k => { if (k.indexOf('$') === 0) { delete obj[k]; } });
+const pick = (src, ...props) => {
+	var obj = {};
+	props.forEach(prop => obj[prop] = src[prop]);
 	return obj;
-};*/
-const LOG = false;
-let log = (...msg) => { if (LOG) { console.log(...msg); } };
+};
 
-export { stringify, arrayRemove, hash, nextTick, log };
+export { stringify, arrayRemove, hash, nextTick, log, pick };

@@ -45,8 +45,8 @@ export default {
 	update(scope, el, val, attr, attribute, stdattribute) {
 		attribute = attribute || stdattribute;
 		let value = val();
-		if (value !== this.prevValue) {
-			this.prevValue = value;
+		if (value !== this.value) {
+			this.value = value;
 			if (booleanAttributes.indexOf(attribute) > -1) {
 				value = value ? attribute : undefined;
 			}

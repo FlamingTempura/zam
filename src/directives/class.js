@@ -18,8 +18,8 @@ export default {
 	attribute: '{prefix}class-(.+)',
 	update(scope, el, val, attr, classname) {
 		let value = val();
-		if (value !== this.prevValue) {
-			this.prevValue = value;
+		if (value !== this.value) {
+			this.value = value;
 			el.classList.toggle(classname, value);
 		}
 	}

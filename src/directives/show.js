@@ -25,9 +25,8 @@ export default {
 	attribute: '{prefix}show',
 	update(scope, el, val) {
 		let value = val() ? '' : 'none';
-		if (value !== this.prevValue) {
-			el.style.display = value;
-			this.prevValue = value;
+		if (value !== this.value) {
+			el.style.display = this.value = value;
 		}
 	}
 };
