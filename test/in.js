@@ -115,7 +115,7 @@ test('z-*-in object', function (t) { // Iterate through an array
 test('z-*-in (stress)', function (t) { // Iterate through an array
 	var nRepeats = 3,
 		nLists = 100,
-		nItems = 50,
+		nItems = 5,
 		count = 0,
 		totalTime1 = 0,
 		totalTime2 = 0,

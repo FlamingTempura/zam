@@ -7,6 +7,53 @@ var test = require('tap').test,
 	$ = require('./test-utils').$,
 	$$ = require('./test-utils').$$;
 
+
+test('directive template', function (t) {
+	t.plan(3);
+	up(`<section>
+			<memo z-let-memo="memos[0]"></memo>
+			<memo z-let-memo="memos[1]"></memo>
+		</section>`);
+
+	zam.directive({
+		tag: 'memo',
+		template: '<p>{{ memo.who }}: {{ memo.message }}</p>'
+	});
+	var view = zam(document.body);
+	view.memos = [{ who: 'me', message: 'thing' }, { who: 'joe', message: 'blah' }];
+	frames(
+		function () {
+			console.log(document.body.outerHTML);
+			t.equal($$('p').length, 2);
+			t.equal($$('p')[0].textContent, 'me: thing');
+			t.equal($$('p')[1].textContent, 'joe: blah');
+		}
+	);
+});
+return;
+
+test('directive template', function (t) {
+	t.plan(3);
+	up(`<section>
+			<memo z-memo-in="memos"></memo>
+		</section>`);
+
+	zam.directive({
+		tag: 'memo',
+		template: '<p>{{ memo.who }}: {{ memo.message }}</p>'
+	});
+	var view = zam(document.body);
+	view.memos = [{ who: 'me', message: 'thing' }, { who: 'joe', message: 'blah' }];
+	frames(
+		function () {
+			console.log(document.body.outerHTML);
+			t.equal($$('p').length, 2);
+			t.equal($$('p')[0].textContent, 'me: thing');
+			t.equal($$('p')[1].textContent, 'joe: blah');
+		}
+	);
+});
+return;
 test('custom directives', function (t) {
 	t.plan(2);
 	up(`<div z-todo-in="todos"><todo-item></todo-item></div>
@@ -41,30 +88,6 @@ test('custom directives', function (t) {
 		}
 	);
 });
-/*
-test('directive template', function (t) {
-	t.plan(3);
-	up(`<section>
-			<memo z-memo-in="memos"></memo>
-		</section>`);
-
-	zam.directive({
-		tag: 'memo',
-		template: '<p>{{ memo.who }}: {{ memo.message }}</p>'
-	});
-	var view = zam(document.body);
-	//console.log(document.body.outerHTML);
-	frames(
-		function () {
-			view.memos = [{ who: 'me', message: 'thing' }, { who: 'joe', message: 'blah' }];
-		},
-		function () {
-			t.equal($$('p').length, 2);
-			t.equal($$('p')[0].textContent, 'me: thing');
-			t.equal($$('p')[1].textContent, 'joe: blah');
-		}
-	);
-});*/
 /*
 // this will fail because z-exists deletes the node which the virtual node is looking after
 test('multiple directives', function (t) {

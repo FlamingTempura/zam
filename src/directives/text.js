@@ -31,7 +31,7 @@ export default {
 	attribute: '{prefix}(text|html)',
 	block: true,
 	inline: true,
-	create(scope, el) {
+	initialize(el) {
 		el.innerHTML = '';
 	},
 	update(scope, el, val, attr, type) {

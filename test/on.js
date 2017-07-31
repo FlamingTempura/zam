@@ -59,3 +59,16 @@ test('z-on-* shorthand', function (t) { // Event handler
 		}
 	);
 });
+
+test('z-on-* shorthand', function (t) {
+	t.plan(1);
+	up(`<input type="button" z-click="i = 1">`);
+	var view = zam(document.body);
+	view.i = 0;
+	frames(
+		function () {
+			trigger($('input'), 'click');
+			t.equal(view.i, 1);
+		}
+	);
+});

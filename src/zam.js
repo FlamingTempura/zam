@@ -6,6 +6,7 @@ import { parse, evaluate } from './expression';
 import { version } from '../package.json';
 import virtualdom from './virtualdom';
 import createDirective from './directive';
+import config from './config';
 
 let id = 0;
 let preparingProxy;
@@ -134,8 +135,8 @@ Object.assign(zam, {
 	}
 });
 Object.defineProperty(zam, 'prefix', {
-	get() { return createDirective.prefix; },
-	set(prefix) { createDirective.prefix = prefix; }
+	get() { return config.prefix; },
+	set(prefix) { config.prefix = prefix; }
 });
 
 export default zam;

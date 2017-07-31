@@ -1,10 +1,10 @@
 /* jshint node: true, browser: true, esversion: 6 */
 'use strict';
 
-const LOG = false;
-const log = (...msg) => { if (LOG) { console.log(...msg); } };
+//const log = (...msg) => console.log(...msg);
+const log = (...msg) => {};
 
-const stringify = value => String(value !== null && typeof value !== 'undefined' ? value : '');
+const stringify = val => val === null || val === undefined ? '' : String(val);
 
 const arrayRemove = (array, element) => {
 	const i = array ? array.indexOf(element) : -1;

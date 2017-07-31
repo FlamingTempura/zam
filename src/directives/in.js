@@ -43,19 +43,19 @@ import zam from '../zam';
 import virtualdom from '../virtualdom';
 import { parse, evaluate } from '../expression';
 import { arrayRemove, log } from '../utils';
-import directive from '../directive';
+import config from '../config';
 
 export default {
 	attribute: '{prefix}(.+)-in',
 	order: 2,
 	block: true, // do not continue traversing through this dom element (separate zam will be created)
 	initialize(el, attr, varname) { // dom manipulation shouldn't happen in init as it will interfere with the virtualdom
-		log('in.init');
+		log('in.init', config.prefix + 'key', el.getAttribute(config.prefix + 'key'));
 		this.items = [];
-		const zKey = el.getAttribute(directive.prefix + 'key');
+		const zKey = el.getAttribute(config.prefix + 'key');
 		if (zKey) {
 			const keyAST = parse(zKey);
-			el.removeAttribute(directive.prefix + 'key');
+			el.removeAttribute(config.prefix + 'key');
 			this.key = data => evaluate(keyAST, { [varname]: data }).value;
 		} else {
 			this.key = data => JSON.stringify(data);
@@ -70,21 +70,21 @@ export default {
 	},
 	update(scope, el, val, attr, varname) {
 		log('in.update');
-		let data = val() || [],
-			keys = Object.keys(data).map(k => ({ index: k, computed: this.key(data[k]), datum: data[k] }));
+		let value = val() || [],
+			data = Object.keys(value).map(k => ({ index: k, computed: this.key(value[k]), datum: value[k] }));
 
 		// recompute keys of existing nodes and remove old nodes
 		[].concat(this.items).forEach(item => {
 			item.key = this.key(item.datum);
-			let update = keys.find(k => k.computed === item.key);
-			if (!update) {
+			let kept = data.find(k => k.computed === item.key);
+			if (!kept) {
 				this.marker.parentNode.removeChild(item.node);
 				item.view.$destroy();
 				arrayRemove(this.items, item);
 			}
 		});
 		// create new nodes and update existing nodes
-		keys.forEach(k => {
+		data.forEach(k => {
 			let item = this.items.find(item_ => k.computed === item_.key);
 			if (!item) {
 				log('in.clone');

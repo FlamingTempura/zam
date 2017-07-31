@@ -96,7 +96,7 @@ export default {
 			plugins: ['external-helpers']
 		}),
 		strip({
-			functions: ['console.*', 'log'],
+			//functions: ['console.*', 'log'],
 			//sourceMap: true
 		}),
 		uglify({

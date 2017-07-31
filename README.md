@@ -436,7 +436,8 @@ zam.directive({
 * `template` - HTML to insert to replace the element with
 * `block` - whether to stop further directives in this element and it's children.
 * `order` - when to run this directive; lower numbers run first.
-* `create` - function called when directive is created.
+* `initialize` - called when the virtualdom is being created.
+* `create` - function called when directive is first bound with a scope.
 * `update` - function called when directive is updating.
 * `destroy` - function called when directive is destorying.
 

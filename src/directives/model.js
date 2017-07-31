@@ -23,7 +23,7 @@ Two way binding with input element value. The input value will be set to the val
 
 import { stringify, hash } from '../utils';
 import { parse } from '../expression';
-import directive from '../directive';
+import config from '../config';
 
 export default {
 	attribute: '{prefix}model',
@@ -42,7 +42,7 @@ export default {
 			el.setAttribute('name', hash(scope.$id + JSON.stringify(this.ast))); // group radios by their model and scope
 		}
 		this.getValue = option => {
-			var valExpr = option.getAttribute(directive.prefix + 'value');
+			var valExpr = option.getAttribute(config.prefix + 'value');
 			return valExpr ?
 				val(parse(valExpr)) :
 				option.getAttribute('value');
