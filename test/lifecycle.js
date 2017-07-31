@@ -11,9 +11,11 @@ test('create', function (t) {
 	up(`<div id="a">{{ name }}</div>
 		<div id="b" z-text="name"></div>
 		<div id="c" z-text="name">{{ name }}</div>`);
+	var jq = [$('#c')]; // jquery-like
+	jq.jquery = 'blah';
 	var view1 = zam('#a'),
 		view2 = zam($('#b')),
-		view3 = zam([$('#c')]); // jquery-like
+		view3 = zam(jq);
 	t.equal($('#a').textContent, '');
 	t.equal($('#b').textContent, '');
 	t.equal($('#b').getAttribute('z-text'), null);
