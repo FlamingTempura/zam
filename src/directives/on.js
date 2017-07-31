@@ -42,6 +42,7 @@ export default {
 			scope.$event = event;
 			val();
 			delete scope.$event;
+			if ((event || stdevent) === 'submit') { event.preventDefault(); }
 		};
 		el.addEventListener(event || stdevent, this.handler);
 	},
