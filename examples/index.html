@@ -36,6 +36,14 @@
 		{{ "my" + "name" }} <!-- shows myname -->
 		{{ Date.now() }} <!-- current unix timestamp -->
 		{{ JSON.stringify({ a: 1, b: 2 }) }} <!-- shows {a:1,b:2} -->
+		<form>
+			<div>{{ Date.now() }}</div>
+			<select type="text" value="blah"></select>
+		</form>
+		<div z-p-in="ps">
+			{{ p }}
+        	<div>Done</div>
+		</div>
 	</div>
  
  	<div id="login">

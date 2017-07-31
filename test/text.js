@@ -7,10 +7,11 @@ var test = require('tap').test,
 	$ = require('./test-utils').$;
 
 test('text interpolation', function (t) {
-	t.plan(9);
+	t.plan(12);
 	up(`<div id="a">{{ name }}</div>
 		<div id="b">{{ name + 'y' }}</div>
-		<div id="c">{{ something }}</div>`);
+		<div id="c">{{ something }}</div>
+		<form><div>{{name + 'y'}}</div><button>ok</button></form>`); // check that forms don't break things
 	var view = zam(document.body);
 	t.equal($('#a').textContent, '');
 	t.equal($('#b').textContent, '');
@@ -18,17 +19,20 @@ test('text interpolation', function (t) {
 		function () {
 			t.equal($('#a').textContent, '');
 			t.equal($('#b').textContent, 'y');
+			t.equal($('form div').textContent, 'y');
 			view.name = 'dave';
 		},
 		function () {
 			t.equal($('#a').textContent, 'dave');
 			t.equal($('#b').textContent, 'davey');
 			t.equal($('#c').textContent, '');
+			t.equal($('form div').textContent, 'davey');
 			view.name = 'bob';
 		},
 		function () {
 			t.equal($('#a').textContent, 'bob');
 			t.equal($('#b').textContent, 'boby');
+			t.equal($('form div').textContent, 'boby');
 		}
 	);
 });

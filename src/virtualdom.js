@@ -24,7 +24,7 @@ const createVNode = (node, template, override) => {
 		return node;
 	} else if (typeof node === 'string') { // selector
 		node = document.querySelector(node);
-	} else if (node[0]) { // jquery element
+	} else if (node.jquery) { // jquery element
 		node = node[0];
 	}
 	return new VirtualNode(node, template, override);
