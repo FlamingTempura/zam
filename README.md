@@ -106,6 +106,21 @@ Warning: Be aware that binding HTML can cause
 [XSS](https://en.wikipedia.org/wiki/Cross-site_scripting). You should not use
 user-entered content without sanitisation.
 
+#### `z-cloak`  - Hide content until zam has initiated
+
+
+Prevents template tags from being visible before zam has initiated. A css rule for `[z-clock]` should be added to set `display: none`.
+
+
+<style>
+	[z-cloak] { display: none; }
+</style>
+Hello. <div z-clock>this div will not be visible until zam has initiated {{ me.name }}</div>
+<script>
+    var view = zam(document.body);
+    view.me = { name: 'Bob' };
+</script>
+
 #### `z-show` - Conditional visibility
 
 

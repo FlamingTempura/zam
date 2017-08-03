@@ -65,7 +65,7 @@ class VirtualNode {
 				this.removedAttrs = template.removedAttrs.map(cloneAttribute);
 			}
 			if (template.children) {
-				let childNodes = Array.from(node.childNodes).filter(cnode => cnode.nodeType === 1 || cnode.nodeType === 3);
+				let childNodes = Array.from(node.childNodes).filter(cnode => cnode.nodeType === 1 || cnode.nodeType === 3 || cnode.nodeType === 11);
 				template.children.forEach(vnode => {
 					this.children.push(createVNode(vnode.fragment ? node : childNodes.shift(), vnode));
 				});
@@ -77,7 +77,7 @@ class VirtualNode {
 	}
 	initialize() {
 		let node = this.node;
-		this.type = node.nodeType; // 1 = ELEMENT_NODE, 3 = TEXT_NODE
+		this.type = node.nodeType; // 1 = ELEMENT_NODE, 3 = TEXT_NODE, 11 = DOCUMENT_FRAGMENT
 		log('vnode.init', this.outerHTML, node.nodeValue, this.type, node.nodeType);
 		if (this.type === 1) {
 			this.tag = node.tagName;
@@ -108,7 +108,7 @@ class VirtualNode {
 			if (!this.blocked && node.childNodes) {
 				log('vnode.children', node.childNodes.length);
 				 Array.from(node.childNodes)
-					.filter(node => node.nodeType === 1 || node.nodeType === 3)
+					.filter(node => node.nodeType === 1 || node.nodeType === 3 || node.nodeType === 11)
 					.map(node => this.children.push(createVNode(node)));
 			}
 		} else

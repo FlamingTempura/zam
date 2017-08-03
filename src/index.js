@@ -14,8 +14,9 @@ import dModel from './directives/model';
 import dIn from './directives/in';
 import dOn from './directives/on';
 import dSkip from './directives/skip';
+import dCloak from './directives/cloak';
 
-[dText, dShow, dAttr, dClass, dExist, dStyle, dModel, dIn, dOn, dSkip]
+[dText, dShow, dAttr, dClass, dExist, dStyle, dModel, dIn, dOn, dSkip, dCloak]
 	.forEach(directive);
 
 export default zam;
