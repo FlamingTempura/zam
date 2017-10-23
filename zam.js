@@ -1129,7 +1129,7 @@
         return u.createBinds(d), d.$(!0), A(d, d);
     };
     Object.assign(k, {
-        version: "0.4.3",
+        version: "0.4.4",
         parse: s,
         evaluate: a,
         directive: m,
