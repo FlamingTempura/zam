@@ -1303,7 +1303,7 @@
         attribute: "{prefix}(?:on-(.+)|(" + [ "load", "error", "focus", "blur", "click", "dblclick", "mouse.*", "keyup", "keydown", "keypress", "input", "change", "submit", "reset", "scroll", "resize", "drag.*", "drop" ].join("|") + "))",
         create: function(e, t, r, n, i, o) {
             this.handler = function(t) {
-                e.$event = t, r(), delete e.$event, "submit" === (t || o) && t.preventDefault();
+                e.$event = t, r(), e.$(), delete e.$event, "submit" === (t || o) && t.preventDefault();
             }, t.addEventListener(i || o, this.handler);
         },
         destroy: function(e, t, r, n, i, o) {

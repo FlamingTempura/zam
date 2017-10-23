@@ -82,7 +82,6 @@ class VirtualNode {
 			this.tag = node.tagName;
 			this.attributes = Array.from(node.attributes).map(cloneAttribute);
 			this.removedAttrs = [];
-			var q = Math.ceil(Math.random() * 10000000)
 			config.directives.forEach(directive => {
 				if (this.blocked) { return; }
 				if (directive.tag) {

@@ -7,9 +7,9 @@ var test = require('tap').test,
 	trigger = require('./test-utils').trigger;
 
 test('$watch', t => {
-	t.plan(4);
+	t.plan(9);
 	up(`<input type="text" z-model="foo">
-		<input type="button" z-click="foo = 'boo'>`);
+		<input type="button" z-click="foo = 'boo'">`);
 	var view = zam(document.body),
 		count = 0,
 		handler = () => { count++; };
@@ -21,31 +21,36 @@ test('$watch', t => {
 			view.foo = 4; // should trigger watch only once
 		},
 		() => {
-			$('input').value = 'bar';
-			trigger($('input'), 'input'); // should trigger watch
-		},
-		() => {
-			view.foo = 'bar'; // should not trigger watch
-		},
-		() => {
-			view.$unwatch('foo', handler);
-			view.foo = '$$$'; // should not trigger watch
-		},
-		() => {
-			view.$watch('foo', foo => {
-				t.equal(foo, 'can');
-			});
-			view.foo = 'can';
+			t.equal(count, 1);
+			view.foo = 'can'; // should trigger watch
 		},
 		() => {
 			t.equal(count, 2);
-		},
-		() => {
-			trigger($('input'), 'click');
+			$('input[type=text]').value = 'bar';
+			trigger($('input[type=text]'), 'input'); // should trigger watch
 		},
 		() => {
 			t.equal(count, 3);
+			t.equal(view.foo, 'bar');
+			view.foo = 'bar'; // should NOT trigger watch
+		},
+		() => {
+			t.equal(count, 3);
+		},
+		() => {
+			trigger($('input[type=button]'), 'click');
+		},
+		() => {
+			t.equal(count, 4);
 			t.equal(view.foo, 'boo');
+			view.$unwatch('foo', handler);
+			view.$watch('foo', foo => {
+				t.equal(foo, '$$$');
+			});
+			view.foo = '$$$'; // should NOT increase count
+		},
+		() => {
+			t.equal(count, 4);
 		}
 	);
 });

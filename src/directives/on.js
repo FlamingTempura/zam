@@ -40,6 +40,7 @@ export default {
 		this.handler = event => {
 			scope.$event = event;
 			val();
+			scope.$(); // if an assignment happens, this is necessary to trigger watchers
 			delete scope.$event;
 			if ((event || stdevent) === 'submit') { event.preventDefault(); }
 		};
