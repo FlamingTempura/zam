@@ -80,7 +80,7 @@ let generateDocs = function () {
 };
 
 export default {
-	entry: 'src/index.js',
+	input: 'src/index.js',
 	plugins: [
 		{ ongenerate: generateDocs },
 		pegjs({
@@ -93,7 +93,8 @@ export default {
 			'presets': [
 				['es2015', { modules: false, loose: true }]
 			],
-			plugins: ['external-helpers']
+			plugins: ['external-helpers'],
+			exclude: 'node_modules/**'
 		}),
 		strip({
 			functions: ['console.*', 'log'],
@@ -129,10 +130,12 @@ export default {
 		})*/
 	],
 	//sourceMap: true,
-	moduleName: 'zam',
-	format: 'umd',
-	//indent: false,
-	dest: 'zam.js'
+	name: 'zam',
+	output: {
+		format: 'umd',
+		//indent: false,
+		file: 'zam.js'
+	}
 };
 
 // linebreak after :
