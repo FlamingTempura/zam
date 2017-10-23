@@ -27,7 +27,6 @@ _Shorthand:_ `on-` may be omitted for standard DOM events, such as `click`, `mou
 @RESULT
 
 */
-/* jshint node: true, browser: true, esversion: 6, unused: true */
 'use strict';
 
 const standardEvents = [

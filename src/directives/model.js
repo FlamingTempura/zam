@@ -18,7 +18,6 @@ Two way binding with input element value. The input value will be set to the val
 @RESULT
 */
 
-/* jshint node: true, browser: true, esversion: 6, unused: true */
 'use strict';
 
 import { stringify, hash } from '../utils';

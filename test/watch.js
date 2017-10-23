@@ -1,4 +1,3 @@
-/* jshint node: true, esversion: 6, browser: true, unused: true */
 'use strict';
 var test = require('tap').test,
 	zam = require('../'),
@@ -7,38 +6,46 @@ var test = require('tap').test,
 	$ = require('./test-utils').$,
 	trigger = require('./test-utils').trigger;
 
-test('$watch', function (t) {
-	t.plan(2);
-	up(`<input type="text" z-model="foo">`);
+test('$watch', t => {
+	t.plan(4);
+	up(`<input type="text" z-model="foo">
+		<input type="button" z-click="foo = 'boo'>`);
 	var view = zam(document.body),
 		count = 0,
-		handler = function () { count++; };
+		handler = () => { count++; };
 	frames(
-		function () { // should trigger watch
+		() => { // should trigger watch
 			view.$watch('foo', handler);
 			view.foo = 1;
 			view.foo = 2;
 			view.foo = 4; // should trigger watch only once
 		},
-		function () {
+		() => {
 			$('input').value = 'bar';
 			trigger($('input'), 'input'); // should trigger watch
 		},
-		function () {
+		() => {
 			view.foo = 'bar'; // should not trigger watch
 		},
-		function () {
+		() => {
 			view.$unwatch('foo', handler);
 			view.foo = '$$$'; // should not trigger watch
 		},
-		function () {
-			view.$watch('foo', function (foo) {
+		() => {
+			view.$watch('foo', foo => {
 				t.equal(foo, 'can');
 			});
 			view.foo = 'can';
 		},
-		function () {
+		() => {
 			t.equal(count, 2);
+		},
+		() => {
+			trigger($('input'), 'click');
+		},
+		() => {
+			t.equal(count, 3);
+			t.equal(view.foo, 'boo');
 		}
 	);
 });

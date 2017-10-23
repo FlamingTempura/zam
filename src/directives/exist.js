@@ -26,7 +26,6 @@ Note: this is equivelant to `ng-if` in angular.
 @RESULT
 */
 
-/* jshint node: true, browser: true, esversion: 6, unused: true */
 'use strict';
 
 import zam from '../zam';

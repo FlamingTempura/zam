@@ -1,8 +1,6 @@
-/* jshint node: true, browser: true, esversion: 6, unused: true */
 'use strict';
 import virtualdom from './virtualdom';
 import config from './config';
-import {log} from './utils'; 
 
 let createDirective = (directive) => {
 	if (directive.inline) {

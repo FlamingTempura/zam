@@ -16,7 +16,6 @@ Hello. <div z-clock>this div will not be visible until zam has initiated {{ me.n
 
 */
 
-/* jshint node: true, browser: true, esversion: 6, unused: true */
 'use strict';
 
 export default {

@@ -1082,7 +1082,7 @@
             },
             percent: function(e) {
                 var t = arguments.length > 1 && void 0 !== arguments[1] ? arguments[1] : 2;
-                return Number(100 * e).toFixed(t) + "%";
+                return Number(100 * e).toFixed(t) + "%d";
             }
         }
     }), Object.defineProperty(P, "prefix", {

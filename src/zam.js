@@ -1,4 +1,3 @@
-/* jshint node: true, browser: true, esversion: 6, unused: true */
 'use strict';
 
 import { arrayRemove, nextTick, log } from './utils';
@@ -67,7 +66,7 @@ const deepProxy = (view, obj, parents = []) => { // when something in the scope 
 };
 
 const zam = (el, data, parent) => {
-	//log('view#' + id + '.create');
+	log('view#' + id + '.create');
 	let vnode = virtualdom(el, null, true),
 		events = {},
 		watchers = [],
@@ -77,7 +76,7 @@ const zam = (el, data, parent) => {
 			$(defer) { // update binds. use defer to wait until end of execution cycle (these will be collapsed into one update)
 				if (!defer) {
 					if (deferringUpdate) { deferringUpdate = deferringUpdate(); } // cancel
-					//log('view#' + view.$id + '.update');
+					log('view#' + view.$id + '.update');
 					vnode.updateBinds(view);
 					emit(events, 'update');
 					watchers.forEach(watcher => {

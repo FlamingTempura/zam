@@ -1,9 +1,8 @@
-/* jshint node: true, esversion: 6, browser: true, unused: true */
 'use strict';
 var test = require('tap').test,
 	zam = require('../');
 
-test('Expressions', function (t) { // The expressions used in a directive mostly include the JavaScript language.
+test('Expressions', t => { // The expressions used in a directive mostly include the JavaScript language.
 	var assertions = 1;
 	var assert = function (expr, val) {
 		assertions++;

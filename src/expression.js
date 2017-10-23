@@ -1,4 +1,3 @@
-/* jshint node: true, browser: true, esversion: 6 */
 'use strict';
 
 import { stringify } from './utils';

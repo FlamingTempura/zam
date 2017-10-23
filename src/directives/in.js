@@ -36,7 +36,6 @@ Note: This directive occurs before anything else.
 
 */
 
-/* jshint node: true, browser: true, esversion: 6, unused: true */
 'use strict';
 
 import zam from '../zam';
