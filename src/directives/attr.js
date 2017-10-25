@@ -43,16 +43,16 @@ const booleanAttributes = [
 	'noresize'];
 
 export default {
-	attribute: '{prefix}(?:attr-(.+)|(' + standardAttributes.join('|') + '))',
+	attribute: `{prefix}(?:attr-(.+)|(${standardAttributes.join('|')}))`,
 	update(scope, el, val, attr, attribute, stdattribute) {
 		attribute = attribute || stdattribute;
 		let value = val();
 		if (value !== this.value) {
 			this.value = value;
-			if (booleanAttributes.indexOf(attribute) > -1) {
+			if (booleanAttributes.includes(attribute)) {
 				value = value ? attribute : undefined;
 			}
-			if (typeof value === 'undefined') {
+			if (value === undefined) {
 				el.removeAttribute(attribute);
 			} else {
 				el.setAttribute(attribute, value);

@@ -2,9 +2,9 @@
 
 import config from './config';
 import { parse, evaluate } from './expression';
-import { log, pick } from './utils';
+import { log } from './utils';
 
-const cloneAttribute = attr => pick(attr, 'name', 'value');
+const cloneAttribute = attr => ({ name: attr.name, value: attr.value });
 
 const execBinds = (vnode, method, scope) => {
 	vnode.binds.forEach(bind => execBind(vnode, method, bind));
@@ -57,7 +57,9 @@ class VirtualNode {
 			node.vnode = this;
 			this.blocked = template.blocked;
 			this.type = template.type;
-			template.binds.forEach(bind => this.bind(pick(bind, 'ast', 'directive', 'args', 'key', 'template')));
+			template.binds.forEach(bind => {
+				this.bind({ ast: bind.ast, directive: bind.directive, args: bind.args, key: bind.key, template: bind.template });
+			});
 			if (template.tagName) { this.tag = template.tagName; }
 			if (template.attributes) {
 				this.attributes = template.attributes.map(cloneAttribute);
@@ -111,7 +113,7 @@ class VirtualNode {
 			}
 		} else
 
-		if (this.type === 3 && node.nodeValue.indexOf('{{') > -1) {
+		if (this.type === 3 && node.nodeValue.includes('{{')) {
 			let parts = parse(node.nodeValue, 'Text');
 			if (parts.length === 1) {
 				if (typeof parts[0] !== 'string') {

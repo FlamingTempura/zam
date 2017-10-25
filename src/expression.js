@@ -1,5 +1,4 @@
 'use strict';
-
 import { stringify } from './utils';
 import parser from './grammar.pegjs';
 const parse = (expr, startRule = 'Expression') => parser.parse(expr, { startRule }); // generates the abstract ast tree
@@ -15,34 +14,25 @@ const evaluate = (ast, scope) => {
 	} else
 	
 	if (type === 'Object') {
-		value = {};
-		ast.properties.forEach(prop => {
-			value[prop.key] = evaluate(prop.value, scope).value;
-		});
+		value = Object.assign({}, ...ast.properties.map(p => ({ [p.key]: evaluate(p.value, scope).value })));
 	} else
 
 	if (type === 'Identifier') {
 		let scope_ = scope;
 		while (scope_) {
-			if (typeof scope_[ast.name] !== 'undefined') { break; }
+			if (scope_[ast.name] !== undefined) { break; }
 			scope_ = scope_.$parent; // is data in parent scopes?
 		}
 		if (!scope_) { scope_ = scope; } // no? then just use current scope
 		value = scope_[ast.name];
-		set = val => {
-			scope_[ast.name] = val;
-			return val;
-		};
+		set = val => scope_[ast.name] = val;
 	} else 
 
 	if (type === 'Member') {
 		let subject = evaluate(ast.object, scope).value,
 			prop = evaluate(ast.property, scope).value;
-		value = typeof subject !== 'undefined' ? subject[prop] : undefined;
-		set = val => {
-			subject[prop] = val;
-			return val;
-		};
+		value = subject !== undefined ? subject[prop] : undefined;
+		set = val => subject[prop] = val;
 	} else
 
 	if (type === 'Conditional') {

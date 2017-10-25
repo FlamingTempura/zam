@@ -92,7 +92,6 @@ CallExpression
     tail:MembershipExpression
     {
       return tail.reduce(function (result, property) {
-        //property[TYPES_TO_PROPERTY_NAMES[property.type]] = result;
         return { type: "Member", property: property, object: result };
       }, head);
     }

@@ -428,21 +428,21 @@ Custom directives can be defined prior to creating a view.
 ```js
 zam.directive({
 	attribute: 'hide',
-	update: (scope, el, val) => {
+	update(scope, el, val) {
 		$(el).toggle(!val);
 	}
 });
 
 zam.directive({
 	attribute: 'on-scroll-([xy])',
-	create: (scope, el) => {},
-	update: (scope, el, val) => {},
-	destroy: (scope, el) => {}
+	create(scope, el) {},
+	update(scope, el, val) {},
+	destroy(scope, el) {}
 });
 
 zam.directive({
 	tag: 'blah',
-	create: (scope, el) => {}
+	create(scope, el) {}
 })
 
 let view = zam(); // directives must be defined before creating the view

@@ -41,7 +41,7 @@ const standardStyles = [
 	'will-change', 'word-.*', 'writing-mode', 'z-index'];
 
 export default {
-	attribute: '{prefix}(?:style-(.+)|(' + standardStyles.join('|') + '))',
+	attribute: `{prefix}(?:style-(.+)|(${standardStyles.join('|')}))`,
 	update(scope, el, val, attr, style, stdstyle) {
 		let value = val();
 		if (value !== this.value) {

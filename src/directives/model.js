@@ -36,8 +36,8 @@ export default {
 		this.type = inputType === 'checkbox' ? 'checkbox' :
 					tag === 'select' ? 'select' :
 					inputType === 'radio' ? 'radio' :
-					['range', 'number'].indexOf(inputType) > -1 ? 'number' :
-					['date', 'datetime-local', 'time', 'month', 'week'].indexOf(inputType) > -1 ? 'date' :
+					['range', 'number'].includes(inputType) ? 'number' :
+					['date', 'datetime-local', 'time', 'month', 'week'].includes(inputType) ? 'date' :
 					'text';
 		if (this.type === 'radio' && !el.getAttribute('name')) {
 			el.setAttribute('name', hash(scope.$id + JSON.stringify(this.ast))); // group radios by their model and scope

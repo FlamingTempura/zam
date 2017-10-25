@@ -25,7 +25,7 @@ const standardEvents = [
 	'scroll', 'resize',  'drag.*', 'drop'];
 
 export default {
-	attribute: '{prefix}(?:on-(.+)|(' + standardEvents.join('|') + '))',
+	attribute: `{prefix}(?:on-(.+)|(${standardEvents.join('|')}))`,
 	create(scope, el, val, attr, event, stdevent) {
 		this.handler = event => {
 			scope.$event = event;

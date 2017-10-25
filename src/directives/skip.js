@@ -13,7 +13,6 @@ Stops Zam from parsing content within the element.
 	zam(document.body);
 </script>
 @RESULT
-
 */
 
 'use strict';

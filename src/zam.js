@@ -20,15 +20,12 @@ const proxyGet = (target, prop, receiver) => {
 };
 
 const deepProxy = (view, obj, parents = []) => { // when something in the scope changes, update the view
-	if (parents.indexOf(obj) > -1) { return; } // prevent circular recursion
+	if (parents.includes(obj)) { return; } // prevent circular recursion
 	parents = parents.concat([obj]);
-	//log('view#' + view.$id + '.watch:', without$(obj));
-	
 	let proxy = new Proxy(obj, {
 		get: proxyGet,
 		set(target, prop, value, receiver) {
 			if (!preparingProxy) {
-				//log('view#' + view.$id + '.set: ' + prop + ' =', value);
 				if (typeof value === 'object' && value !== null && !(value instanceof Date)) { // TODO date should be proxied (if it works)
 					value = deepProxy(view, value, parents);
 				} 
@@ -41,7 +38,6 @@ const deepProxy = (view, obj, parents = []) => { // when something in the scope 
 		},
 		deleteProperty(target, prop) {
 			if (!preparingProxy) {
-				//log('view#' + view.$id + '.delete: ' + prop);
 				view.$(true);
 			}
 			preparingProxy = true; // prevents triggering parent views which also proxy this object
