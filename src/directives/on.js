@@ -17,8 +17,6 @@ events, such as `click`, `mousemove`, and `mousedown`.
 </script>
 @RESULT
 */
-'use strict';
-
 const standardEvents = [
 	'load', 'error', 'focus', 'blur', 'click', 'dblclick',   'mouse.*',
 	'keyup', 'keydown', 'keypress', 'input', 'change', 'submit', 'reset',

@@ -21,9 +21,6 @@ Together: <span>{{ me.name }}, {{{ boldName }}}</span>
 </script>
 @RESULT
 */
-
-'use strict';
-
 import { stringify } from '../utils';
 
 export default {

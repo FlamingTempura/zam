@@ -1,5 +1,3 @@
-'use strict';
-
 import config from './config';
 import { parse, evaluate } from './expression';
 import { log } from './utils';

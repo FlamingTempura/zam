@@ -1,4 +1,3 @@
-'use strict';
 import { stringify } from './utils';
 import parser from './grammar.pegjs';
 const parse = (expr, startRule = 'Expression') => parser.parse(expr, { startRule }); // generates the abstract ast tree

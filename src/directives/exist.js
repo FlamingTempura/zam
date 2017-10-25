@@ -25,9 +25,6 @@ Note: this is equivalent to `ng-if` in angular.
 </script>
 @RESULT
 */
-
-'use strict';
-
 import zam from '../zam';
 import virtualdom from '../virtualdom';
 import { log } from '../utils';

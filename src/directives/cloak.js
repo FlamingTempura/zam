@@ -16,9 +16,6 @@ Hello. <div z-cloak>this div will not be visible until zam has initiated {{ me.n
 </script>
 @RESULT
 */
-
-'use strict';
-
 export default {
 	attribute: '{prefix}cloak',
 	initialize(el) {

@@ -1,5 +1,3 @@
-'use strict';
-
 import { arrayRemove, nextTick, log } from './utils';
 import { parse, evaluate } from './expression';
 import { version } from '../package.json';
@@ -7,8 +5,8 @@ import virtualdom from './virtualdom';
 import createDirective from './directive';
 import config from './config';
 
-let id = 0;
-let preparingProxy;
+let id = 0,
+	preparingProxy;
 
 const emit = (events, event) => {
 	if (events[event]) { events[event].forEach(cb => cb()); }
@@ -46,13 +44,10 @@ const deepProxy = (view, obj, parents = []) => { // when something in the scope 
 			return a;
 		}
 	});
-	
-	Object.keys(obj).forEach(k => { // this will also work for arrays
-		let o = obj[k];
-		if (typeof o === 'object' && !(o instanceof Date) && !(obj === view && k.charAt(0) === '$')) { // TODO date should be proxied (if it works)
-			proxy[k] = o;
-		}
-	});
+
+	Object.entries(obj)
+		.filter(({ k, o }) => typeof o === 'object' && !(o instanceof Date) && !(obj === view && k.charAt(0) === '$')) // TODO date should be proxied (if it works))
+		.forEach(({ k, o }) => proxy[k] = o);
 
 	return proxy;
 };
@@ -79,7 +74,6 @@ const zam = (el, data, parent) => {
 						}
 					});
 				} else if (!deferringUpdate) {
-					//log('view#' + view.$id + '.deferUpdate');
 					deferringUpdate = nextTick(() => view.$());
 				}
 				return view;
@@ -122,7 +116,7 @@ Object.assign(zam, {
 	root: {
 		$parent: typeof global !== 'undefined' ? global : window,
 		number: (num, dec = 2) => Number(num).toFixed(dec),
-		percent: (num, dec = 2) => Number(num * 100).toFixed(dec) + '%'
+		percent: (num, dec = 2) => `${Number(num * 100).toFixed(dec)}%`
 	}
 });
 Object.defineProperty(zam, 'prefix', {

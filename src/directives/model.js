@@ -19,9 +19,6 @@ data will also change, and the view will be kept up to date.
 </script>
 @RESULT
 */
-
-'use strict';
-
 import { stringify, hash } from '../utils';
 import { parse } from '../expression';
 import config from '../config';

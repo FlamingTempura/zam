@@ -14,8 +14,6 @@ Adds the specified classname only if the result of the expression is
 </script>
 @RESULT
 */
-'use strict';
-
 export default {
 	attribute: '{prefix}class-(.+)',
 	update(scope, el, val, attr, classname) {

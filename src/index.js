@@ -1,5 +1,3 @@
-'use strict';
-
 import zam from './zam';
 import directive from './directive';
 import dText from './directives/text';

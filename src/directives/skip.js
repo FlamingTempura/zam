@@ -14,9 +14,6 @@ Stops Zam from parsing content within the element.
 </script>
 @RESULT
 */
-
-'use strict';
-
 export default {
 	attribute: '{prefix}skip',
 	order: 1,

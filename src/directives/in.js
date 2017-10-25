@@ -34,9 +34,6 @@ If `z-key` is not specified, `JSON.stringify` is used.
 
 Note: This directive occurs before anything else.
 */
-
-'use strict';
-
 import zam from '../zam';
 import virtualdom from '../virtualdom';
 import { parse, evaluate } from '../expression';

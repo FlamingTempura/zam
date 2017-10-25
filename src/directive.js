@@ -1,4 +1,3 @@
-'use strict';
 import virtualdom from './virtualdom';
 import config from './config';
 

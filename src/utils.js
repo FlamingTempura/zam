@@ -1,5 +1,3 @@
-'use strict';
-
 const log = (...msg) => console.log(...msg);
 
 const stringify = val => val === null || val === undefined ? '' : String(val);

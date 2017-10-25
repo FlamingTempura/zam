@@ -17,8 +17,6 @@ omitted for standard HTML attributes, like `disabled`, `src`, and `alt`.
 </script>
 @RESULT
 */
-'use strict';
-
 const standardAttributes = [
 	'accept', 'accept-charset', 'accesskey', 'action', 'align', 'alt',
 	'async', 'autocomplete', 'autofocus', 'autoplay', 'autosave',

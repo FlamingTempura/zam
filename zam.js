@@ -1088,9 +1088,12 @@
                     return y = !1, n;
                 }
             });
-            return Object.keys(r).forEach(function(e) {
-                var n = r[e];
-                "object" !== (void 0 === n ? "undefined" : u(n)) || n instanceof Date || r === t && "$" === e.charAt(0) || (i[e] = n);
+            return Object.entries(r).filter(function(e) {
+                var n = e.k, i = e.o;
+                return !("object" !== (void 0 === i ? "undefined" : u(i)) || i instanceof Date || r === t && "$" === n.charAt(0));
+            }).forEach(function(e) {
+                var t = e.k, r = e.o;
+                return i[t] = r;
             }), i;
         }
     }, A = function e(r, i, a) {

@@ -19,9 +19,6 @@ Displays the element only if the result of the expression is
 </script>
 @RESULT
 */
-
-'use strict';
-
 export default {
 	attribute: '{prefix}show',
 	update(scope, el, val) {

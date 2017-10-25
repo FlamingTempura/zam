@@ -18,9 +18,6 @@ and `width`.
 </script>
 @RESULT
 */
-
-'use strict';
-
 const standardStyles = [
 	'align-.*', 'all', 'animation', 'animation-.*', 'backface-visibility',
 	'background', 'background-.*', 'border', 'border-.*', 'bottom', 'box-.*',
