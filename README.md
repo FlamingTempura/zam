@@ -1,38 +1,38 @@
 # Zam.js - Lightweight DOM data binding
 
-Zam is a fast and minimal library for rendering HTML views and automatically keeping them up-to-date. Zam focuses only on the view, and does not require any particular data structures to be used. It is designed to be easy to use, yet powerful enough to handle large-scale web pages. [Try it out on JSFiddle](https://jsfiddle.net/1ta0eada/).
+Zam is a fast and minimal library for rendering DOM views and automatically keeping them up-to-date. Zam focuses only on the view, and does not require any particular data structures to be used. It is designed to be easy to use, yet powerful enough to handle large-scale web pages. [Try it out on JSFiddle](https://jsfiddle.net/1ta0eada/).
 
 ```html
 <html>
 <body>
-    <div z-todo-in="todos" z-show="!todo.done">
-        {{ todo.message }}
-        <button z-click="todo.done = true">Done</button>
-    </div>
-    <input type="text" z-model="newTodo.message">
-    <button z-click="create()">Create</button>
-    <script src="zam.js"></script>
-    <script>
-        var view = zam(document.body);
-        view.todos = [];
-        view.newTodo = {};
-        view.create = function () {
-            view.todos.push(view.newTodo);
-            view.newTodo = {};
-        };
-    </script>
+	<div z-todo-in="todos" z-show="!todo.done">
+		{{ todo.message }}
+		<button z-click="todo.done = true">Done</button>
+	</div>
+	<input type="text" z-model="newTodo.message">
+	<button z-click="create()">Create</button>
+	<script src="zam.js"></script>
+	<script>
+		const view = zam(document.body);
+		view.todos = [];
+		view.newTodo = {};
+		view.create = () => {
+			view.todos.push(view.newTodo);
+			view.newTodo = {};
+		};
+	</script>
 </body>
 </html>
 ```
 
-Zam uses [Proxy objects](https://developer.mozilla.org/en/docs/Web/JavaScript/Reference/Global_Objects/Proxy) to observe changes in the data. This means that Zam knows when to update the view; it is not necessary to manually render the view. Each of the below statements will cause the view to be updated (to ensure efficiency, the view will actually only update once, following the last statement).
+Zam uses [Proxy objects](https://developer.mozilla.org/en/docs/Web/JavaScript/Reference/Global_Objects/Proxy) to observe changes in the data. This means that Zam knows when to update the view after data has changed, so it is not necessary to manually render the view. Each of the below statements will cause the view to be updated (to ensure efficiency, the view will actually only update once, following the last statement).
 
 ```js
-var view = zam(document.body);
+const view = zam(document.body);
 view.a = 1;
 view.a = 2;
 view.b = {};
-view.b.c = 2;
+view.b.c = 2; // view will be updated
 ```
 
 ## Installation
@@ -55,18 +55,20 @@ npm install zam
 
 ## Views
 
-A view binds data to the page.
+A view binds data to a DOM element.
 
-#### `zam(el[, data])` - Create a view
+### `zam(el[, data])` - Create a view
 
 * `el` is the element to create the view from. It can be an HTMLElement, jQuery object, or selector.
 * `data` is the initial data to use within the view (defaults to `{}`). This must be an object.
 
 ```js
-var todoList = { todos: ['thing', 'another thing'] };
-var view1 = zam('#todolist', todoList);
-var view2 = zam($('.navbar'));
-var view3 = zam(document.getElementById('memo'));
+const view1 = zam(document.body); // the document can be a view
+const view2 = zam(document.getElementById('memo')); // an element can be a view
+const view3 = zam($('.navbar')); // a view can be made from a jquery selection
+const view4 = zam('#todolist'); // a view can be a selector query
+const todoList = { todos: ['thing', 'another thing'] };
+const view5 = zam('#todolist', todoList); // optionally, provide a data object
 ```
 
 ## Directives
@@ -75,18 +77,22 @@ Directives are specific instructions on how to display the view
 
 [//]: # (DOC1)
 
-#### `z-text` and `z-html`  - Set text or HTML content
+### `z-text` and `z-html` - Set text or HTML content
 
+Sets the text or HTML content of the specified element. Text and HTML can also
+be set using template tags ('{{ blah }}'). HTML will not be checked for
+directives.
 
 ```html
 My name is <div>{{ me.name }}</div>
 My name is <div z-text="me.name"></div><!-- equivalent to above -->
 Some HTML: <span>{{{ boldName }}}</span>
 Some HTML: <span z-html="boldName"></span>
+Together: <span>{{ me.name }}, {{{ boldName }}}</span>
 <script>
-    var view = zam(document.body);
-    view.me = { name: 'Bob' };
-    view.boldName = '<em>Bob</em>';
+	const view = zam(document.body);
+	view.me = { name: 'Bob' };
+	view.boldName = '<em>Bob</em>';
 </script>
 ```
 
@@ -97,45 +103,51 @@ My name is <div>Bob</div>
 My name is <div>Bob</div>
 Some HTML: <span><span><em>Bob</em></span></span>
 Some HTML: <span><em>Bob</em></span>
+Together: <span>Bob, <span><em>Bob</em></span></span>
 ```
-
-
-HTML will not be checked for directives.
 
 Warning: Be aware that binding HTML can cause
 [XSS](https://en.wikipedia.org/wiki/Cross-site_scripting). You should not use
 user-entered content without sanitisation.
 
-#### `z-cloak`  - Hide content until zam has initiated
+### `z-cloak` - Hide content until zam has initiated
 
+Prevents template tags from being visible before zam has initiated. A css rule
+for `[z-clock]` should be added to set `display: none`.
 
-Prevents template tags from being visible before zam has initiated. A css rule for `[z-clock]` should be added to set `display: none`.
-
-
+```html
 <style>
 	[z-cloak] { display: none; }
 </style>
-Hello. <div z-clock>this div will not be visible until zam has initiated {{ me.name }}</div>
+Hello. <div z-cloak>this div will not be visible until zam has initiated {{ me.name }}</div>
 <script>
-    var view = zam(document.body);
-    view.me = { name: 'Bob' };
+	const view = zam(document.body);
+	view.me = { name: 'Bob' };
 </script>
+```
 
-#### `z-show` - Conditional visibility
+Result:
 
+```html
+Hello. <div>this div will not be visible until zam has initiated Bob</div>
+```
 
-Conditionally display the element. Equivelant to `z-attr-display="thing ? '' : 'none'"`.
+### `z-show` - Conditional visibility
+
+Displays the element only if the result of the expression is
+[truthy](https://developer.mozilla.org/en/docs/Glossary/Truthy) (e.g. true,
+1). Equivalent to `z-attr-display="thing ? '' : 'none'"`.
 
 ```html
 <div z-show="showMe">My name is {{ me.name }}</div>
 <button z-on-click="hide()">Hide</button>
 <script>
-    var view = zam(document.body);
-    view.me = { name: 'Bob' };
-    view.showMe = true;
-    view.hide = function () {
-        view.showMe = false;
-    };
+	const view = zam(document.body);
+	view.me = { name: 'Bob' };
+	view.showMe = true;
+	view.hide = () => {
+		view.showMe = false;
+	};
 </script>
 ```
 
@@ -146,30 +158,28 @@ Result:
 <button>Hide</button>
 ```
 
+### `z-exist` - Conditional existence
 
-#### `z-exist` - Conditional existance
-
-
-Render the element only if the result of the expression is
+Renders the element only if the result of the expression is
 [truthy](https://developer.mozilla.org/en/docs/Glossary/Truthy) (e.g. true,
 1). Unlike z-show, the directives inside the element will not be updated while
 the element is hidden (since the element is in fact destroyed when falsey and
 recreated when truthy). This directive occurs after `z-in` and before anything
 else.
 
-Note: this is equivelant to `ng-if` in angular.
+Note: this is equivalent to `ng-if` in angular.
 
 ```html
 <div z-exist="showMe">My name is {{ me.name }}</div>
 <div z-exist="!showMe">I'm not here</div>
 <button z-click="hide()">Hide</button>
 <script>
-    var view = zam(document.body);
-    view.me = { name: 'Bob' };
-    view.showMe = true;
-    view.hide = function () {
-        view.showMe = false;
-    };
+	const view = zam(document.body);
+	view.me = { name: 'Bob' };
+	view.showMe = true;
+	view.hide = () => {
+		view.showMe = false;
+	};
 </script>
 ```
 
@@ -180,9 +190,7 @@ Result:
 <button>Hide</button>
 ```
 
-
-#### `z-*-in` - Iterate through an array
-
+### `z-*-in` - Iterate through an array
 
 Renders the element for each item in an array or object. Each value in the
 array/object is assigned to a variable name specified in the attribute name
@@ -196,19 +204,19 @@ array/object is assigned to a variable name specified in the attribute name
 	<li z-info-in="apple">{{ $index }}: {{ info }}</li><!-- $index is the property name of the object -->
 </ul>
 <script>
-    var view = zam(document.body);
-    view.memos = ['food', 'code', 'clothes'];
-    view.todos = [
-        { message: 'Buy food' },
-        { message: 'Fix code' },
-        { message: 'Wash clothes' }
-    ];
-    view.basket = [
-        { id: 1, name: 'Chair' },
-        { id: 2, name: 'Table' },
-        { id: 2, name: 'Table' } // this won't show because the item above has the same id
-    ];
-    view.apple = { type: 'granny smith', color: 'green' };
+	const view = zam(document.body);
+	view.memos = ['food', 'code', 'clothes'];
+	view.todos = [
+		{ message: 'Buy food' },
+		{ message: 'Fix code' },
+		{ message: 'Wash clothes' }
+	];
+	view.basket = [
+		{ id: 1, name: 'Chair' },
+		{ id: 2, name: 'Table' },
+		{ id: 2, name: 'Table' } // this won't show because the item above has the same id
+	];
+	view.apple = { type: 'granny smith', color: 'green' };
 </script>
 ```
 
@@ -229,13 +237,14 @@ Result:
 </ul>
 ```
 
-
 If `z-key` is not specified, `JSON.stringify` is used.
 
 Note: This directive occurs before anything else.
 
-#### `z-attr-*` - Attribute value
+### `z-attr-*` - Attribute value
 
+Sets the value of an element's attribute. As a shorthand, `attr-` may be
+omitted for standard HTML attributes, like `disabled`, `src`, and `alt`.
 
 ```html
 <img z-attr-src="pic">
@@ -243,9 +252,9 @@ Note: This directive occurs before anything else.
 <input z-disabled="!showMe"></input>
 <button z-disabled="showMe"></button>
 <script>
-    var view = zam(document.body);
-    view.showMe = false;
-    view.pic = 'photo.png';
+	const view = zam(document.body);
+	view.showMe = false;
+	view.pic = 'photo.png';
 </script>
 ```
 
@@ -258,15 +267,17 @@ Result:
 <button></button>
 ```
 
+### `z-class-*` - Conditional class name
 
-#### `z-class-*` - Conditional class name
-
+Adds the specified classname only if the result of the expression is
+[truthy](https://developer.mozilla.org/en/docs/Glossary/Truthy) (e.g. true,
+1).
 
 ```html
 <h4 z-class-red="warning" z-class-green="!warning"></h4>
 <script>
-    var view = zam(document.body);
-    view.warning = true;
+	const view = zam(document.body);
+	view.warning = true;
 </script>
 ```
 
@@ -276,19 +287,21 @@ Result:
 <h4 class="red"></h4>
 ```
 
+### `z-style-*` - Style value
 
-#### `z-style-*` - Style value
-
+Sets the value of the specified CSS property of the element. As a shorthand,
+`style-` may be omitted for standard CSS properties, such as `border`, `top`,
+and `width`.
 
 ```html
 <h1 z-style-font-weight="big ? 'bold' : 'normal'"></h1>
-<em z-font-weight="big ? 'bold' : 'normal'"></em><!-- `style-` may be omitted for standard CSS properties -->
+<em z-font-weight="big ? 'bold' : 'normal'"></em><!-- equivalent to above -->
 <p z-color="color" z-font-size="fontsize + 'pt'"></p> 
 <script>
-    var view = zam(document.body);
-    view.big = true;
-    view.color = 'red';
-    view.fontsize = 12
+	const view = zam(document.body);
+	view.big = true;
+	view.color = 'red';
+	view.fontsize = 12
 </script>
 ```
 
@@ -300,22 +313,22 @@ Result:
 <p style="color: red; font-size: 12pt;"></p>
 ```
 
+### `z-model` - Bind input
 
-#### `z-model` - Bind input
-
-
-Two way binding with input element value. The input value will be set to the value of z-model. When the input value is changed by the user, the data will also change, and the view will be kept up to date.
+Creates a two way binding with input element value. The input value will be
+set to the value of z-model. When the input value is changed by the user, the
+data will also change, and the view will be kept up to date.
 
 ```html
 <input type="text" z-model="blah">
 {{ blah }} <!-- this will always display the value entered in the text input -->
 <input type="button" z-click="thing()">
 <script>
-    var view = zam(document.body);
-    view.blah = 'foo'; // will set the value of the input to blah
-    view.thing = function () {
-        console.log(view.blah); // will print whatever the user entered into the input
-    }
+	const view = zam(document.body);
+	view.blah = 'foo'; // will set the value of the input to blah
+	view.thing = () => {
+		console.log(view.blah); // will print whatever the user entered into the input
+	}
 </script>
 ```
 
@@ -327,19 +340,20 @@ foo
 <input type="button">
 ```
 
+### `z-on-*` - Event handler
 
-#### `z-on-*` - Event handler
-
-
-Execute an expression when an event happens. Event data is available in `$event`.
+Executes an expression when the specified event happens. Event data is
+available in `$event`. As a shorthand, `on-` may be omitted for standard DOM
+events, such as `click`, `mousemove`, and `mousedown`.
 
 ```html
 <input type="button" z-on-click="doSomething($event)">
+<input type="button" z-click="doSomething($event)"><!-- equivalent to above -->
 <script>
-    var view = zam(document.body);
-    view.doSomething = function (e) {
-        console.log('click!', e.clientX, e.clientY);
-    }
+	const view = zam(document.body);
+	view.doSomething = e => {
+		console.log('click!', e.clientX, e.clientY);
+	}
 </script>
 ```
 
@@ -347,31 +361,12 @@ Result:
 
 ```html
 <input type="button">
-```
-
-
-_Shorthand:_ `on-` may be omitted for standard DOM events, such as `click`, `mousemove`, and `mousedown`:
-```html
-<input type="button" z-click="doSomething($event)">
-<form z-submit="doSomething($event)"></form>
-<script>
-    var view = zam(document.body);
-    view.doSomething = function (e) {
-        console.log('click!', e.clientX, e.clientY);
-    }
-</script>
-```
-
-Result:
-
-```html
 <input type="button">
-<form></form>
 ```
 
+### `z-skip` - Skip compilation of this element
 
-#### `z-skip` - Skip compilation of this element
-
+Stops Zam from parsing content within the element.
 
 ```html
 <div z-skip>
@@ -379,7 +374,7 @@ Result:
 	<div z-font-size="'12pt'">Directives will not be parsed</div>
 </div>
 <script>
-    zam(document.body);
+	zam(document.body);
 </script>
 ```
 
@@ -392,9 +387,7 @@ Result:
 </div>
 ```
 
-
 [//]: # (DOC1!)
-
 
 ## Scope
 
@@ -402,20 +395,20 @@ Directives have access to their parent scopes through `$parent`:
 
 ```html
 <div class="foo">
-    {{ food }} <!-- chips -->
-    {{ drink }} <!-- tea -->
-    <div class="bar">
-        {{ food }} <!-- chips -->
-        {{ drink }} <!-- coffee -->
-        {{ $parent.drink }} <!-- tea -->
-    </div>
+	{{ food }} <!-- chips -->
+	{{ drink }} <!-- tea -->
+	<div class="bar">
+		{{ food }} <!-- chips -->
+		{{ drink }} <!-- coffee -->
+		{{ $parent.drink }} <!-- tea -->
+	</div>
 </div>
 <script>
-    var foo = zam('.foo'),
-        bar = zam('.bar');
-    foo.food = 'chips';
-    foo.drink = 'tea';
-    bar.drink = 'coffee';
+	let foo = zam('.foo'),
+		bar = zam('.bar');
+	foo.food = 'chips';
+	foo.drink = 'tea';
+	bar.drink = 'coffee';
 </script>
 ```
 
@@ -428,33 +421,43 @@ Result:
 
 ```
 
-
 ## Custom directives
+
+Custom directives can be defined prior to creating a view. 
 
 ```js
 zam.directive({
-    attribute: 'hide',
-    update: function (el) {
-        $(el).toggle(!this.eval());
-    }
+	attribute: 'hide',
+	update: (scope, el, val) => {
+		$(el).toggle(!val);
+	}
 });
 
 zam.directive({
-    attribute: 'on-scroll-([xy])',
-    create: function () {},
-    update: function (el) {},
-    destroy: function (el) {}
+	attribute: 'on-scroll-([xy])',
+	create: (scope, el) => {},
+	update: (scope, el, val) => {},
+	destroy: (scope, el) => {}
 });
+
+zam.directive({
+	tag: 'blah',
+	create: (scope, el) => {}
+})
+
+let view = zam(); // directives must be defined before creating the view
 ```
+
+The following options may be specified:
 * `attribute` - elements with an attribute matching this pattern will use this directive.. This can contain regular expressions. Results from capture groups will be provided to create, update, and remove methods.
 * `tag` - elements with tag names matching this pattern will use this directive.
 * `template` - HTML to insert to replace the element with
 * `block` - whether to stop further directives in this element and it's children.
 * `order` - when to run this directive; lower numbers run first.
-* `initialize` - called when the virtualdom is being created.
-* `create` - function called when directive is first bound with a scope.
-* `update` - function called when directive is updating.
-* `destroy` - function called when directive is destorying.
+* `initialize(el)` - function called when the virtualdom is being created.
+* `create(scope, el)` - function called when directive is first bound with a scope.
+* `update(scope, el, val)` - function called when directive is updating.
+* `destroy(scope, el)` - function called when directive is being destoryed.
 
 ## Expressions
 
@@ -476,14 +479,14 @@ The expressions used in a directive mostly include the JavaScript language.
 ## Events and watchers
 
 ```js
-var view = zam(document.body);
-var oncreate = function () { console.log('hello world!'); }
+const view = zam(document.body);
+const oncreate = () => { console.log('hello world!'); }
 view.$on('create', oncreate); // listen for creation event (happens when view is created)
 view.$off('create', oncreate); // remove event handler
-view.$on('update', function () {}); // gets called whenever the view is updated
-view.$on('destroy', function () {}); // view destroyed
+view.$on('update', () => {}); // gets called whenever the view is updated
+view.$on('destroy', () => {}); // view destroyed
 
-var change = function (starsign) { console.log('star sign is', starsign); } 
+const change = starsign => { console.log('star sign is', starsign); } 
 view.$watch('starsign', change); // watch view.starsign for changes
 view.$unwatch('starsign', change); // stop watching view.starsign
 view.$watch('thing.a + 1', change); // you can watch any expression for changes
@@ -491,18 +494,18 @@ view.$watch('thing.a + 1', change); // you can watch any expression for changes
 
 ## Other things
 
-#### `zam.root`
+### `zam.root`
 
 The root object is provided to all views and can be used to provide methods and data which should be available to all views.
 
 ```html
 {{ food }}, {{ drink }}, {{ sweet }} <!-- chips, beer, cake -->
 <script>
-    zam.root.food = 'chips';
-    zam.root.drink = 'water';
-    var view = zam(document.body);
-    view.drink = 'beer';
-    zam.root.sweet = 'cake';
+	zam.root.food = 'chips';
+	zam.root.drink = 'water';
+	const view = zam(document.body);
+	view.drink = 'beer';
+	zam.root.sweet = 'cake';
 </script>
 ```
 
@@ -517,15 +520,13 @@ You may wish to define other utility functions in root:
 {{ percent(0.17) }} <!-- 17.00% -->
 {{ date(d, 'DD MMM' }} <!-- 17 Jan -->
 <script>
-    zam.root.date = function (date, format) {
-        return moment(format).format(format);
-    };
-    var view = zam(document.body);
-    view.d = new Date(2017, 0, 17);
+	zam.root.date = (date, format) => moment(date).format(format);
+	const view = zam(document.body);
+	view.d = new Date(2017, 0, 17);
 </script>
 ```
 
-#### `zam.prefix` - Directive attribute prefix
+### `zam.prefix` - Directive attribute prefix
 
 Set the prefix (by default `z-`).
 ```html
@@ -533,6 +534,6 @@ Set the prefix (by default `z-`).
 <script>zam.prefix = 'foo-';</script>
 ```
 
-#### `zam.version` - Version
+### `zam.version` - Version
 
 Gets the version of zam (e.g. `"0.1.0"`).

@@ -2,15 +2,18 @@
 `z-attr-*` - Attribute value
 @ORDER 5
 
+Sets the value of an element's attribute. As a shorthand, `attr-` may be
+omitted for standard HTML attributes, like `disabled`, `src`, and `alt`.
+
 @CODE
 <img z-attr-src="pic">
 <img z-src="pic"><!-- you can omit 'attr-' for standard HTML attributes -->
 <input z-disabled="!showMe"></input>
 <button z-disabled="showMe"></button>
 <script>
-    var view = zam(document.body);
-    view.showMe = false;
-    view.pic = 'photo.png';
+	const view = zam(document.body);
+	view.showMe = false;
+	view.pic = 'photo.png';
 </script>
 @RESULT
 */

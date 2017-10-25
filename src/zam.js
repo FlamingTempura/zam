@@ -16,11 +16,7 @@ const emit = (events, event) => {
 
 const proxyGet = (target, prop, receiver) => {
 	var q = Reflect.get(target, prop, receiver);
-	if (!(target instanceof Array) && typeof q === 'function') {
-		return q.bind(target); // this ensures things like Date.getDate work
-	} else {
-		return q;
-	}
+	return !(target instanceof Array) && typeof q === 'function' ? q.bind(target) : q; // binding target ensures things like Date.getDate work
 };
 
 const deepProxy = (view, obj, parents = []) => { // when something in the scope changes, update the view
@@ -115,7 +111,7 @@ const zam = (el, data, parent) => {
 				return view;
 			},
 			get $parent() {
-				return parent || (vnode.parent && vnode.parent.scope) || zam.root;
+				return parent || vnode.parent && vnode.parent.scope || zam.root;
 			}
 		}, data);
 

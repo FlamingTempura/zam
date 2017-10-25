@@ -40,12 +40,12 @@ let generateDocs = function () {
 		docs = fs.readdirSync('src/directives')
 			.map(function (file) {
 				var src = fs.readFileSync('src/directives/' + file, 'utf8'),
-					text = '#### ' + src.slice(src.indexOf('/*') + 2, src.indexOf('*/')).trim(),
+					text = '### ' + src.slice(src.indexOf('/*') + 2, src.indexOf('*/')).trim(),
 					m = text.match(/@ORDER (\d+)/),
 					order = m ? Number(m[1]) : Infinity;
 				return {
 					order: order,
-					text: text.replace(/@ORDER (\d+)/, '')
+					text: text.replace(/@ORDER (\d+)\n?/, '')
 				};
 			})
 			.sort((a, b) => a.order - b.order)
@@ -68,7 +68,7 @@ let generateDocs = function () {
 					html = '';
 				}
 				newreadme[i * 2] = '```html' + code + '```\n\n' +
-					'Result:\n\n```html\n' + html.trim() + '\n```\n';
+					'Result:\n\n```html\n' + html.trim() + '\n```';
 				waiting--;
 				if (waiting === 0) {
 					fs.writeFileSync('README.md', newreadme.join(''), 'utf8');

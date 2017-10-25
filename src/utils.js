@@ -10,11 +10,7 @@ const arrayRemove = (array, element) => {
 };
 
 // https://stackoverflow.com/questions/7616461/generate-a-hash-from-string-in-javascript-jquery
-const hash = str => {
-	return str.split('').reduce((hash, char) => {
-		return ((hash << 5) - hash) + char.charCodeAt(0) | 0;
-	}, 0).toString(16);
-};
+const hash = str => str.split('').reduce((hash, char) => (hash << 5) - hash + char.charCodeAt(0) | 0, 0).toString(16);
 
 const nextTick = function (cb) {
 	var cancelled,

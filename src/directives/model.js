@@ -2,18 +2,20 @@
 `z-model` - Bind input
 @ORDER 8
 
-Two way binding with input element value. The input value will be set to the value of z-model. When the input value is changed by the user, the data will also change, and the view will be kept up to date.
+Creates a two way binding with input element value. The input value will be
+set to the value of z-model. When the input value is changed by the user, the
+data will also change, and the view will be kept up to date.
 
 @CODE
 <input type="text" z-model="blah">
 {{ blah }} <!-- this will always display the value entered in the text input -->
 <input type="button" z-click="thing()">
 <script>
-    var view = zam(document.body);
-    view.blah = 'foo'; // will set the value of the input to blah
-    view.thing = function () {
-        console.log(view.blah); // will print whatever the user entered into the input
-    }
+	const view = zam(document.body);
+	view.blah = 'foo'; // will set the value of the input to blah
+	view.thing = () => {
+		console.log(view.blah); // will print whatever the user entered into the input
+	}
 </script>
 @RESULT
 */

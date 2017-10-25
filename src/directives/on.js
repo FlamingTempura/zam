@@ -2,30 +2,20 @@
 `z-on-*` - Event handler
 @ORDER 9
 
-Execute an expression when an event happens. Event data is available in `$event`.
+Executes an expression when the specified event happens. Event data is
+available in `$event`. As a shorthand, `on-` may be omitted for standard DOM
+events, such as `click`, `mousemove`, and `mousedown`.
 
 @CODE
 <input type="button" z-on-click="doSomething($event)">
+<input type="button" z-click="doSomething($event)"><!-- equivalent to above -->
 <script>
-    var view = zam(document.body);
-    view.doSomething = function (e) {
-        console.log('click!', e.clientX, e.clientY);
-    }
+	const view = zam(document.body);
+	view.doSomething = e => {
+		console.log('click!', e.clientX, e.clientY);
+	}
 </script>
 @RESULT
-
-_Shorthand:_ `on-` may be omitted for standard DOM events, such as `click`, `mousemove`, and `mousedown`:
-@CODE
-<input type="button" z-click="doSomething($event)">
-<form z-submit="doSomething($event)"></form>
-<script>
-    var view = zam(document.body);
-    view.doSomething = function (e) {
-        console.log('click!', e.clientX, e.clientY);
-    }
-</script>
-@RESULT
-
 */
 'use strict';
 

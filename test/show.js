@@ -5,7 +5,7 @@ var test = require('tap').test,
 	up = require('./test-utils').up,
 	$ = require('./test-utils').$;
 
-test('z-show', t => { // Conditionally display the element. Equivelant to attr-display="thing ? "" : 'none'".
+test('z-show', t => { // Conditionally display the element. Equivelant to style-display="thing ? "" : 'none'".
 	t.plan(8);
 	up(`<div z-show="showMe">Hello</div>
 		<span z-show="!showMe">Boo</span>`);

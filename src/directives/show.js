@@ -2,18 +2,20 @@
 `z-show` - Conditional visibility
 @ORDER 2
 
-Conditionally display the element. Equivelant to `z-attr-display="thing ? '' : 'none'"`.
+Displays the element only if the result of the expression is
+[truthy](https://developer.mozilla.org/en/docs/Glossary/Truthy) (e.g. true,
+1). Equivalent to `z-attr-display="thing ? '' : 'none'"`.
 
 @CODE
 <div z-show="showMe">My name is {{ me.name }}</div>
 <button z-on-click="hide()">Hide</button>
 <script>
-    var view = zam(document.body);
-    view.me = { name: 'Bob' };
-    view.showMe = true;
-    view.hide = function () {
-        view.showMe = false;
-    };
+	const view = zam(document.body);
+	view.me = { name: 'Bob' };
+	view.showMe = true;
+	view.hide = () => {
+		view.showMe = false;
+	};
 </script>
 @RESULT
 */

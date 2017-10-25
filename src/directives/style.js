@@ -2,15 +2,19 @@
 `z-style-*` - Style value
 @ORDER 7
 
+Sets the value of the specified CSS property of the element. As a shorthand,
+`style-` may be omitted for standard CSS properties, such as `border`, `top`,
+and `width`.
+
 @CODE
 <h1 z-style-font-weight="big ? 'bold' : 'normal'"></h1>
-<em z-font-weight="big ? 'bold' : 'normal'"></em><!-- `style-` may be omitted for standard CSS properties -->
+<em z-font-weight="big ? 'bold' : 'normal'"></em><!-- equivalent to above -->
 <p z-color="color" z-font-size="fontsize + 'pt'"></p> 
 <script>
-    var view = zam(document.body);
-    view.big = true;
-    view.color = 'red';
-    view.fontsize = 12
+	const view = zam(document.body);
+	view.big = true;
+	view.color = 'red';
+	view.fontsize = 12
 </script>
 @RESULT
 */

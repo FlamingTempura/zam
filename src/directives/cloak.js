@@ -1,19 +1,20 @@
 /*
-`z-cloak`  - Hide content until zam has initiated
+`z-cloak` - Hide content until zam has initiated
 @ORDER 1
 
-Prevents template tags from being visible before zam has initiated. A css rule for `[z-clock]` should be added to set `display: none`.
+Prevents template tags from being visible before zam has initiated. A css rule
+for `[z-clock]` should be added to set `display: none`.
 
 @CODE
 <style>
 	[z-cloak] { display: none; }
 </style>
-Hello. <div z-clock>this div will not be visible until zam has initiated {{ me.name }}</div>
+Hello. <div z-cloak>this div will not be visible until zam has initiated {{ me.name }}</div>
 <script>
-    var view = zam(document.body);
-    view.me = { name: 'Bob' };
+	const view = zam(document.body);
+	view.me = { name: 'Bob' };
 </script>
-
+@RESULT
 */
 
 'use strict';

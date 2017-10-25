@@ -1,25 +1,27 @@
 /*
-`z-text` and `z-html`  - Set text or HTML content
+`z-text` and `z-html` - Set text or HTML content
 @ORDER 1
+
+Sets the text or HTML content of the specified element. Text and HTML can also
+be set using template tags ('{{ blah }}'). HTML will not be checked for
+directives.
 
 @CODE
 My name is <div>{{ me.name }}</div>
 My name is <div z-text="me.name"></div><!-- equivalent to above -->
 Some HTML: <span>{{{ boldName }}}</span>
 Some HTML: <span z-html="boldName"></span>
+Together: <span>{{ me.name }}, {{{ boldName }}}</span>
 <script>
-    var view = zam(document.body);
-    view.me = { name: 'Bob' };
-    view.boldName = '<em>Bob</em>';
+	const view = zam(document.body);
+	view.me = { name: 'Bob' };
+	view.boldName = '<em>Bob</em>';
 </script>
 @RESULT
-
-HTML will not be checked for directives.
 
 Warning: Be aware that binding HTML can cause
 [XSS](https://en.wikipedia.org/wiki/Cross-site_scripting). You should not use
 user-entered content without sanitisation.
-
 */
 
 'use strict';

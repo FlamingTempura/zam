@@ -14,26 +14,25 @@ array/object is assigned to a variable name specified in the attribute name
 	<li z-info-in="apple">{{ $index }}: {{ info }}</li><!-- $index is the property name of the object -->
 </ul>
 <script>
-    var view = zam(document.body);
-    view.memos = ['food', 'code', 'clothes'];
-    view.todos = [
-        { message: 'Buy food' },
-        { message: 'Fix code' },
-        { message: 'Wash clothes' }
-    ];
-    view.basket = [
-        { id: 1, name: 'Chair' },
-        { id: 2, name: 'Table' },
-        { id: 2, name: 'Table' } // this won't show because the item above has the same id
-    ];
-    view.apple = { type: 'granny smith', color: 'green' };
+	const view = zam(document.body);
+	view.memos = ['food', 'code', 'clothes'];
+	view.todos = [
+		{ message: 'Buy food' },
+		{ message: 'Fix code' },
+		{ message: 'Wash clothes' }
+	];
+	view.basket = [
+		{ id: 1, name: 'Chair' },
+		{ id: 2, name: 'Table' },
+		{ id: 2, name: 'Table' } // this won't show because the item above has the same id
+	];
+	view.apple = { type: 'granny smith', color: 'green' };
 </script>
 @RESULT
 
 If `z-key` is not specified, `JSON.stringify` is used.
 
 Note: This directive occurs before anything else.
-
 */
 
 'use strict';
