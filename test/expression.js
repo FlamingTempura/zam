@@ -177,7 +177,7 @@ test('Expressions', t => { // The expressions used in a directive mostly include
 	try {
 		assert('a(.a', undefined); // syntax error
 	} catch (e) {
-		t.equal(e.message.slice(0, 10), 'Unexpected');
+		t.equal(e.message.slice(0, 8), 'Expected');
 	}
 
 	t.plan(assertions);

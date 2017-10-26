@@ -3,12 +3,27 @@
 
 const pegjs = require('rollup-plugin-pegjs'),
       uglify = require('rollup-plugin-uglify'),
+      uglifyes = require('rollup-plugin-uglify-es'),
       json = require('rollup-plugin-json'),
       babel = require('rollup-plugin-babel'),
       esformatter = require('rollup-plugin-esformatter'),
       strip = require('rollup-plugin-strip'),
       jsdom = require('jsdom'),
       fs = require('fs');
+
+const browsers = [
+	//'Android >= 56',
+	'Chrome >= 49',
+	'ChromeAndroid >= 61',
+	'Edge >= 14',
+	'Firefox >= 52', // 18 for proxy, 22 for arrow fn
+	'FirefoxAndroid >= 56',
+	'iOS >= 10.2',
+	'Opera >= 36',
+	'OperaMobile >= 37',
+	'Safari >= 10',
+	'Samsung >=5'
+];
 
 const renderExample = function (html, cb) { // set global document to new dom
 	const zamscript = fs.readFileSync('./zam.js', 'utf8');
@@ -91,7 +106,8 @@ export default {
 		json(),
 		babel({
 			'presets': [
-				['es2015', { modules: false, loose: true }]
+				//['es2015', { modules: false, loose: true }]
+				['env', { targets: { browsers }, modules: false, loose: true }]
 			],
 			plugins: ['external-helpers'],
 			exclude: 'node_modules/**'
@@ -100,7 +116,7 @@ export default {
 			//functions: ['console.*', 'log'],
 			sourceMap: false
 		}),
-		uglify({
+		uglifyes({
 			compress: {
 				//dead_code: true,
 				unused: true,
@@ -118,7 +134,7 @@ export default {
 				//preserve_line: true
 			}
 		}),
-		/*esformatter ({
+		esformatter ({
 			indent: {
 				value: '	',
 			},
@@ -127,7 +143,7 @@ export default {
 					ConditionalExpressionAlternate: 1
 				}
 			}
-		})*/
+		})
 	],
 	//sourceMap: true,
 	name: 'zam',
