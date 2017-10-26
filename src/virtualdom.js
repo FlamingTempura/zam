@@ -29,16 +29,16 @@ const createVNode = (node, template, override) => {
 
 class VirtualNode {
 	constructor(node, template, override = false) {
-		log('vnode.create', node.outerHTML || node.textContent);
+		//log('vnode.create', node.outerHTML || node.textContent);
 		this.node = node;
 		this.children = [];
 		this.binds = [];
 		this.type = node.nodeType;
 
 		if (node.vnode && !template) {
-			log('vnode.create - already a vnode for this node');
+			//log('vnode.create - already a vnode for this node');
 			if (override) {
-				log('vnode.create - override');
+				//log('vnode.create - override');
 				this.parent = node.vnode;
 				node.vnode = this;
 				this.type = this.parent.type;
@@ -47,7 +47,7 @@ class VirtualNode {
 				this.parent.children = [];
 				this.parent.binds = [];
 			} else {
-				log('vnode.create - make pointer');
+				//log('vnode.create - make pointer');
 				node.vnode.parent = this;
 				this.pointer = node.vnode;
 			}
@@ -77,7 +77,7 @@ class VirtualNode {
 	initialize() {
 		let node = this.node;
 		this.type = node.nodeType; // 1 = ELEMENT_NODE, 3 = TEXT_NODE, 11 = DOCUMENT_FRAGMENT
-		log('vnode.init', this.outerHTML, node.nodeValue, this.type, node.nodeType);
+		//log('vnode.init', this.outerHTML, node.nodeValue, this.type, node.nodeType);
 		if (this.type === 1) {
 			this.tag = node.tagName;
 			this.attributes = Array.from(node.attributes).map(cloneAttribute);
@@ -104,15 +104,15 @@ class VirtualNode {
 			});
 			
 			if (!this.blocked && node.childNodes) {
-				log('vnode.children', node.childNodes.length);
+				//log('vnode.children', node.childNodes.length);
 				 Array.from(node.childNodes)
-					.filter(node => node.nodeType === 1 || node.nodeType === 3 || node.nodeType === 11)
+					.filter(node => node.nodeType === 1 || node.nodeType === 3)
 					.map(node => this.children.push(createVNode(node)));
 			}
 		} else
 
 		if (this.type === 3 && node.nodeValue.includes('{{')) {
-			let parts = parse(node.nodeValue, 'Text');
+			let parts = parse(node.nodeValue, 'Text');//.filter(p => p !== '');
 			if (parts.length === 1) {
 				if (typeof parts[0] !== 'string') {
 					if (parts[0].html) {
@@ -151,12 +151,12 @@ class VirtualNode {
 		}
 	}
 	bind(bind) {
-		log('vnode.bind', bind.directive.attribute || bind.directive.tag);
+		//log('vnode.bind', bind.directive.attribute || bind.directive.tag);
 		if (bind.directive.block) {
 			this.blocked = true;  // stop looking for more attributes
 		}
 		if (bind.directive.template) {
-			log('vnode.bind.template');
+			//log('vnode.bind.template');
 			//log(this.node.parentNode);
 			let vnode = bind.directive.template.clone();
 			//log('boo', node_)
@@ -165,7 +165,6 @@ class VirtualNode {
 			this.node.parentNode.replaceChild(vnode.node, this.node);
 			this.node = vnode.node;
 			this.node.vnode = this;
-			log('boo', this.binds.length, this.children.length);
 			this.binds = this.binds.concat(vnode.binds);
 			this.type = vnode.type;
 			this.children = vnode.children;
@@ -178,7 +177,7 @@ class VirtualNode {
 		execBind(this, 'initialize', bind);
 	}
 	clone() {
-		log('vnode.clone');
+		//log('vnode.clone');
 		return createVNode(this.node.cloneNode(true), this);
 	}
 	createBinds(scope) {
@@ -191,13 +190,10 @@ class VirtualNode {
 		if (this.pointer) { this.pointer.updateBinds(); }
 	}
 	destroyBinds() {
-		log('vnode.destroy');
 		execBinds(this, 'destroy');
 		if (this.removedAttrs) {
 			this.removedAttrs.forEach(attr => this.node.setAttribute(attr.name, attr.value)); // restore attributes
 		}
-		delete this.scope;
-		delete this.node.vnode;
 	}
 }
 

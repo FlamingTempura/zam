@@ -37,7 +37,7 @@ Note: This directive occurs before anything else.
 import zam from '../zam';
 import virtualdom from '../virtualdom';
 import { parse, evaluate } from '../expression';
-import { arrayRemove, log } from '../utils';
+import { arrayRemove } from '../utils';
 import config from '../config';
 
 export default {
@@ -45,7 +45,6 @@ export default {
 	order: 2,
 	block: true, // do not continue traversing through this dom element (separate zam will be created)
 	initialize(el, attr, varname) { // dom manipulation shouldn't happen in init as it will interfere with the virtualdom
-		log('in.init', config.prefix + 'key', el.getAttribute(config.prefix + 'key'));
 		this.items = [];
 		const zKey = el.getAttribute(config.prefix + 'key');
 		if (zKey) {
@@ -56,15 +55,12 @@ export default {
 			this.key = data => JSON.stringify(data);
 		}
 		this.template = virtualdom(el.cloneNode(true));
-		log('in.template', this.template.node.outerHTML);
 	},
 	create(scope, el, val, attr) {
-		log('in.create');
 		this.marker = document.createComment(attr);
 		el.parentNode.replaceChild(this.marker, el);
 	},
 	update(scope, el, val, attr, varname) {
-		log('in.update');
 		let value = val() || [],
 			data = Object.keys(value).map(k => ({ index: k, computed: this.key(value[k]), datum: value[k] }));
 
@@ -82,13 +78,11 @@ export default {
 		data.forEach(k => {
 			let item = this.items.find(item_ => k.computed === item_.key);
 			if (!item) {
-				log('in.clone');
 				let vnode = this.template.clone();
 				item = { key: k.computed, datum: k.datum, node: vnode.node };
 				this.marker.parentNode.insertBefore(item.node, this.marker);
 				item.view = zam(vnode, { [varname]: item.datum, }, scope);
 			} else {
-				log('in.move');
 				arrayRemove(this.items, item);
 				this.marker.parentNode.insertBefore(item.node, this.marker);
 			}

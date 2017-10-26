@@ -43,7 +43,6 @@ test('z-model', t => { // Two way binding with element value
 	);
 });
 
-
 test('input text and textarea', t => {
 	t.plan(6);
 	up(`<input type="text" z-model="blah">
@@ -398,4 +397,28 @@ test('input radio', t => {
 		});
 	});
 	frames.apply(null, fs);
+});
+
+test('z-model destruction', t => {
+	t.plan(4);
+	up(`<input type="button" z-model="i">`);
+	var view = zam(document.body);
+	view.i = 'a';
+	frames(
+		() => {
+			trigger($('input'), 'input');
+			t.equal($('input').value, 'a');
+			$('input').value = 'b';
+			trigger($('input'), 'input');
+			t.equal(view.i, 'b');
+			view.$destroy();
+			view.i = 'c';
+		},
+		() => {
+			t.equal($('input').value, 'b');
+			$('input').value = 'e';
+			trigger($('input'), 'input');
+			t.equal(view.i, 'c');
+		}
+	);
 });

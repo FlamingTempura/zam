@@ -71,3 +71,32 @@ test('z-on-* shorthand', t => {
 		}
 	);
 });
+
+test('z-on-* destruction', t => {
+	t.plan(2);
+	up(`<input type="button" z-click="i = 1">`);
+	var view = zam(document.body);
+	view.i = 0;
+	frames(
+		() => {
+			trigger($('input'), 'click');
+			t.equal(view.i, 1);
+			view.$destroy();
+			trigger($('input'), 'click');
+			t.equal(view.i, 1);
+		}
+	);
+});
+
+test('z-on-submit', t => {
+	t.plan(1);
+	up(`<form type="button" z-submit="i = 1"></form>`);
+	var view = zam(document.body);
+	view.i = 0;
+	frames(
+		() => {
+			trigger($('form'), 'submit'); // should not trigger page change
+			t.equal(view.i, 1);
+		}
+	);
+});

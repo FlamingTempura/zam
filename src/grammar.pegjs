@@ -16,11 +16,32 @@
   }
 }
 
+/*
 Text
-  = head:[^{]* expression:InlineExpression tail:Text
+  = expression:InlineExpression tail:Text
+      { return [expression].concat(tail); }
+  / head:.* expression:InlineExpression tail:Text
       { return (head.length > 0 ? [head.join('')] : []).concat([expression], tail); }
   / text:.*
       { return text.length > 0 ? [text.join('')] : []; }
+*/
+
+Text
+  = parts:TextCharacter*
+    { return parts.reduce((m, p) => {
+        if (typeof p === 'string' && typeof m[m.length - 1] === 'string') {
+          m[m.length - 1] += p;
+        } else {
+          m.push(p);
+        }
+        return m;
+      }, []); }
+
+TextCharacter
+  = expression:InlineExpression
+      { return expression; }
+  / char:.
+      { return char; }
 
 InlineExpression
   = '{{{' _ expression:Expression _ '}}}' { return { html: true, expression: expression }; }

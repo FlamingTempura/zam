@@ -39,24 +39,24 @@ test('text interpolation', t => {
 test('html interpolation', t => {
 	t.plan(10);
 	up(`<div id="a">{{{ name }}}</div>
-		<div id="b">{{{ name + 'y' }}}</div>`);
+		<div id="b">{{{ name + 'y' }}} boo</div>`);
 	var view = zam(document.body);
 	frames(
 		() => {
 			t.equal($('#a').textContent, '');
-			t.equal($('#b').textContent, 'y');
+			t.equal($('#b').textContent, 'y boo');
 			view.name = '<strong>dave</strong>';
 		},
 		() => {
 			t.equal($('#a').textContent, 'dave');
-			t.equal($('#b').textContent, 'davey');
+			t.equal($('#b').textContent, 'davey boo');
 			t.equal($('#a strong').textContent, 'dave');
 			t.equal($('#b strong').textContent, 'dave');
 			view.name = '<em>bob</em>';
 		},
 		() => {
 			t.equal($('#a').textContent, 'bob');
-			t.equal($('#b').textContent, 'boby');
+			t.equal($('#b').textContent, 'boby boo');
 			t.equal($('#a em').textContent, 'bob');
 			t.equal($('#b em').textContent, 'bob');
 		}
@@ -113,6 +113,32 @@ test('z-html', t => { // Set HTML content
 			t.equal($('div strong').textContent, 'Bob');
 			t.equal($('span').textContent, 'Aliceboo');
 			t.equal($('span em').textContent, 'Alice');
+		}
+	);
+});
+
+test('incomplete tags', t => {
+	t.plan(8);
+	up(`<div id="a">{{ hello</div>
+		<div id="b">{{ hello }</div>
+		<div id="c">hello }}</div>
+		<div id="d">{ hello }}</div>
+		<div id="e">{{ hello }} }}</div>
+		<div id="f">{ {{ hello }} }</div>
+		<div id="g">{{ hello }} {{</div>
+		<div id="h">{{{ hello }}} {{</div>`);
+	var view = zam(document.body);
+	view.hello = 'boo';
+	frames(
+		() => {
+			t.equal($('#a').textContent, '{{ hello');
+			t.equal($('#b').textContent, '{{ hello }');
+			t.equal($('#c').textContent, 'hello }}');
+			t.equal($('#d').textContent, '{ hello }}');
+			t.equal($('#e').textContent, 'boo }}');
+			t.equal($('#f').textContent, '{ boo }');
+			t.equal($('#g').textContent, 'boo {{');
+			t.equal($('#h').textContent, 'boo {{');
 		}
 	);
 });

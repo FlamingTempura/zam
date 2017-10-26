@@ -81,11 +81,11 @@ test('child then parent scoping', t => {
 
 test('utility functions', t => {
 	t.plan(1);
-	up(`{{ number(1.553, 1) }} {{ number(1.553) }} {{ percent(0.17) }}`);
+	up(`{{ number(1.553, 1) }} {{ number(1.553) }} {{ percent(0.17) }} {{ percent(0.177, 1) }}`);
 	zam(document.body);
 	frames(
 		() => {
-			t.equals(document.body.textContent, '1.6 1.55 17.00%');
+			t.equals(document.body.textContent, '1.6 1.55 17.00% 17.7%');
 		}
 	);
 });

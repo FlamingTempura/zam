@@ -25,12 +25,12 @@ const standardEvents = [
 export default {
 	attribute: `{prefix}(?:on-(.+)|(${standardEvents.join('|')}))`,
 	create(scope, el, val, attr, event, stdevent) {
-		this.handler = event => {
-			scope.$event = event;
+		this.handler = e => {
+			scope.$event = e;
 			val();
 			scope.$(); // if an assignment happens, this is necessary to trigger watchers
 			delete scope.$event;
-			if ((event || stdevent) === 'submit') { event.preventDefault(); }
+			if ((event || stdevent) === 'submit') { e.preventDefault(); }
 		};
 		el.addEventListener(event || stdevent, this.handler);
 	},
