@@ -1,26 +1,8 @@
-import { stringify, log } from './utils';
+import { stringify } from './utils';
 import parser from './grammar.pegjs';
-import {parseExpressionAt} from 'acorn';
-//import * as babylon from 'babylon';
-//import jsep from 'jsep';
-//import esprima from 'esprima';
-//const parse = (expr, startRule = 'Expression') => parser.parse(expr, { startRule }); // generates the abstract ast tree
-
-const parse = (expr, startRule = 'Expression') => { // generates the abstract ast tree
-	if (startRule === 'Expression') {
-		return parseExpressionAt(expr);
-		//babylon.parseExpression(expr);
-		//return parser.parse(expr, { startRule }); 
-		//return jsep(expr);
-		//return esprima.parse(expr).body[0].expression;
-	} else {
-		//return acorn.parseExpressionAt(`\`${expr}\``);
-		return parser.parse(expr, { startRule }); 
-	}
-};
+const parse = (expr, startRule = 'Expression') => parser.parse(expr, { startRule }); // generates the abstract ast tree
 
 const evaluate = (ast, scope) => {
-	//log(JSON.stringify(ast));
 	let value, set,
 		{ type, operator } = ast;
 
