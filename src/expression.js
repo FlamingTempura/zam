@@ -1,19 +1,37 @@
-import { stringify } from './utils';
+import { stringify, log } from './utils';
 import parser from './grammar.pegjs';
-const parse = (expr, startRule = 'Expression') => parser.parse(expr, { startRule }); // generates the abstract ast tree
+import {parseExpressionAt} from 'acorn';
+//import * as babylon from 'babylon';
+//import jsep from 'jsep';
+//import esprima from 'esprima';
+//const parse = (expr, startRule = 'Expression') => parser.parse(expr, { startRule }); // generates the abstract ast tree
+
+const parse = (expr, startRule = 'Expression') => { // generates the abstract ast tree
+	if (startRule === 'Expression') {
+		return parseExpressionAt(expr);
+		//babylon.parseExpression(expr);
+		//return parser.parse(expr, { startRule }); 
+		//return jsep(expr);
+		//return esprima.parse(expr).body[0].expression;
+	} else {
+		//return acorn.parseExpressionAt(`\`${expr}\``);
+		return parser.parse(expr, { startRule }); 
+	}
+};
 
 const evaluate = (ast, scope) => {
+	//log(JSON.stringify(ast));
 	let value, set,
 		{ type, operator } = ast;
 
 	if (type === 'Literal') { value = ast.value; } else 
 
-	if (type === 'Array') {
+	if (type === 'ArrayExpression') {
 		value = ast.elements.map(item => evaluate(item, scope).value);
 	} else
 	
-	if (type === 'Object') {
-		value = Object.assign({}, ...ast.properties.map(p => ({ [p.key]: evaluate(p.value, scope).value })));
+	if (type === 'ObjectExpression') {
+		value = Object.assign({}, ...ast.properties.map(p => ({ [p.key.name || p.key.value]: evaluate(p.value, scope).value })));
 	} else
 
 	if (type === 'Identifier') {
@@ -27,20 +45,22 @@ const evaluate = (ast, scope) => {
 		set = val => scope_[ast.name] = val;
 	} else 
 
-	if (type === 'Member') {
+	if (type === 'MemberExpression') {
 		let subject = evaluate(ast.object, scope).value,
-			prop = evaluate(ast.property, scope).value;
+			prop = ast.property.type === 'Identifier' ?
+				ast.property.name :
+				evaluate(ast.property, scope).value;
 		value = subject !== undefined ? subject[prop] : undefined;
 		set = val => subject[prop] = val;
 	} else
 
-	if (type === 'Conditional') {
+	if (type === 'ConditionalExpression') {
 		value = evaluate(ast.test, scope).value ?
 			evaluate(ast.consequent, scope).value :
 			evaluate(ast.alternate, scope).value;
 	} else 
 
-	if (type === 'Unary' || type === 'Update') {
+	if (type === 'UnaryExpression' || type === 'UpdateExpression') {
 		let arg = evaluate(ast.argument, scope),
 			argv = arg.value;
 		value = operator === '!' ? !argv :
@@ -48,14 +68,14 @@ const evaluate = (ast, scope) => {
 		        operator === '-' ? -argv :
 		        operator === '++' ? argv + 1 :
 		        operator === '--' ? argv - 1 : null;
-		if (type === 'Update') {
+		if (type === 'UpdateExpression') {
 			set = arg.set;
 			if (set) { value = set(value); }
 			if (!ast.prefix) { value += operator === '++' ? -1 : 1; }
 		}
 	} else 
 
-	if (type === 'Binary' || type === 'Logical' || type === 'Assignment') {
+	if (type === 'BinaryExpression' || type === 'LogicalExpression' || type === 'AssignmentExpression') {
 		let left  = evaluate(ast.left, scope),
 			leftv = left.value,
 			rightv = evaluate(ast.right, scope).value;
@@ -80,18 +100,18 @@ const evaluate = (ast, scope) => {
 		        operator === '+='  ? leftv +   rightv :
 		        operator === '-='  ? leftv -   rightv : 
 		        operator === '='   ? rightv :  null;
-		if (type === 'Assignment') {
+		if (type === 'AssignmentExpression') {
 			set = left.set;
 			value = set(value);
 		}
 	} else 
 
-	if (type === 'Call' || type === 'NewExpression') {
+	if (type === 'CallExpression' || type === 'NewExpression') {
 		let caller = ast.callee.object ? evaluate(ast.callee.object, scope).value : scope,
 			callee = evaluate(ast.callee, scope).value,
 			args = ast.arguments.map(arg_ => evaluate(arg_, scope).value);
 		value = callee ? 
-			type === 'Call' ? callee.apply(caller, args) : new (callee.bind.apply(callee, args))() :
+			type === 'CallExpression' ? callee.apply(caller, args) : new (callee.bind.apply(callee, args))() :
 			undefined;
 	}
 

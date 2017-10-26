@@ -8,7 +8,9 @@ const pegjs = require('rollup-plugin-pegjs'),
       esformatter = require('rollup-plugin-esformatter'),
       strip = require('rollup-plugin-strip'),
       jsdom = require('jsdom'),
-      fs = require('fs');
+      fs = require('fs'),
+      resolve = require('rollup-plugin-node-resolve'),
+      commonjs = require('rollup-plugin-commonjs');
 
 const renderExample = function (html, cb) { // set global document to new dom
 	const zamscript = fs.readFileSync('./zam.js', 'utf8');
@@ -89,6 +91,8 @@ export default {
 			cache: 'true'
 		}),
 		json(),
+		resolve(),
+		commonjs(),
 		babel({
 			'presets': [
 				['es2015', { modules: false, loose: true }]

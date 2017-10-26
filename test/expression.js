@@ -4,6 +4,7 @@ var test = require('tap').test,
 
 test('Expressions', t => { // The expressions used in a directive mostly include the JavaScript language.
 	var assertions = 1;
+	global.i = 0;
 	var assert = function (expr, val) {
 		assertions++;
 		var result = zam.evaluate(zam.parse(expr), global);
@@ -56,10 +57,10 @@ test('Expressions', t => { // The expressions used in a directive mostly include
 	assert('Math.pow(Math.pow(2, 3), 2)', Math.pow(Math.pow(2, 3), 2));
 	assert('Math.pow(2, 3)+(2)', Math.pow(2, 3)+2);
 	assert('Math.pow(2,(9))', Math.pow(2, 9));
-	assert('1++', 1);
-	assert('++1', 2);
-	assert('1--', 1);
-	assert('--1', 0);
+	assert('i++', 0);
+	assert('++i', 2);
+	assert('i--', 2);
+	assert('--i', 0);
 
 	// String
 	assert('String(10)', '10');
@@ -176,7 +177,7 @@ test('Expressions', t => { // The expressions used in a directive mostly include
 	try {
 		assert('a(.a', undefined); // syntax error
 	} catch (e) {
-		t.equal(e.message.slice(0, 8), 'Expected');
+		t.equal(e.message.slice(0, 10), 'Unexpected');
 	}
 
 	t.plan(assertions);

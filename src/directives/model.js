@@ -56,7 +56,7 @@ export default {
 			if (value !== this.value) {
 				this.value = value;
 				val({ // evaluate "<expression> = <value>"
-					type: 'Assignment',
+					type: 'AssignmentExpression',
 					operator: '=',
 					left: this.ast,
 					right: { type: 'Literal', value }
