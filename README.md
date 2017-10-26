@@ -35,7 +35,7 @@ view.b = {};
 view.b.c = 2; // view will be updated
 ```
 
-Zam works well in all modern browser, including Chrome, Firefox, Edge, and Safari. Internet Explorer is not supported because it does to implement Proxy objects.
+Zam works in all modern browsers, including Chrome, Firefox, Edge, and Safari. Older browsers, including Internet Explorer, are not supported because they do not implement Proxy objects.
 
 ## Installation
 
