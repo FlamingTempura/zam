@@ -6,12 +6,14 @@ var test = require('tap').test,
 	$ = require('./test-utils').$;
 
 test('text interpolation', t => {
-	t.plan(12);
+	t.plan(14);
 	up(`<div id="a">{{ name }}</div>
 		<div id="b">{{ name + 'y' }}</div>
 		<div id="c">{{ something }}</div>
+		<div id="e">{{ date.toISOString() }}</div>
 		<form><div>{{name + 'y'}}</div><button>ok</button></form>`); // check that forms don't break things
 	var view = zam(document.body);
+	view.date = new Date(1509028530345);
 	t.equal($('#a').textContent, '');
 	t.equal($('#b').textContent, '');
 	frames(
@@ -19,6 +21,7 @@ test('text interpolation', t => {
 			t.equal($('#a').textContent, '');
 			t.equal($('#b').textContent, 'y');
 			t.equal($('form div').textContent, 'y');
+			t.equal($('#e').textContent, '2017-10-26T14:35:30.345Z');
 			view.name = 'dave';
 		},
 		() => {
@@ -32,6 +35,10 @@ test('text interpolation', t => {
 			t.equal($('#a').textContent, 'bob');
 			t.equal($('#b').textContent, 'boby');
 			t.equal($('form div').textContent, 'boby');
+			view.date.setTime(1412117200166);
+		},
+		() => {
+			t.equal($('#e').textContent, '2014-09-30T22:46:40.166Z');
 		}
 	);
 });

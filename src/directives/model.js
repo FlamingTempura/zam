@@ -88,7 +88,7 @@ export default {
 			} else if (this.type === 'number') {
 				el.value = Number(value);
 			} else if (this.type === 'date') {
-				el.valueAsDate = value;
+				el.valueAsDate = new Date(value.getTime()); // proxied date's will not work
 			} else {
 				el.value = stringify(value);
 			}

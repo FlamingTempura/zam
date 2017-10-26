@@ -1,6 +1,6 @@
 import config from './config';
 import { parse, evaluate } from './expression';
-import { log } from './utils';
+//import { log } from './utils';
 
 const cloneAttribute = attr => ({ name: attr.name, value: attr.value });
 
@@ -58,17 +58,14 @@ class VirtualNode {
 			template.binds.forEach(bind => {
 				this.bind({ ast: bind.ast, directive: bind.directive, args: bind.args, key: bind.key, template: bind.template });
 			});
-			if (template.tagName) { this.tag = template.tagName; }
 			if (template.attributes) {
 				this.attributes = template.attributes.map(cloneAttribute);
 				this.removedAttrs = template.removedAttrs.map(cloneAttribute);
 			}
-			if (template.children) {
-				let childNodes = Array.from(node.childNodes).filter(cnode => cnode.nodeType === 1 || cnode.nodeType === 3 || cnode.nodeType === 11);
-				template.children.forEach(vnode => {
-					this.children.push(createVNode(vnode.fragment ? node : childNodes.shift(), vnode));
-				});
-			}
+			let childNodes = Array.from(node.childNodes).filter(cnode => cnode.nodeType === 1 || cnode.nodeType === 3);
+			template.children.forEach(vnode => {
+				this.children.push(createVNode(vnode.fragment ? node : childNodes.shift(), vnode));
+			});
 		} else {
 			node.vnode = this;
 			this.initialize();
@@ -76,7 +73,7 @@ class VirtualNode {
 	}
 	initialize() {
 		let node = this.node;
-		this.type = node.nodeType; // 1 = ELEMENT_NODE, 3 = TEXT_NODE, 11 = DOCUMENT_FRAGMENT
+		this.type = node.nodeType; // 1 = ELEMENT_NODE, 3 = TEXT_NODE
 		//log('vnode.init', this.outerHTML, node.nodeValue, this.type, node.nodeType);
 		if (this.type === 1) {
 			this.tag = node.tagName;
@@ -161,6 +158,9 @@ class VirtualNode {
 			let vnode = bind.directive.template.clone();
 			//log('boo', node_)
 			//node_.vnode = this;
+			Array.from(this.node.attributes).map(attr => {
+				vnode.node.setAttribute(attr.name, attr.value); // copy over attributes
+			});
 
 			this.node.parentNode.replaceChild(vnode.node, this.node);
 			this.node = vnode.node;

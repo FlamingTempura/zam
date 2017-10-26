@@ -8,6 +8,65 @@ var test = require('tap').test,
 
 
 test('directive template', t => {
+	t.plan(7);
+	up(`<memo style="color: red" z-show="show" z-border="border"></memo>`);
+
+	zam.directive({
+		tag: 'memo',
+		template: '<p>{{ memo.who }}: {{ memo.message }}</p>'
+	});
+	var view = zam(document.body);
+	view.memo = { who: 'me', message: 'thing' };
+	view.border = '1px solid blue';
+	frames(
+		() => {
+			t.equal($$('memo').length, 0);
+			t.equal($('p').style.color, 'red');
+			t.equal($('p').style.border, '1px solid blue');
+			t.equal($('p').textContent, 'me: thing');
+			view.border = '1px solid green';
+			view.memo.who = 'paul';
+		},
+		() => {
+			t.equal($('p').style.color, 'red');
+			t.equal($('p').style.border, '1px solid green');
+			t.equal($('p').textContent, 'paul: thing');
+		}
+	);
+});
+
+test('directive events', t => {
+	t.plan(4);
+	up(`<div z-todo-in="todos"><todo-item z-id="todo.id"></todo-item></div>
+		<span thing></span>`);
+
+	zam.directive({
+		tag: 'todo-item',
+		create(scope, el) {
+			el.style.color = 'red';
+		},
+		update(scope, el) {
+			el.textContent = scope.todo.message;
+		}
+	});
+
+	var view = zam(document.body);
+	frames(
+		() => {
+			view.todos = [{ id: 'a', message: 'buy cake' }, { id: 'b', message: 'eat cake' }];
+			view.boo = 'foo';
+		},
+		() => {
+			t.equal($('#a').style.color, 'red');
+			t.equal($('#a').textContent, 'buy cake');
+			t.equal($('todo-item#b').style.color, 'red');
+			t.equal($('todo-item#b').textContent, 'eat cake');
+		}
+	);
+});
+
+return;
+test('directive template', t => {
 	t.plan(3);
 	up(`<section>
 			<memo z-let-memo="memos[0]"></memo>
@@ -22,13 +81,15 @@ test('directive template', t => {
 	view.memos = [{ who: 'me', message: 'thing' }, { who: 'joe', message: 'blah' }];
 	frames(
 		() => {
-			console.log(document.body.outerHTML);
 			t.equal($$('p').length, 2);
 			t.equal($$('p')[0].textContent, 'me: thing');
 			t.equal($$('p')[1].textContent, 'joe: blah');
 		}
 	);
 });
+
+
+
 return;
 
 test('directive template', t => {
@@ -52,41 +113,7 @@ test('directive template', t => {
 		}
 	);
 });
-return;
-test('custom directives', t => {
-	t.plan(2);
-	up(`<div z-todo-in="todos"><todo-item></todo-item></div>
-		<span thing></span>`);
 
-	zam.directive({
-		tag: 'todo-item',
-		create: () => {
-			//console.log('aaa')
-		},
-		update: function (scope, el) {
-			el.textContent = scope.todo.message;
-		}
-	});
-
-	zam.directive({
-		attribute: 'thing',
-		update: function (scope, el) {
-			el.textContent = scope.boo;
-		}
-	});
-
-	var view = zam(document.body);
-	frames(
-		() => {
-			view.todos = [{ message: 'buy cake' }];
-			view.boo = 'foo';
-		},
-		() => {
-			t.equal($('todo-item').textContent, 'buy cake');
-			t.equal($('span').textContent, 'foo');
-		}
-	);
-});
 /*
 // this will fail because z-exists deletes the node which the virtual node is looking after
 test('multiple directives', t => {
@@ -119,18 +146,3 @@ test('multiple directives', t => {
 		}
 	);
 });*/
-
-
-test('custom prefix', t => {
-	t.plan(1);
-	up(`<div foo-text="bar"></div>`);
-	zam.prefix = 'foo-';
-	var view = zam(document.body);
-	view.bar = 'blah';
-	frames(
-		() => {
-			t.equal($('div').textContent, 'blah');
-		}
-	);
-	zam.prefix = 'z-';
-});

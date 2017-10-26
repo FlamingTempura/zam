@@ -7,10 +7,12 @@ let createDirective = (directive) => {
 	}
 	if (directive.template) {
 		directive.block = true;
-		//directive.order = 0.5;
 		var node = document.createElement('span');
 		node.innerHTML = directive.template;
-		directive.template = virtualdom(node.childNodes[0]); // TODO warn if node_.childNodes > 0
+		if (node.childNodes.length === 1) {
+			node = node.childNodes[0];
+		}
+		directive.template = virtualdom(node);
 	}
 	if (!directive.order) { directive.order = 100; }
 	let i = config.directives.findIndex(directive_ => directive.order < directive_.order); // insert in order of priority

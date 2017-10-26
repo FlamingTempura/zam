@@ -12,21 +12,25 @@ const emit = (events, event) => {
 	if (events[event]) { events[event].forEach(cb => cb()); }
 };
 
-const proxyGet = (target, prop, receiver) => {
-	var q = Reflect.get(target, prop, receiver);
-	return !(target instanceof Array) && typeof q === 'function' ? q.bind(target) : q; // binding target ensures things like Date.getDate work
-};
-
 const deepProxy = (view, obj, parents = []) => { // when something in the scope changes, update the view
 	if (parents.includes(obj)) { return; } // prevent circular recursion
 	parents = parents.concat([obj]);
-	let proxy = new Proxy(obj, {
-		get: proxyGet,
+	return new Proxy(obj, {
+		get(target, prop, receiver) {
+			var q = Reflect.get(target, prop, receiver);
+			if (target instanceof Date && typeof prop === 'string') {
+				if (prop.startsWith('set')) { // some properties are Symbols, not strings
+					view.$(true);
+				}
+				return q.bind(target);
+			}
+			return !(target instanceof Array) && typeof q === 'function' ? q.bind(target) : q; // binding target ensures things like Date.getDate work
+		},
 		set(target, prop, value, receiver) {
 			if (!preparingProxy) {
-				if (typeof value === 'object' && value !== null && !(value instanceof Date)) { // TODO date should be proxied (if it works)
+				if (typeof value === 'object' && value !== null) {
 					value = deepProxy(view, value, parents);
-				} 
+				}
 				view.$(true);
 			}
 			preparingProxy = true; // prevents triggering parent views which also proxy this object
@@ -44,12 +48,6 @@ const deepProxy = (view, obj, parents = []) => { // when something in the scope 
 			return a;
 		}
 	});
-
-	Object.entries(obj)
-		.filter(({ k, o }) => typeof o === 'object' && !(o instanceof Date) && !(obj === view && k.charAt(0) === '$')) // TODO date should be proxied (if it works))
-		.forEach(({ k, o }) => proxy[k] = o);
-
-	return proxy;
 };
 
 const zam = (el, data, parent) => {
