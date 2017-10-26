@@ -2,7 +2,6 @@
 'use strict';
 
 const pegjs = require('rollup-plugin-pegjs'),
-      uglify = require('rollup-plugin-uglify'),
       uglifyes = require('rollup-plugin-uglify-es'),
       json = require('rollup-plugin-json'),
       babel = require('rollup-plugin-babel'),
@@ -106,14 +105,13 @@ export default {
 		json(),
 		babel({
 			'presets': [
-				//['es2015', { modules: false, loose: true }]
 				['env', { targets: { browsers }, modules: false, loose: true }]
 			],
 			plugins: ['external-helpers'],
 			exclude: 'node_modules/**'
 		}),
 		strip({
-			//functions: ['console.*', 'log'],
+			functions: ['console.*', 'log'],
 			sourceMap: false
 		}),
 		uglifyes({
@@ -127,11 +125,6 @@ export default {
 				//drop_console: true,
 				properties: true,
 				//sequences: false
-			},
-			output: {
-				beautify: true,
-				//max_line_len: 80
-				//preserve_line: true
 			}
 		}),
 		esformatter ({
@@ -149,9 +142,6 @@ export default {
 	name: 'zam',
 	output: {
 		format: 'umd',
-		//indent: false,
 		file: 'zam.js'
 	}
 };
-
-// linebreak after :
