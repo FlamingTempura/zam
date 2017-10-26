@@ -4,15 +4,19 @@ var test = require('tap').test,
 	frames = require('./test-utils').frames,
 	up = require('./test-utils').up,
 	$ = require('./test-utils').$,
+	$$ = require('./test-utils').$$,
 	trigger = require('./test-utils').trigger;
 
 test('z-on-*', t => { // Event handler
-	t.plan(6);
+	t.plan(9);
 	up(`<input type="button" z-on-click="doSomething($event)" z-click="doSomething2($event)">
-		<div z-on-mousemove="q = 'hello'">{{ i }}</div>`);
+		<div z-on-mousemove="q = 'hello'">{{ i }}</div>
+		<button z-on-click="bees.push('honey')">Bees</button>
+		<div class="bee" z-bee-in="bees">Bees?!</div>`);
 	var view = zam(document.body);
 	view.i = 0;
 	view.q = 'boo';
+	view.bees = [];
 	view.doSomething = function (e) {
 		t.equal(typeof e, 'object');
 		view.i = 1;
@@ -30,6 +34,12 @@ test('z-on-*', t => { // Event handler
 		},
 		() => {
 			t.equal($('div').textContent, '1');
+			t.equal($$('.bee').length, 0);
+			trigger($('button'), 'click');
+		},
+		() => {
+			t.equal($$('.bee').length, 1);
+			t.equal(view.bees.length, 1);
 		}
 	);
 });
