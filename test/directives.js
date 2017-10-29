@@ -12,9 +12,10 @@ test('directive template', t => {
 	up(`<memo style="color: red" z-show="show" z-border="border"></memo>`);
 
 	zam.directive({
-		tag: 'memo',
+		query: '<memo>',
 		template: '<p>{{ memo.who }}: {{ memo.message }}</p>'
 	});
+
 	var view = zam(document.body);
 	view.memo = { who: 'me', message: 'thing' };
 	view.border = '1px solid blue';
@@ -35,13 +36,13 @@ test('directive template', t => {
 	);
 });
 
-test('directive events', t => {
+test('directive lifecycle', t => {
 	t.plan(4);
 	up(`<div z-todo-in="todos"><todo-item z-id="todo.id"></todo-item></div>
 		<span thing></span>`);
 
 	zam.directive({
-		tag: 'todo-item',
+		query: '<todo-item>',
 		create(scope, el) {
 			el.style.color = 'red';
 		},
@@ -65,6 +66,37 @@ test('directive events', t => {
 	);
 });
 
+test('directive attributes', t => {
+	t.plan(8);
+	up(`<bork color="red" type="1"></bork>
+		<bork color="blue" type="2" big-red="9"></bork>
+		<bork></bork>`);
+	let i = 0;
+	zam.directive({
+		query: '<bork type big-(.+)="">',
+		create(scope, el, tag, type, big) {
+			if (i++ === 0) {
+				t.equal(type.value(), 1);
+				t.equal(big.value(), undefined);
+			} else {
+				t.equal(type.value(), 2);
+				t.equal(big.name, 'big-red');
+				t.equal(big.match[0], 'red');
+				t.equal(big.value(), 9);
+			}
+		}
+	});
+	var view = zam(document.body);
+	view.memo = { who: 'me', message: 'thing' };
+	frames(
+		() => {
+			t.equal($$('bork')[0].getAttribute('color'), 'red');
+			t.equal($$('bork')[1].getAttribute('color'), 'blue');
+		}
+	);
+});
+
+
 return;
 test('directive template', t => {
 	t.plan(3);
@@ -74,7 +106,7 @@ test('directive template', t => {
 		</section>`);
 
 	zam.directive({
-		tag: 'memo',
+		query: '<memo>',
 		template: '<p>{{ memo.who }}: {{ memo.message }}</p>'
 	});
 	var view = zam(document.body);
@@ -99,7 +131,7 @@ test('directive template', t => {
 		</section>`);
 
 	zam.directive({
-		tag: 'memo',
+		query: '<memo>',
 		template: '<p>{{ memo.who }}: {{ memo.message }}</p>'
 	});
 	var view = zam(document.body);

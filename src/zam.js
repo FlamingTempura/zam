@@ -1,4 +1,4 @@
-import { arrayRemove, nextTick, log } from './utils';
+import { arrayRemove, nextTick } from './utils';
 import { parse, evaluate } from './expression';
 import { version } from '../package.json';
 import virtualdom from './virtualdom';
@@ -102,6 +102,9 @@ const zam = (el, data, parent) => {
 			},
 			get $parent() {
 				return parent || vnode.parent && vnode.parent.scope || zam.root;
+			},
+			__print() {
+				vnode.__print();
 			}
 		}, data);
 

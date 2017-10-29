@@ -425,41 +425,72 @@ Result:
 
 ## Custom directives
 
-Custom directives can be defined prior to creating a view. 
-
-```js
-zam.directive({
-	attribute: 'hide',
-	update(scope, el, val) {
-		$(el).toggle(!val);
-	}
-});
-
-zam.directive({
-	attribute: 'on-scroll-([xy])',
-	create(scope, el) {},
-	update(scope, el, val) {},
-	destroy(scope, el) {}
-});
-
-zam.directive({
-	tag: 'blah',
-	create(scope, el) {}
-})
-
-let view = zam(); // directives must be defined before creating the view
-```
+A directive can be defined to bind DOM elements to certain defined functionality. Each directive should have a query defined to identify elements (by their tag or attribute
+names) to apply the directive to, and which attributes to bind. Directives must be defined prior to creating a view.
 
 The following options may be specified:
-* `attribute` - elements with an attribute matching this pattern will use this directive.. This can contain regular expressions. Results from capture groups will be provided to create, update, and remove methods.
-* `tag` - elements with tag names matching this pattern will use this directive.
-* `template` - HTML to insert to replace the element with
+* `query` - elements with matching this pattern will use this directive. This can contain regular expressions. Results from capture groups will be provided to create, update, and remove methods.
+* `template` - HTML to insert to replace the element with.
+* `scope` - set to true to create an isolate scope. The parent scope can be accessed via `scope.$parent`.
 * `block` - whether to stop further directives in this element and it's children.
 * `order` - when to run this directive; lower numbers run first.
 * `initialize(el)` - function called when the virtualdom is being created.
 * `create(scope, el)` - function called when directive is first bound with a scope.
 * `update(scope, el, val)` - function called when directive is updating.
 * `destroy(scope, el)` - function called when directive is being destoryed.
+
+```js
+zam.directive({
+	query: '<memo>' // this will bind to all <memo> elements
+});
+//<memo></memo> <!-- matches -->
+//<memo color="red">Hello</memo> <!-- matches -->
+//<mem>Boo</mem> <!-- does not match -->
+
+zam.directive({
+	query: '<.+ hide>', // bind all elements with hide attribute
+	create(scope, el) {
+		el.style.display = 'none'
+	},
+});
+// <div hide></div> <!-- element will be hidden -->
+
+zam.directive({
+	query: '<message author>', // bind to all <message> elements with the author attribute 
+	create(scope, el, tag, author) {
+		el.textContent = author.value(); // set the text of the element to the author
+	}
+})
+//<message></message> <!-- does not match -->
+//<message author="Bob">Hello</message> <!-- matches, and will replace "Hello" with "Bob" -->
+
+zam.directive({
+	query: '<product name description="Jane">', // define a default value to make an attribute optional
+	template: '<div><h1>{{ name }}<p>{{ description }}</p></div>', // the <product> elements will be replaced with this template
+	scope: true, // isolate the scope within this directive
+	update(scope, el, tag, description) {
+		scope.description = description.value(); // set the text of the element to the author
+	}
+})
+// <product name="fancy watch"></product> <!-- matches -->
+// <product description="the cheapest phone around" name="phone">Hello</product> <!-- matches - note that attribute order does not matter -->
+
+zam.directive({
+	query: '<mem(.*) auth(.*)="Jane" number="1">', // a query may contain regular expressions
+	create(scope, el, tag, auth, number) {
+		tag.name // "memooo"
+		tag.match[0] // "ooo" // capture groups can be accessed in the match array
+		auth.name // "authorrrr"
+		auth.value() // "bob"
+		auth.match[0] // "orrrr"
+		number.name // "number"
+		number.value() // 1
+	}
+})
+// <memooo authorrrr="'bob'" number="2"></memooo> <!-- matches -->
+
+let view = zam(); // directives must be defined before creating the view
+```
 
 ## Expressions
 

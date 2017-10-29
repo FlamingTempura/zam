@@ -24,16 +24,16 @@ Together: <span>{{ me.name }}, {{{ boldName }}}</span>
 import { stringify } from '../utils';
 
 export default {
-	attribute: '{prefix}(text|html)',
+	query: '<.+ {prefix}(text|html)>',
 	block: true,
 	inline: true,
 	initialize(el) {
 		el.innerHTML = '';
 	},
-	update(scope, el, val, attr, type) {
-		let value = stringify(val());
+	update(scope, el, tag, attr) {
+		let value = stringify(attr.value());
 		if (value !== this.value) {
-			if (type === 'html') {
+			if (attr.match[0] === 'html') {
 				el.innerHTML = value;
 			} else {
 				el.textContent = value;

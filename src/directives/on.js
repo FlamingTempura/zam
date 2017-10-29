@@ -23,18 +23,21 @@ const standardEvents = [
 	'scroll', 'resize',  'drag.*', 'drop'];
 
 export default {
-	attribute: `{prefix}(?:on-(.+)|(${standardEvents.join('|')}))`,
-	create(scope, el, val, attr, event, stdevent) {
+	query: `<.+ {prefix}(on-.+|${standardEvents.join('|')})>`,
+	initialize(el, tag, attr) {
+		this.event = attr.match[0].replace(/^on-/, '');
+	},
+	create(scope, el, tag, attr) {
 		this.handler = e => {
 			scope.$event = e;
-			val();
+			attr.value();
 			scope.$(); // if an assignment happens, this is necessary to trigger watchers
 			delete scope.$event;
-			if ((event || stdevent) === 'submit') { e.preventDefault(); }
+			if (this.event === 'submit') { e.preventDefault(); }
 		};
-		el.addEventListener(event || stdevent, this.handler);
+		el.addEventListener(this.event, this.handler);
 	},
-	destroy(scope, el, val, attr, event, stdevent) {
-		el.removeEventListener(event || stdevent, this.handler);
+	destroy(scope, el) {
+		el.removeEventListener(this.event, this.handler);
 	}
 };

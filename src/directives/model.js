@@ -20,29 +20,28 @@ data will also change, and the view will be kept up to date.
 @RESULT
 */
 import { stringify, hash } from '../utils';
-import { parse } from '../expression';
+import { parse, evaluate } from '../expression';
 import config from '../config';
 
 export default {
-	attribute: '{prefix}model',
+	query: '<input|select|textarea {prefix}model>',
 	block: true,
 	order: 3, // must happen before z-attr-* binds with z-value on radio inputs
-	create(scope, el, val) {
-		let tag = el.tagName.toLowerCase(),
-			inputType = (el.getAttribute('type') || '').toLowerCase();
+	create(scope, el, tag, attr) {
+		let inputType = (el.getAttribute('type') || '').toLowerCase();
 		this.type = inputType === 'checkbox' ? 'checkbox' :
-					tag === 'select' ? 'select' :
+					tag.name.toLowerCase() === 'select' ? 'select' :
 					inputType === 'radio' ? 'radio' :
 					['range', 'number'].includes(inputType) ? 'number' :
 					['date', 'datetime-local', 'time', 'month', 'week'].includes(inputType) ? 'date' :
 					'text';
 		if (this.type === 'radio' && !el.getAttribute('name')) {
-			el.setAttribute('name', hash(scope.$id + JSON.stringify(this.ast))); // group radios by their model and scope
+			el.setAttribute('name', hash(scope.$id + JSON.stringify(attr.ast))); // group radios by their model and scope
 		}
 		this.getValue = option => {
 			var valExpr = option.getAttribute(config.prefix + 'value');
 			return valExpr ?
-				val(parse(valExpr)) :
+				evaluate(parse(valExpr), scope).value :
 				option.getAttribute('value');
 		};
 		this.handler = () => {
@@ -55,12 +54,12 @@ export default {
 						el.value;
 			if (value !== this.value) {
 				this.value = value;
-				val({ // evaluate "<expression> = <value>"
+				evaluate({ // evaluate "<expression> = <value>"
 					type: 'AssignmentExpression',
 					operator: '=',
-					left: this.ast,
+					left: attr.ast,
 					right: { type: 'Literal', value }
-				});
+				}, scope);
 				scope.$();
 			}
 		};
@@ -70,8 +69,8 @@ export default {
 			el.selectedIndex = -1; // select empty value
 		}
 	},
-	update(scope, el, val) { // update dom
-		let value = val();
+	update(scope, el, tag, attr) { // update dom
+		let value = attr.value();
 		if (value !== this.value) {
 			if (this.type === 'checkbox') {
 				el.checked = !!value;

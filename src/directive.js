@@ -1,7 +1,20 @@
 import virtualdom from './virtualdom';
 import config from './config';
+import { parse } from './expression';
 
-let createDirective = (directive) => {
+let createDirective = directive => {
+	let parts = directive.query.match(/<([^\s>="]+)((?:\s+[^\s>="]+(?:\s*=\s*"[^"]*")?)*)>/);
+
+	directive.tagQuery = parts[1];
+	directive.attributeQueries = [];
+		
+	parts[2].replace(/\s+([^\s>="]+)(?:\s*=\s*"([^"]*)")?/g, (m, name, defaultValue) => {
+		if (defaultValue !== undefined) {
+			defaultValue = parse(defaultValue || 'undefined');
+		}
+		directive.attributeQueries.push({ name, defaultValue });
+	});
+
 	if (directive.inline) {
 		config.inlineParser = directive;
 	}

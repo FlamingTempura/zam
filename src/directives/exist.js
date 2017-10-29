@@ -29,18 +29,18 @@ import zam from '../zam';
 import virtualdom from '../virtualdom';
 
 export default {
-	attribute: '{prefix}exist',
+	query: '<.+ {prefix}exist>',
 	order: 3,
 	block: true, // stop traversal into the element if it should not exist
 	initialize(el) { // dom manipulation shouldn't happen in init as it will interfere with the virtualdom
 		this.template = virtualdom(el.cloneNode(true)); // clone needed (for pointer)
 	},
-	create(scope, el, val, attr) {
-		this.marker = document.createComment(attr);
+	create(scope, el, tag, attr) {
+		this.marker = document.createComment(attr.name);
 		el.parentNode.replaceChild(this.marker, el);
 	},	
-	update(scope, el, val) {
-		let value = !!val();
+	update(scope, el, tag, attr) {
+		let value = !!attr.value();
 		if (value !== this.value) {
 			if (value) {
 				this.vnode = this.template.clone();

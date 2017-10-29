@@ -1,5 +1,3 @@
-const log = (...msg) => console.log(...msg);
-
 const stringify = val => val === null || val === undefined ? '' : String(val);
 
 const arrayRemove = (array, element) => {
@@ -30,4 +28,4 @@ const nextTick = cb => {
 	return () => { cancelled = true; };
 };
 
-export { stringify, arrayRemove, hash, nextTick, log };
+export { stringify, arrayRemove, hash, nextTick };

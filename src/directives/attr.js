@@ -17,6 +17,8 @@ omitted for standard HTML attributes, like `disabled`, `src`, and `alt`.
 </script>
 @RESULT
 */
+import { stringify } from '../utils';
+
 const standardAttributes = [
 	'accept', 'accept-charset', 'accesskey', 'action', 'align', 'alt',
 	'async', 'autocomplete', 'autofocus', 'autoplay', 'autosave',
@@ -41,19 +43,21 @@ const booleanAttributes = [
 	'noresize'];
 
 export default {
-	attribute: `{prefix}(?:attr-(.+)|(${standardAttributes.join('|')}))`,
-	update(scope, el, val, attr, attribute, stdattribute) {
-		attribute = attribute || stdattribute;
-		let value = val();
+	query: `<.+ {prefix}(attr-.+|${standardAttributes.join('|')})>`,
+	initialize(el, tag, attr) {
+		this.attrName = attr.match[0].replace(/^attr-/, '');
+	},
+	update(scope, el, tag, attr) {
+		let value = attr.value();
 		if (value !== this.value) {
 			this.value = value;
-			if (booleanAttributes.includes(attribute)) {
-				value = value ? attribute : undefined;
+			if (booleanAttributes.includes(this.attrName)) {
+				value = value ? this.attrName : undefined;
 			}
 			if (value === undefined) {
-				el.removeAttribute(attribute);
+				el.removeAttribute(this.attrName);
 			} else {
-				el.setAttribute(attribute, value);
+				el.setAttribute(this.attrName, stringify(value));
 			}
 		}
 	}

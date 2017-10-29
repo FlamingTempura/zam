@@ -15,7 +15,7 @@ Stops Zam from parsing content within the element.
 @RESULT
 */
 export default {
-	attribute: '{prefix}skip',
+	query: '<.+ {prefix}skip>',
 	order: 1,
 	block: true
 };

@@ -41,27 +41,27 @@ import { arrayRemove } from '../utils';
 import config from '../config';
 
 export default {
-	attribute: '{prefix}(.+)-in',
+	query: '<.+ {prefix}(.+)-in>',
 	order: 2,
 	block: true, // do not continue traversing through this dom element (separate zam will be created)
-	initialize(el, attr, varname) { // dom manipulation shouldn't happen in init as it will interfere with the virtualdom
+	initialize(el, tag, attr) { // dom manipulation shouldn't happen in init as it will interfere with the virtualdom
 		this.items = [];
 		const zKey = el.getAttribute(config.prefix + 'key');
 		if (zKey) {
 			const keyAST = parse(zKey);
 			el.removeAttribute(config.prefix + 'key');
-			this.key = data => evaluate(keyAST, { [varname]: data }).value;
+			this.key = data => evaluate(keyAST, { [attr.match[0]]: data }).value;
 		} else {
 			this.key = data => JSON.stringify(data);
 		}
 		this.template = virtualdom(el.cloneNode(true));
 	},
-	create(scope, el, val, attr) {
-		this.marker = document.createComment(attr);
+	create(scope, el, tag, attr) {
+		this.marker = document.createComment(attr.name);
 		el.parentNode.replaceChild(this.marker, el);
 	},
-	update(scope, el, val, attr, varname) {
-		let value = val() || [],
+	update(scope, el, tag, attr) {
+		let value = attr.value() || [],
 			data = Object.keys(value).map(k => ({ index: k, computed: this.key(value[k]), datum: value[k] }));
 
 		// recompute keys of existing nodes and remove old nodes
@@ -81,7 +81,7 @@ export default {
 				let vnode = this.template.clone();
 				item = { key: k.computed, datum: k.datum, node: vnode.node };
 				this.marker.parentNode.insertBefore(item.node, this.marker);
-				item.view = zam(vnode, { [varname]: item.datum, }, scope);
+				item.view = zam(vnode, { [attr.match[0]]: item.datum, }, scope);
 			} else {
 				arrayRemove(this.items, item);
 				this.marker.parentNode.insertBefore(item.node, this.marker);

@@ -110,11 +110,11 @@ export default {
 			plugins: ['external-helpers'],
 			exclude: 'node_modules/**'
 		}),
-		strip({
-			functions: ['console.*', 'log'],
-			sourceMap: false
-		}),
-		uglifyes({
+		//strip({
+			//functions: ['console.*', 'log'],
+		//	sourceMap: false
+		//}),
+		/*uglifyes({
 			compress: {
 				//dead_code: true,
 				unused: true,
@@ -122,7 +122,7 @@ export default {
 				reduce_vars: true,
 				cascade: true,
 				collapse_vars: true,
-				//drop_console: true,
+				drop_console: false,
 				properties: true,
 				//sequences: false
 			}
@@ -136,9 +136,9 @@ export default {
 					ConditionalExpressionAlternate: 1
 				}
 			}
-		})
+		})*/
 	],
-	//sourceMap: true,
+	sourcemap: true,
 	name: 'zam',
 	output: {
 		format: 'umd',

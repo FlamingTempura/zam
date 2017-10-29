@@ -20,9 +20,9 @@ Displays the element only if the result of the expression is
 @RESULT
 */
 export default {
-	attribute: '{prefix}show',
-	update(scope, el, val) {
-		let value = val() ? '' : 'none';
+	query: '<.+ {prefix}show>',
+	update(scope, el, tag, attr) {
+		let value = attr.value() ? '' : 'none';
 		if (value !== this.value) {
 			el.style.display = this.value = value;
 		}

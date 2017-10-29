@@ -15,12 +15,12 @@ Adds the specified classname only if the result of the expression is
 @RESULT
 */
 export default {
-	attribute: '{prefix}class-(.+)',
-	update(scope, el, val, attr, classname) {
-		let value = val();
+	query: '<.+ {prefix}class-(.+)>',
+	update(scope, el, tag, clas) {
+		let value = clas.value();
 		if (value !== this.value) {
 			this.value = value;
-			el.classList.toggle(classname, value);
+			el.classList.toggle(clas.match[0], value);
 		}
 	}
 };

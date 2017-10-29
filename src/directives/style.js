@@ -38,11 +38,14 @@ const standardStyles = [
 	'will-change', 'word-.*', 'writing-mode', 'z-index'];
 
 export default {
-	attribute: `{prefix}(?:style-(.+)|(${standardStyles.join('|')}))`,
-	update(scope, el, val, attr, style, stdstyle) {
-		let value = val();
+	query: `<.+ {prefix}(style-.+|${standardStyles.join('|')})>`,
+	initialize(el, tag, attr) {
+		this.property = attr.match[0].replace(/^style-/, '');
+	},
+	update(scope, el, tag, attr) {
+		let value = attr.value();
 		if (value !== this.value) {
-			el.style[style || stdstyle] = this.value = value;
+			el.style[this.property] = this.value = value;
 		}
 	}
 };
