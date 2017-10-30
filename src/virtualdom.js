@@ -180,23 +180,18 @@ class VirtualNode {
 		}
 		if (directive.template) {
 			let vnode = directive.template.clone();
-			//node_.vnode = this;
 			Array.from(this.node.attributes).map(attr => {
 				vnode.node.setAttribute(attr.name, attr.value); // copy over attributes
 			});
-
+			this.originalNode = this.node;
 			this.node.parentNode.replaceChild(vnode.node, this.node);
 			this.node = vnode.node;
 			this.node.vnode = this;
 			this.binds = this.binds.concat(vnode.binds);
 			this.type = vnode.type;
 			this.children = vnode.children;
-			//this.node = node_;
-			//this.pointer = node_;
-			//this.initialize();
-		} else {
-			this.binds.push(binding);
 		}
+		this.binds.push(binding);
 		execBind(this, 'initialize', binding);
 	}
 	clone() {

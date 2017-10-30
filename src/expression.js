@@ -2,7 +2,7 @@ import { stringify } from './utils';
 import parser from './grammar.pegjs';
 const parse = (expr, startRule = 'Expression') => parser.parse(expr, { startRule }); // generates the abstract ast tree
 
-const evaluate = (ast, scope) => {
+const evaluate = (ast, scope, checkParentScope = true) => {
 	let value, set,
 		{ type, operator } = ast;
 
@@ -18,7 +18,7 @@ const evaluate = (ast, scope) => {
 
 	if (type === 'Identifier') {
 		let scope_ = scope;
-		while (scope_) {
+		while (scope_ && checkParentScope) {
 			if (scope_[ast.name] !== undefined) { break; }
 			scope_ = scope_.$parent; // is data in parent scopes?
 		}
@@ -58,7 +58,7 @@ const evaluate = (ast, scope) => {
 	} else 
 
 	if (type === 'BinaryExpression' || type === 'LogicalExpression' || type === 'AssignmentExpression') {
-		let left  = evaluate(ast.left, scope),
+		let left  = evaluate(ast.left, scope, type !== 'AssignmentExpression'),
 			leftv = left.value,
 			rightv = evaluate(ast.right, scope).value;
 		value = operator === '===' ? leftv === rightv :

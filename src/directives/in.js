@@ -54,6 +54,7 @@ export default {
 		} else {
 			this.key = data => JSON.stringify(data);
 		}
+		console.log('boooo')
 		this.template = virtualdom(el.cloneNode(true));
 	},
 	create(scope, el, tag, attr) {
@@ -90,5 +91,6 @@ export default {
 			item.view.$();
 			this.items.push(item);
 		});
+		console.log('ITEMS', this.items);
 	}
 };

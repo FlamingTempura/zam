@@ -2,7 +2,6 @@ import { arrayRemove, nextTick } from './utils';
 import { parse, evaluate } from './expression';
 import { version } from '../package.json';
 import virtualdom from './virtualdom';
-import createDirective from './directive';
 import config from './config';
 
 let id = 0,
@@ -51,7 +50,7 @@ const deepProxy = (view, obj, parents = []) => { // when something in the scope 
 };
 
 const zam = (el, data, parent) => {
-	//log('view#' + id + '.create');
+	//console.log('view#' + id + '.create');
 	let vnode = virtualdom(el, null, true),
 		events = {},
 		watchers = [],
@@ -113,9 +112,42 @@ const zam = (el, data, parent) => {
 	return deepProxy(view, view);
 };
 
+const directive = directive => {
+	let parts = directive.query.match(/<([^\s>="]+)((?:\s+[^\s>="]+(?:\s*=\s*"[^"]*")?)*)>/);
+
+	directive.tagQuery = parts[1];
+	directive.attributeQueries = [];
+		
+	parts[2].replace(/\s+([^\s>="]+)(?:\s*=\s*"([^"]*)")?/g, (m, name, defaultValue) => {
+		if (defaultValue !== undefined) {
+			defaultValue = parse(defaultValue || 'undefined');
+		}
+		directive.attributeQueries.push({ name, defaultValue });
+	});
+
+	if (directive.inline) {
+		config.inlineParser = directive;
+	}
+	
+	if (directive.template) {
+		directive.block = true;
+		var node = document.createElement('span');
+		node.innerHTML = directive.template;
+		if (node.childNodes.length === 1) {
+			node = node.childNodes[0];
+		}
+		directive.template = virtualdom(node);
+	}
+
+	if (!directive.order) { directive.order = 100; }
+
+	let i = config.directives.findIndex(directive_ => directive.order < directive_.order); // insert in order of priority
+	config.directives.splice(i === -1 ? config.directives.length : i, 0, directive);
+	return directive;
+};
+
 Object.assign(zam, {
-	version, parse, evaluate,
-	directive: createDirective,
+	version, directive, __evaluate: evaluate, __parse: parse,
 	root: {
 		$parent: typeof global !== 'undefined' ? global : window,
 		number: (num, dec = 2) => Number(num).toFixed(dec),
