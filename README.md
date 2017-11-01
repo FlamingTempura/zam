@@ -444,6 +444,31 @@ Result:
 
 For <input> tags, or <option> tags within <select>.
 
+```html
+<select z-model="selectedCar">
+	<option z-value="null">None</option>
+	<option z-car-in="cars" z-value="car">{{ car.model }}</option>
+</select>
+You have selected: {{ selectedCar.make }} {{ selectedCar.model }}
+<script>
+	const view = zam(document.body);
+	view.cars = [{ make: 'Toyota', model: 'Prius' },
+	             { make: 'Aston Martin', model: 'DB9' }];
+	view.selectedCar = view.cars[1];
+</script>
+```
+
+Result:
+
+```html
+<select>
+	<option value="null">None</option>
+	<option value="{&quot;make&quot;:&quot;Toyota&quot;,&quot;model&quot;:&quot;Prius&quot;}">Prius</option>
+	<option value="{&quot;make&quot;:&quot;Aston Martin&quot;,&quot;model&quot;:&quot;DB9&quot;}">DB9</option>
+</select>
+You have selected: Aston Martin DB9
+```
+
 [//]: # (DOC1!)
 
 ## Scope
