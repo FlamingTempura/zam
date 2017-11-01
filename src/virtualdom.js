@@ -215,10 +215,6 @@ class VirtualNode {
 			this.removedAttrs.forEach(attr => this.node.setAttribute(attr.name, attr.value)); // restore attributes
 		}
 	}
-	__print (indent = '') {
-		console.log(`@${indent}> [${this.__id}] ${this.node.outerHTML || this.node.textContent}`);
-		this.children.forEach(child => child.__print(`--${indent}`));
-	}
 }
 
 export default createVNode;

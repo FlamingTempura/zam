@@ -76,9 +76,13 @@ export default {
 			let item = this.items.find(item_ => k.computed === item_.key);
 			if (!item) {
 				let vnode = this.template.clone();
+				vnode.originalNode = el.cloneNode(true); // pffft... whatever
+				//vnode.originalNode = vnode.node;
 				item = { key: k.computed, datum: k.datum, node: vnode.node };
 				this.marker.parentNode.insertBefore(item.node, this.marker);
 				item.view = zam(vnode, { [attr.match[0]]: item.datum, }, scope);
+				//vnode.originalNode = vnode.node;
+
 			} else {
 				arrayRemove(this.items, item);
 				this.marker.parentNode.insertBefore(item.node, this.marker);

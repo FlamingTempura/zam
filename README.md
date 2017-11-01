@@ -81,6 +81,56 @@ Directives are specific instructions on how to display the view
 
 [//]: # (DOC1)
 
+### `z-cloak` - Hide content until zam has initiated
+
+Prevents template tags from being visible before zam has initiated. A css rule
+for `[z-clock]` should be added to set `display: none`.
+
+```html
+<style>
+	[z-cloak] { display: none; }
+</style>
+Hello. <div z-cloak>this div will not be visible until zam has initiated {{ me.name }}</div>
+<script>
+	const view = zam(document.body);
+	view.me = { name: 'Bob' };
+</script>
+```
+
+Result:
+
+```html
+Hello. <div>this div will not be visible until zam has initiated Bob</div>
+```
+
+### `z-isolate` - Create an isolate scope
+
+Creates a new scope for the DOM element and its children.
+
+```html
+{{ name }}
+<input ng-model="name">
+<div z-isolate>
+	{{ name }}
+	<input ng-model="name">
+</div>
+<script>
+	const view = zam(document.body);
+	view.name = 'Bob';
+</script>
+```
+
+Result:
+
+```html
+Bob
+<input ng-model="name">
+<div>
+	Bob
+	<input ng-model="name">
+</div>
+```
+
 ### `z-text` and `z-html` - Set text or HTML content
 
 Sets the text or HTML content of the specified element. Text and HTML can also
@@ -112,28 +162,6 @@ Some HTML: <span><em>Bob</em></span>
 Together: <span>Bob, <span><em>Bob</em></span></span>
 ```
 
-### `z-cloak` - Hide content until zam has initiated
-
-Prevents template tags from being visible before zam has initiated. A css rule
-for `[z-clock]` should be added to set `display: none`.
-
-```html
-<style>
-	[z-cloak] { display: none; }
-</style>
-Hello. <div z-cloak>this div will not be visible until zam has initiated {{ me.name }}</div>
-<script>
-	const view = zam(document.body);
-	view.me = { name: 'Bob' };
-</script>
-```
-
-Result:
-
-```html
-Hello. <div>this div will not be visible until zam has initiated Bob</div>
-```
-
 ### `z-show` - Conditional visibility
 
 Displays the element only if the result of the expression is
@@ -159,6 +187,10 @@ Result:
 <div>My name is Bob</div>
 <button>Hide</button>
 ```
+
+### `z-isolate` - Create an isolate scope
+
+For <input> tags, or <option> tags within <select>.
 
 ### `z-exist` - Conditional existence
 
@@ -387,6 +419,29 @@ Result:
 	{{ this will appear as it is (including curly braces) }}
 	<div z-font-size="'12pt'">Directives will not be parsed</div>
 </div>
+```
+
+### `z-isolate` - Create an isolate scope
+
+For use in directives, this allows the original content of an element to be
+placed wihin a templated directive.
+
+```html
+<person id="d">Name: <strong>{{ name }}</strong></person>
+<script>
+	zam.directive({
+		query: '<person>',
+		template: '<p z-transclude></p>'
+	});
+	const view = zam(document.body);
+	view.name = 'Bob';
+</script>
+```
+
+Result:
+
+```html
+<p id="d">Name: <strong>Bob</strong></p>
 ```
 
 [//]: # (DOC1!)

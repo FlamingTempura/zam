@@ -101,9 +101,6 @@ const zam = (el, data, parent) => {
 			},
 			get $parent() {
 				return parent || vnode.parent && vnode.parent.scope || zam.root;
-			},
-			__print() {
-				vnode.__print();
 			}
 		}, data);
 

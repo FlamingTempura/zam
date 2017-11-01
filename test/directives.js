@@ -2,92 +2,6 @@ const { test } = require('tap');
 const zam = require('../');
 const { steps, up, $, $$ } = require('./test-utils');
 
-test('transclude in loop', t => {
-	t.plan(3);
-	up(`<q z-thing-in="things"><a>{{ i }}</a></q>`);
-
-	zam.directive({
-		query: '<q>',
-		template: '<p z-transclude></p>',
-		order: 100,
-		initialize(el) {
-			console.log('@@@ init');
-		},
-		create(scope, el) {
-			console.log('@@@ create', scope.animal)
-		},
-		update(scope, el) {
-			console.log('@@@ update', scope.animal)
-		}
-	});
-	let view = zam(document.body);
-	view.i = 20;
-	view.things = [1, 2];
-	steps(
-		() => {
-			console.log(document.body.outerHTML);
-			t.equal($$('p').length, 2);
-			t.equal($$('p')[0].textContent, '20');
-			t.equal($$('p')[1].textContent, '20');
-		}
-	);
-});
-return
-
-test('directive template in loop', t => {
-	t.plan(3);
-	up(`<q z-thing-in="things"></q>`);
-
-	zam.directive({
-		query: '<q>',
-		template: '<p>{{ i }}</p>'
-	});
-	let view = zam(document.body);
-	view.i = 20;
-	view.things = [1, 2];
-	steps(
-		() => {
-			console.log(document.body.outerHTML);
-			t.equal($$('p').length, 2);
-			t.equal($$('p')[0].textContent, '20');
-			t.equal($$('p')[1].textContent, '20');
-		}
-	);
-});
-return 
-
-
-test('directive template in loop', t => {
-	t.plan(3);
-	up(`<div z-animal-in="animals"><animal>{{ animal.type }}: {{ animal.name }}</animal></div>`);
-	//up(`<div z-animal-in="animals"><p>{{ animal.type }}: {{ animal.name }}</p></div>`);
-
-	zam.directive({
-		query: '<animal>',
-		template: '<p z-transclude></p>',
-		initialize(el) {
-			console.log('init');
-		},
-		create(scope, el) {
-			console.log('create', scope.animal)
-		},
-		update(scope, el) {
-			console.log('update', scope.animal)
-		}
-	});
-	let view = zam(document.body);
-	view.animals = [{ type: 'cat', name: 'Felix' }, { type: 'dog', name: 'Spot' }];
-	steps(
-		() => {
-			console.log(document.body.outerHTML);
-			t.equal($$('p').length, 2);
-			t.equal($$('p')[0].textContent, 'cat: Felix');
-			t.equal($$('p')[1].textContent, 'dog: Spot');
-		}
-	);
-});
-return 
-
 test('directive template', t => {
 	t.plan(7);
 	up(`<memo style="color: red" z-show="show" z-border="border"></memo>`);
@@ -175,35 +89,42 @@ test('directive attributes', t => {
 	);
 });
 
-/*
-// this will fail because z-exists deletes the node which the virtual node is looking after
-test('multiple directives', t => {
-	t.plan(7);
-	up(`<div z-thing-in="things" z-exist="thing.show">{{ thing.foo }}</div>`);
+test('directive template in loop', t => {
+	t.plan(3);
+	up(`<qa z-thing-in="things"></qa>`);
+
+	zam.directive({
+		query: '<qa>',
+		template: '<p>{{ i }}</p>'
+	});
 	let view = zam(document.body);
-	view.things = [{ show: true, foo: 'blah'}, { show: false, foo: 'hello' }];
+	view.i = 20;
+	view.things = [1, 2];
 	steps(
 		() => {
-			console.log(document.body.innerHTML);
-			console.log('_____update_____')
-			t.equal($$('div').length, 1);
-			t.equal($$('div')[0].textContent, 'blah');
-			view.boo = 1;
-			view.things[1].show = true;
-		},
-		() => {
-			console.log(document.body.innerHTML);
-			console.log('_____ahhh_____')
-			t.equal($$('div').length, 2);
-			t.equal($$('div')[0].textContent, 'blah');
-			t.equal($$('div')[1].textContent, 'hello');
-			view.things[0].show = false;
-		},
-		() => {
-			console.log(document.body.innerHTML);
-			console.log('_____qq_____')
-			t.equal($$('div').length, 1);
-			t.equal($$('div')[0].textContent, 'hello');
+			t.equal($$('p').length, 2);
+			t.equal($$('p')[0].textContent, '20');
+			t.equal($$('p')[1].textContent, '20');
 		}
 	);
-});*/
+});
+
+test('transclude in loop', t => {
+	t.plan(3);
+	up(`<qb z-thing-in="things">{{ i }}</qb>`);
+
+	zam.directive({
+		query: '<qb>',
+		template: '<p z-transclude></p>'
+	});
+	let view = zam(document.body);
+	view.i = 20;
+	view.things = [1, 2];
+	steps(
+		() => {
+			t.equal($$('p').length, 2);
+			t.equal($$('p')[0].textContent, '20');
+			t.equal($$('p')[1].textContent, '20');
+		}
+	);
+});

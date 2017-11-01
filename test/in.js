@@ -12,12 +12,11 @@ test('z-*-in', t => { // Iterate through an array
 			let els = $$('div');
 			t.equal(els.length, 3);
 			view.todos.forEach((todo, i) => {
-				t.equal(els[i].textContent, i + ': ' + todo);
+				t.equal(els[i].textContent, `${i}: ${todo}`);
 			});
 		}
 	);
 });
-return;
 
 test('z-*-in array', t => { // Iterate through an array
 	t.plan(21);
@@ -39,7 +38,7 @@ test('z-*-in array', t => { // Iterate through an array
 			t.equal(els.length, 3);
 			view.todos.slice(0, -1).forEach((todo, i) => {
 				t.equal(els[i].getAttribute('z-key'), null);
-				t.equal(els[i].textContent, (i === 2 ? 3 : i) + ': ' + todo.message); // duplicate shouldn't show, so index will be overridden
+				t.equal(els[i].textContent, `${i === 2 ? 3 : i}: ${todo.message}`); // duplicate shouldn't show, so index will be overridden
 			});
 			view.todos.splice(3, 1); // remove the duplicate
 			view.todos.push({ message: 'Wash car' });
@@ -48,7 +47,7 @@ test('z-*-in array', t => { // Iterate through an array
 			let els = $$('div');
 			t.equal(els.length, 4);
 			view.todos.forEach((todo, i) => {
-				t.equal(els[i].textContent, i + ': ' + todo.message);
+				t.equal(els[i].textContent, `${i}: ${todo.message}`);
 			});
 			view.todos.splice(2, 1);
 		},
@@ -56,7 +55,7 @@ test('z-*-in array', t => { // Iterate through an array
 			let els = $$('div');
 			t.equal(els.length, 3);
 			view.todos.forEach((todo, i) => {
-				t.equal(els[i].textContent, i + ': ' + todo.message);
+				t.equal(els[i].textContent, `${i}: ${todo.message}`);
 			});
 			view.todos.unshift(view.todos.pop()); // test that re-ordering works
 		},
@@ -64,7 +63,7 @@ test('z-*-in array', t => { // Iterate through an array
 			let els = $$('div');
 			t.equal(els.length, 3);
 			view.todos.forEach((todo, i) => {
-				t.equal(els[i].textContent, i + ': ' + todo.message);
+				t.equal(els[i].textContent, `${i}: ${todo.message}`);
 			});
 		}
 	);
@@ -85,7 +84,7 @@ test('z-*-in object', t => { // Iterate through an array
 			let els = $$('div');
 			t.equal(els.length, 3);
 			Object.keys(view.apple).forEach((key, i) => {
-				t.equal(els[i].textContent, key + ': ' + view.apple[key]);
+				t.equal(els[i].textContent, `${key}: ${view.apple[key]}`);
 			});
 			view.apple.price = '30p';
 		},
@@ -93,7 +92,7 @@ test('z-*-in object', t => { // Iterate through an array
 			let els = $$('div');
 			t.equal(els.length, 4);
 			Object.keys(view.apple).forEach((key, i) => {
-				t.equal(els[i].textContent, key + ': ' + view.apple[key]);
+				t.equal(els[i].textContent, `${key}: ${view.apple[key]}`);
 			});
 			delete view.apple.weight;
 		},
@@ -101,7 +100,7 @@ test('z-*-in object', t => { // Iterate through an array
 			let els = $$('div');
 			t.equal(els.length, 3);
 			Object.keys(view.apple).forEach((key, i) => {
-				t.equal(els[i].textContent, key + ': ' + view.apple[key]);
+				t.equal(els[i].textContent, `${key}: ${view.apple[key]}`);
 			});
 		}
 	);

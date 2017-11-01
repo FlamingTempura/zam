@@ -1,6 +1,3 @@
-/* jshint node: true, esversion: 6, unused: true */
-'use strict';
-
 const pegjs = require('rollup-plugin-pegjs'),
       uglifyes = require('rollup-plugin-uglify-es'),
       json = require('rollup-plugin-json'),
@@ -11,7 +8,6 @@ const pegjs = require('rollup-plugin-pegjs'),
       fs = require('fs');
 
 const browsers = [
-	//'Android >= 56',
 	'Chrome >= 49',
 	'ChromeAndroid >= 61',
 	'Edge >= 14',
@@ -24,8 +20,8 @@ const browsers = [
 	'Samsung >=5'
 ];
 
-const renderExample = function (html, cb) { // set global document to new dom
-	const zamscript = fs.readFileSync('./zam.js', 'utf8');
+const zamscript = fs.readFileSync('./zam.js', 'utf8');
+const renderExample = (html, cb) => { // set global document to new dom
 	try {
 		let window = (new jsdom.JSDOM(html, { runScripts: 'outside-only' })).window,
 			document = window.document,
@@ -34,11 +30,9 @@ const renderExample = function (html, cb) { // set global document to new dom
 		window.eval(zamscript);
 		window.eval(script.textContent);
 		window.setTimeout(() => {
-			var html = document.body.innerHTML;
+			let html = document.body.innerHTML;
 			html = html
-				.replace(/(\s*)(\S[^\n]*)<!--z-\w+-in-->/g, function (match, indent, line) {
-					return line.replace(/(<[^/])/g, '\n' + indent + '$1');
-				})
+				.replace(/(\s*)(\S[^\n]*)<!--z-\w+-in-->/g, (match, indent, line) => line.replace(/(<[^/])/g, `\n${indent}$1`))
 				.replace(/<!--[^>]*-->/g, '')
 				.replace(/\n+/g, '\n')
 				.trim();
@@ -49,33 +43,33 @@ const renderExample = function (html, cb) { // set global document to new dom
 	}
 };
 
-let generateDocs = function () {
-	var readme = fs.readFileSync('README.md', 'utf8'),
+const generateDocs = () => {
+	let readme = fs.readFileSync('README.md', 'utf8'),
 		docs = fs.readdirSync('src/directives')
-			.map(function (file) {
-				var src = fs.readFileSync('src/directives/' + file, 'utf8'),
+			.map(file => {
+				let src = fs.readFileSync(`src/directives/${file}`, 'utf8'),
 					text = '### ' + src.slice(src.indexOf('/*') + 2, src.indexOf('*/')).trim(),
 					m = text.match(/@ORDER (\d+)/),
 					order = m ? Number(m[1]) : Infinity;
 				return {
-					order: order,
+					order,
 					text: text.replace(/@ORDER (\d+)\n?/, '')
 				};
 			})
 			.sort((a, b) => a.order - b.order)
 			.map(file => file.text);
 	readme = readme.replace(/\[\/\/\]: # \(DOC1\)[\w\W]*\[\/\/\]: # \(DOC1!\)/m,
-		'[//]: # (DOC1)\n\n' + docs.join('\n\n') + '\n\n[//]: # (DOC1!)');
-	var waiting = 0,
+		`[//]: # (DOC1)\n\n${docs.join('\n\n')}\n\n[//]: # (DOC1!)`);
+	let waiting = 0,
 		newreadme = [];
-	readme.split('@CODE').forEach(function (part, i) { // this renders all example code in the docs
-		var parts_ = part.split('@RESULT');
+	readme.split('@CODE').forEach((part, i) => { // this renders all example code in the docs
+		let parts_ = part.split('@RESULT');
 		if (parts_.length === 1) {
 			newreadme[i * 2] = parts_[0];
 		} else {
 			let code = parts_[0];
 			waiting++;
-			renderExample(code, function (err, html) {
+			renderExample(code, (err, html) => {
 				if (err) {
 					console.error(err);
 					console.error(code);
@@ -114,19 +108,7 @@ export default {
 			//functions: ['console.*', 'log'],
 		//	sourceMap: false
 		//}),
-		/*uglifyes({
-			compress: {
-				//dead_code: true,
-				unused: true,
-				negate_iife: true,
-				reduce_vars: true,
-				cascade: true,
-				collapse_vars: true,
-				drop_console: false,
-				properties: true,
-				//sequences: false
-			}
-		}),
+		uglifyes(),
 		esformatter ({
 			indent: {
 				value: '	',
@@ -136,9 +118,9 @@ export default {
 					ConditionalExpressionAlternate: 1
 				}
 			}
-		})*/
+		})
 	],
-	sourcemap: true,
+	//sourcemap: true,
 	name: 'zam',
 	output: {
 		format: 'umd',
