@@ -103,34 +103,6 @@ Result:
 Hello. <div>this div will not be visible until zam has initiated Bob</div>
 ```
 
-### `z-isolate` - Create an isolate scope
-
-Creates a new scope for the DOM element and its children.
-
-```html
-{{ name }}
-<input ng-model="name">
-<div z-isolate>
-	{{ name }}
-	<input ng-model="name">
-</div>
-<script>
-	const view = zam(document.body);
-	view.name = 'Bob';
-</script>
-```
-
-Result:
-
-```html
-Bob
-<input ng-model="name">
-<div>
-	Bob
-	<input ng-model="name">
-</div>
-```
-
 ### `z-text` and `z-html` - Set text or HTML content
 
 Sets the text or HTML content of the specified element. Text and HTML can also
@@ -160,6 +132,34 @@ My name is <div>Bob</div>
 Some HTML: <span><span><em>Bob</em></span></span>
 Some HTML: <span><em>Bob</em></span>
 Together: <span>Bob, <span><em>Bob</em></span></span>
+```
+
+### `z-isolate` - Create an isolate scope
+
+Creates a new scope for the DOM element and its children.
+
+```html
+{{ name }}
+<input ng-model="name">
+<div z-isolate>
+	{{ name }}
+	<input ng-model="name">
+</div>
+<script>
+	const view = zam(document.body);
+	view.name = 'Bob';
+</script>
+```
+
+Result:
+
+```html
+Bob
+<input ng-model="name">
+<div>
+	Bob
+	<input ng-model="name">
+</div>
 ```
 
 ### `z-show` - Conditional visibility
@@ -421,17 +421,17 @@ Result:
 </div>
 ```
 
-### `z-isolate` - Create an isolate scope
+### `z-inherit` - Set where template should inherit specified contents
 
 For use in directives, this allows the original content of an element to be
-placed wihin a templated directive.
+placed within a templated directive.
 
 ```html
 <person id="d">Name: <strong>{{ name }}</strong></person>
 <script>
 	zam.directive({
 		query: '<person>',
-		template: '<p z-transclude></p>'
+		template: '<p z-inherit></p>'
 	});
 	const view = zam(document.body);
 	view.name = 'Bob';

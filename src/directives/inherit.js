@@ -1,16 +1,16 @@
 /*
-`z-isolate` - Create an isolate scope
+`z-inherit` - Set where template should inherit specified contents
 @ORDER 10
 
 For use in directives, this allows the original content of an element to be
-placed wihin a templated directive.
+placed within a templated directive.
 
 @CODE
 <person id="d">Name: <strong>{{ name }}</strong></person>
 <script>
 	zam.directive({
 		query: '<person>',
-		template: '<p z-transclude></p>'
+		template: '<p z-inherit></p>'
 	});
 	const view = zam(document.body);
 	view.name = 'Bob';
@@ -20,7 +20,7 @@ placed wihin a templated directive.
 import virtualdom from '../virtualdom';
 
 export default {
-	query: '<.+ {prefix}transclude>',
+	query: '<.+ {prefix}inherit>',
 	block: true,
 	create(scope, el) {
 		let node = el,

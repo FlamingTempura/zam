@@ -2,7 +2,7 @@ const { test } = require('tap');
 const zam = require('../');
 const { steps, up, $, $$ } = require('./test-utils');
 
-test('directive transclude', t => {
+test('directive inherit', t => {
 	t.plan(4);
 	up(`<tab id="a">hello</tab>
 		<tab id="b">{{ hello }}</tab>
@@ -11,7 +11,7 @@ test('directive transclude', t => {
 
 	zam.directive({
 		query: '<tab>',
-		template: '<p z-transclude></p>'
+		template: '<p z-inherit></p>'
 	});
 
 	let view = zam(document.body);
@@ -26,13 +26,13 @@ test('directive transclude', t => {
 	);
 });
 
-test('transclude in loop', t => {
+test('inherit in loop', t => {
 	t.plan(3);
 	up(`<animal z-animal-in="animals">{{ animal.type }}: {{ animal.name }}</animal>`);
 
 	zam.directive({
 		query: '<animal>',
-		template: '<p z-transclude></p>'
+		template: '<p z-inherit></p>'
 	});
 	let view = zam(document.body);
 	view.animals = [{ type: 'cat', name: 'Felix' }, { type: 'dog', name: 'Spot' }];

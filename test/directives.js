@@ -109,13 +109,13 @@ test('directive template in loop', t => {
 	);
 });
 
-test('transclude in loop', t => {
+test('inherit in loop', t => {
 	t.plan(3);
 	up(`<qb z-thing-in="things">{{ i }}</qb>`);
 
 	zam.directive({
 		query: '<qb>',
-		template: '<p z-transclude></p>'
+		template: '<p z-inherit></p>'
 	});
 	let view = zam(document.body);
 	view.i = 20;

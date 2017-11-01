@@ -102,19 +102,7 @@
 					n,
 					r = 33 * On + 1,
 					i = Mn[r];
-				return i ? (On = i.nextPos, i.result) : (e = On, (n = d()) !== J && (Tn = e, n = W(n)), (e = n) === J && (e = On, t.length > On ? (n = t.charAt(On), On++) : (n = J, 0 === Dn && c(G)), n !== J && (Tn = e, n = K(n)), e = n), Mn[r] = {
-					nextPos: On,
-					result: e
-				}, e)
-			}
-			function d() {
-				var e,
-					n,
-					r,
-					i,
-					s = 33 * On + 2,
-					o = Mn[s];
-				return o ? (On = o.nextPos, o.result) : (e = On, t.substr(On, 3) === X ? (n = X, On += 3) : (n = J, 0 === Dn && c(Y)), n !== J && V() !== J && (r = h()) !== J && V() !== J ? (t.substr(On, 3) === Z ? (i = Z, On += 3) : (i = J, 0 === Dn && c(ee)), i !== J ? (Tn = e, e = n = te(r)) : (On = e, e = J)) : (On = e, e = J), e === J && (e = On, t.substr(On, 2) === ne ? (n = ne, On += 2) : (n = J, 0 === Dn && c(re)), n !== J && V() !== J && (r = h()) !== J && V() !== J ? (t.substr(On, 2) === ie ? (i = ie, On += 2) : (i = J, 0 === Dn && c(se)), i !== J ? (Tn = e, e = n = oe(r)) : (On = e, e = J)) : (On = e, e = J)), Mn[s] = {
+				return i ? (On = i.nextPos, i.result) : (e = On, (n = h()) !== J && (Tn = e, n = W(n)), (e = n) === J && (e = On, t.length > On ? (n = t.charAt(On), On++) : (n = J, 0 === Dn && c(G)), n !== J && (Tn = e, n = K(n)), e = n), Mn[r] = {
 					nextPos: On,
 					result: e
 				}, e)
@@ -124,9 +112,21 @@
 					n,
 					r,
 					i,
+					s = 33 * On + 2,
+					o = Mn[s];
+				return o ? (On = o.nextPos, o.result) : (e = On, t.substr(On, 3) === X ? (n = X, On += 3) : (n = J, 0 === Dn && c(Y)), n !== J && V() !== J && (r = d()) !== J && V() !== J ? (t.substr(On, 3) === Z ? (i = Z, On += 3) : (i = J, 0 === Dn && c(ee)), i !== J ? (Tn = e, e = n = te(r)) : (On = e, e = J)) : (On = e, e = J), e === J && (e = On, t.substr(On, 2) === ne ? (n = ne, On += 2) : (n = J, 0 === Dn && c(re)), n !== J && V() !== J && (r = d()) !== J && V() !== J ? (t.substr(On, 2) === ie ? (i = ie, On += 2) : (i = J, 0 === Dn && c(se)), i !== J ? (Tn = e, e = n = oe(r)) : (On = e, e = J)) : (On = e, e = J)), Mn[s] = {
+					nextPos: On,
+					result: e
+				}, e)
+			}
+			function d() {
+				var e,
+					n,
+					r,
+					i,
 					s = 33 * On + 3,
 					o = Mn[s];
-				return o ? (On = o.nextPos, o.result) : (e = On, n = p(), n !== J && V() !== J ? (61 === t.charCodeAt(On) ? (r = ue, On++) : (r = J, 0 === Dn && c(ae)), r === J && (t.substr(On, 2) === ce ? (r = ce, On += 2) : (r = J, 0 === Dn && c(le)), r === J && (t.substr(On, 2) === fe ? (r = fe, On += 2) : (r = J, 0 === Dn && c(de)), r === J && (t.substr(On, 2) === he ? (r = he, On += 2) : (r = J, 0 === Dn && c(pe)), r === J && (t.substr(On, 2) === me ? (r = me, On += 2) : (r = J, 0 === Dn && c(ve)), r === J && (t.substr(On, 2) === xe ? (r = xe, On += 2) : (r = J, 0 === Dn && c(ye))))))), r !== J && V() !== J && (i = h()) !== J ? (Tn = e, e = n = ge(n, r, i)) : (On = e, e = J)) : (On = e, e = J), e === J && (e = m()), Mn[s] = {
+				return o ? (On = o.nextPos, o.result) : (e = On, n = p(), n !== J && V() !== J ? (61 === t.charCodeAt(On) ? (r = ue, On++) : (r = J, 0 === Dn && c(ae)), r === J && (t.substr(On, 2) === ce ? (r = ce, On += 2) : (r = J, 0 === Dn && c(le)), r === J && (t.substr(On, 2) === fe ? (r = fe, On += 2) : (r = J, 0 === Dn && c(he)), r === J && (t.substr(On, 2) === de ? (r = de, On += 2) : (r = J, 0 === Dn && c(pe)), r === J && (t.substr(On, 2) === me ? (r = me, On += 2) : (r = J, 0 === Dn && c(ve)), r === J && (t.substr(On, 2) === xe ? (r = xe, On += 2) : (r = J, 0 === Dn && c(ye))))))), r !== J && V() !== J && (i = d()) !== J ? (Tn = e, e = n = ge(n, r, i)) : (On = e, e = J)) : (On = e, e = J), e === J && (e = m()), Mn[s] = {
 					nextPos: On,
 					result: e
 				}, e)
@@ -310,7 +310,7 @@
 					s,
 					o = 33 * On + 15,
 					u = Mn[o];
-				return u ? (On = u.nextPos, u.result) : (e = On, (n = N()) === J && (n = L()) === J && (n = S()) === J && (n = $()) === J && (n = z()) === J && (n = On, 40 === t.charCodeAt(On) ? (r = lt, On++) : (r = J, 0 === Dn && c(ft)), r !== J && V() !== J && (i = h()) !== J && V() !== J ? (41 === t.charCodeAt(On) ? (s = dt, On++) : (s = J, 0 === Dn && c(ht)), s !== J ? (Tn = n, n = r = W(i)) : (On = n, n = J)) : (On = n, n = J)), n !== J && (r = w()) !== J ? (Tn = e, e = n = pt(n, r)) : (On = e, e = J), Mn[o] = {
+				return u ? (On = u.nextPos, u.result) : (e = On, (n = N()) === J && (n = L()) === J && (n = S()) === J && (n = $()) === J && (n = z()) === J && (n = On, 40 === t.charCodeAt(On) ? (r = lt, On++) : (r = J, 0 === Dn && c(ft)), r !== J && V() !== J && (i = d()) !== J && V() !== J ? (41 === t.charCodeAt(On) ? (s = ht, On++) : (s = J, 0 === Dn && c(dt)), s !== J ? (Tn = n, n = r = W(i)) : (On = n, n = J)) : (On = n, n = J)), n !== J && (r = w()) !== J ? (Tn = e, e = n = pt(n, r)) : (On = e, e = J), Mn[o] = {
 					nextPos: On,
 					result: e
 				}, e)
@@ -324,7 +324,7 @@
 					o = 33 * On + 16,
 					u = Mn[o];
 				if (u) return On = u.nextPos, u.result;
-				for (e = [], n = On, V() !== J ? (91 === t.charCodeAt(On) ? (r = mt, On++) : (r = J, 0 === Dn && c(vt)), r !== J && V() !== J && (i = h()) !== J && V() !== J ? (93 === t.charCodeAt(On) ? (s = xt, On++) : (s = J, 0 === Dn && c(yt)), s !== J ? (Tn = n, n = gt(i)) : (On = n, n = J)) : (On = n, n = J)) : (On = n, n = J), n === J && (n = On, V() !== J ? (46 === t.charCodeAt(On) ? (r = bt, On++) : (r = J, 0 === Dn && c(At)), r !== J && V() !== J && (i = L()) !== J ? (Tn = n, n = Pt(i)) : (On = n, n = J)) : (On = n, n = J)); n !== J;) e.push(n), n = On, V() !== J ? (91 === t.charCodeAt(On) ? (r = mt, On++) : (r = J, 0 === Dn && c(vt)), r !== J && V() !== J && (i = h()) !== J && V() !== J ? (93 === t.charCodeAt(On) ? (s = xt, On++) : (s = J, 0 === Dn && c(yt)), s !== J ? (Tn = n, n = gt(i)) : (On = n, n = J)) : (On = n, n = J)) : (On = n, n = J), n === J && (n = On, V() !== J ? (46 === t.charCodeAt(On) ? (r = bt, On++) : (r = J, 0 === Dn && c(At)), r !== J && V() !== J && (i = L()) !== J ? (Tn = n, n = Pt(i)) : (On = n, n = J)) : (On = n, n = J));
+				for (e = [], n = On, V() !== J ? (91 === t.charCodeAt(On) ? (r = mt, On++) : (r = J, 0 === Dn && c(vt)), r !== J && V() !== J && (i = d()) !== J && V() !== J ? (93 === t.charCodeAt(On) ? (s = xt, On++) : (s = J, 0 === Dn && c(yt)), s !== J ? (Tn = n, n = gt(i)) : (On = n, n = J)) : (On = n, n = J)) : (On = n, n = J), n === J && (n = On, V() !== J ? (46 === t.charCodeAt(On) ? (r = bt, On++) : (r = J, 0 === Dn && c(At)), r !== J && V() !== J && (i = L()) !== J ? (Tn = n, n = Pt(i)) : (On = n, n = J)) : (On = n, n = J)); n !== J;) e.push(n), n = On, V() !== J ? (91 === t.charCodeAt(On) ? (r = mt, On++) : (r = J, 0 === Dn && c(vt)), r !== J && V() !== J && (i = d()) !== J && V() !== J ? (93 === t.charCodeAt(On) ? (s = xt, On++) : (s = J, 0 === Dn && c(yt)), s !== J ? (Tn = n, n = gt(i)) : (On = n, n = J)) : (On = n, n = J)) : (On = n, n = J), n === J && (n = On, V() !== J ? (46 === t.charCodeAt(On) ? (r = bt, On++) : (r = J, 0 === Dn && c(At)), r !== J && V() !== J && (i = L()) !== J ? (Tn = n, n = Pt(i)) : (On = n, n = J)) : (On = n, n = J));
 				return Mn[o] = {
 						nextPos: On,
 						result: e
@@ -355,12 +355,12 @@
 					l = 33 * On + 18,
 					f = Mn[l];
 				if (f) return On = f.nextPos, f.result;
-				if (e = On, 40 === t.charCodeAt(On) ? (n = lt, On++) : (n = J, 0 === Dn && c(ft)), n !== J && V() !== J ? (41 === t.charCodeAt(On) ? (r = dt, On++) : (r = J, 0 === Dn && c(ht)), r !== J ? (Tn = e, e = n = Nt()) : (On = e, e = J)) : (On = e, e = J), e === J)
+				if (e = On, 40 === t.charCodeAt(On) ? (n = lt, On++) : (n = J, 0 === Dn && c(ft)), n !== J && V() !== J ? (41 === t.charCodeAt(On) ? (r = ht, On++) : (r = J, 0 === Dn && c(dt)), r !== J ? (Tn = e, e = n = Nt()) : (On = e, e = J)) : (On = e, e = J), e === J)
 					if (e = On, 40 === t.charCodeAt(On) ? (n = lt, On++) : (n = J, 0 === Dn && c(ft)), n !== J)
 						if (V() !== J)
-							if ((r = h()) !== J) {
-								for (i = [], s = On, (o = V()) !== J ? (44 === t.charCodeAt(On) ? (u = jt, On++) : (u = J, 0 === Dn && c(Lt)), u !== J && V() !== J && (a = h()) !== J ? (Tn = s, s = o = $t(r, a)) : (On = s, s = J)) : (On = s, s = J); s !== J;) i.push(s), s = On, (o = V()) !== J ? (44 === t.charCodeAt(On) ? (u = jt, On++) : (u = J, 0 === Dn && c(Lt)), u !== J && V() !== J && (a = h()) !== J ? (Tn = s, s = o = $t(r, a)) : (On = s, s = J)) : (On = s, s = J);
-								i !== J && (s = V()) !== J ? (41 === t.charCodeAt(On) ? (o = dt, On++) : (o = J, 0 === Dn && c(ht)), o !== J ? (Tn = e, e = n = qt(r, i)) : (On = e, e = J)) : (On = e, e = J)
+							if ((r = d()) !== J) {
+								for (i = [], s = On, (o = V()) !== J ? (44 === t.charCodeAt(On) ? (u = jt, On++) : (u = J, 0 === Dn && c(Lt)), u !== J && V() !== J && (a = d()) !== J ? (Tn = s, s = o = $t(r, a)) : (On = s, s = J)) : (On = s, s = J); s !== J;) i.push(s), s = On, (o = V()) !== J ? (44 === t.charCodeAt(On) ? (u = jt, On++) : (u = J, 0 === Dn && c(Lt)), u !== J && V() !== J && (a = d()) !== J ? (Tn = s, s = o = $t(r, a)) : (On = s, s = J)) : (On = s, s = J);
+								i !== J && (s = V()) !== J ? (41 === t.charCodeAt(On) ? (o = ht, On++) : (o = J, 0 === Dn && c(dt)), o !== J ? (Tn = e, e = n = qt(r, i)) : (On = e, e = J)) : (On = e, e = J)
 							} else On = e, e = J;
 						else On = e, e = J;
 					else On = e, e = J;
@@ -411,8 +411,8 @@
 					u = 33 * On + 21,
 					a = Mn[u];
 				if (a) return On = a.nextPos, a.result;
-				if (e = On, (n = h()) !== J) {
-					for (r = [], i = On, V() !== J ? (44 === t.charCodeAt(On) ? (s = jt, On++) : (s = J, 0 === Dn && c(Lt)), s !== J && V() !== J && (o = h()) !== J ? (Tn = i, i = Rt(n, o)) : (On = i, i = J)) : (On = i, i = J); i !== J;) r.push(i), i = On, V() !== J ? (44 === t.charCodeAt(On) ? (s = jt, On++) : (s = J, 0 === Dn && c(Lt)), s !== J && V() !== J && (o = h()) !== J ? (Tn = i, i = Rt(n, o)) : (On = i, i = J)) : (On = i, i = J);
+				if (e = On, (n = d()) !== J) {
+					for (r = [], i = On, V() !== J ? (44 === t.charCodeAt(On) ? (s = jt, On++) : (s = J, 0 === Dn && c(Lt)), s !== J && V() !== J && (o = d()) !== J ? (Tn = i, i = Rt(n, o)) : (On = i, i = J)) : (On = i, i = J); i !== J;) r.push(i), i = On, V() !== J ? (44 === t.charCodeAt(On) ? (s = jt, On++) : (s = J, 0 === Dn && c(Lt)), s !== J && V() !== J && (o = d()) !== J ? (Tn = i, i = Rt(n, o)) : (On = i, i = J)) : (On = i, i = J);
 					r !== J ? (Tn = e, e = n = qt(n, r)) : (On = e, e = J)
 				} else On = e, e = J;
 				return Mn[u] = {
@@ -460,7 +460,7 @@
 					i,
 					s = 33 * On + 24,
 					o = Mn[s];
-				return o ? (On = o.nextPos, o.result) : (e = On, (n = L()) === J && (n = R()) === J && (n = B()), n !== J && V() !== J ? (58 === t.charCodeAt(On) ? (r = Pe, On++) : (r = J, 0 === Dn && c(ke)), r !== J && V() !== J && (i = h()) !== J ? (Tn = e, e = n = Wt(n, i)) : (On = e, e = J)) : (On = e, e = J), Mn[s] = {
+				return o ? (On = o.nextPos, o.result) : (e = On, (n = L()) === J && (n = R()) === J && (n = B()), n !== J && V() !== J ? (58 === t.charCodeAt(On) ? (r = Pe, On++) : (r = J, 0 === Dn && c(ke)), r !== J && V() !== J && (i = d()) !== J ? (Tn = e, e = n = Wt(n, i)) : (On = e, e = J)) : (On = e, e = J), Mn[s] = {
 					nextPos: On,
 					result: e
 				}, e)
@@ -523,7 +523,7 @@
 					o = Mn[s];
 				if (o) return On = o.nextPos, o.result;
 				if (48 === t.charCodeAt(On) ? (e = cn, On++) : (e = J, 0 === Dn && c(ln)), e === J)
-					if (e = On, fn.test(t.charAt(On)) ? (n = t.charAt(On), On++) : (n = J, 0 === Dn && c(dn)), n !== J) {
+					if (e = On, fn.test(t.charAt(On)) ? (n = t.charAt(On), On++) : (n = J, 0 === Dn && c(hn)), n !== J) {
 						for (r = [], on.test(t.charAt(On)) ? (i = t.charAt(On), On++) : (i = J, 0 === Dn && c(un)); i !== J;) r.push(i), on.test(t.charAt(On)) ? (i = t.charAt(On), On++) : (i = J, 0 === Dn && c(un));
 						r !== J ? e = n = [n, r] : (On = e, e = J)
 					} else On = e, e = J;
@@ -541,7 +541,7 @@
 					o = 33 * On + 29,
 					u = Mn[o];
 				if (u) return On = u.nextPos, u.result;
-				if (e = On, t.substr(On, 1).toLowerCase() === hn ? (n = t.charAt(On), On++) : (n = J, 0 === Dn && c(pn)), n !== J)
+				if (e = On, t.substr(On, 1).toLowerCase() === dn ? (n = t.charAt(On), On++) : (n = J, 0 === Dn && c(pn)), n !== J)
 					if (Ke.test(t.charAt(On)) ? (r = t.charAt(On), On++) : (r = J, 0 === Dn && c(Xe)), r === J && (r = null), r !== J) {
 						if (i = [], on.test(t.charAt(On)) ? (s = t.charAt(On), On++) : (s = J, 0 === Dn && c(un)), s !== J)
 							for (; s !== J;) i.push(s), on.test(t.charAt(On)) ? (s = t.charAt(On), On++) : (s = J, 0 === Dn && c(un));
@@ -606,7 +606,7 @@
 				J = {},
 				U = {
 					Text: l,
-					Expression: h
+					Expression: d
 				},
 				Q = l,
 				H = function(e) {
@@ -648,8 +648,8 @@
 				ce = "*=",
 				le = i("*=", !1),
 				fe = "/=",
-				de = i("/=", !1),
-				he = "%=",
+				he = i("/=", !1),
+				de = "%=",
 				pe = i("%=", !1),
 				me = "+=",
 				ve = i("+=", !1),
@@ -763,8 +763,8 @@
 				},
 				lt = "(",
 				ft = i("(", !1),
-				dt = ")",
-				ht = i(")", !1),
+				ht = ")",
+				dt = i(")", !1),
 				pt = function(e, t) {
 					return t.reduce(function(e, t) {
 						return {
@@ -900,8 +900,8 @@
 				cn = "0",
 				ln = i("0", !1),
 				fn = /^[1-9]/,
-				dn = s([["1", "9"]], !1, !1),
-				hn = "e",
+				hn = s([["1", "9"]], !1, !1),
+				dn = "e",
 				pn = i("e", !0),
 				mn = o("string"),
 				vn = '"',
@@ -1098,14 +1098,14 @@
 			"initialize" === t ? n.directive[t].call(n, e.node, ...n.args) : n.directive[t].call(n, e.scope, e.node, ...n.args)
 		},
 		f = (e, t, n) => {
-			if (e instanceof h) return e;
-			"string" == typeof e ? e = document.querySelector(e) : e.jquery && (e = e[0]);return new h(e, t, n)
+			if (e instanceof d) return e;
+			"string" == typeof e ? e = document.querySelector(e) : e.jquery && (e = e[0]);return new d(e, t, n)
 		};
-	let d = 0;
-	class h {
+	let h = 0;
+	class d {
 		constructor(e, t) {
 			let n = arguments.length > 2 && void 0 !== arguments[2] && arguments[2];
-			if (this.__id = ++d, this.node = e, this.children = [], this.binds = [], this.type = e.nodeType, e.vnode && !t)
+			if (this.__id = ++h, this.node = e, this.children = [], this.binds = [], this.type = e.nodeType, e.vnode && !t)
 				n ? (this.parent = e.vnode, e.vnode = this, this.type = this.parent.type, this.children = this.parent.children, this.binds = this.parent.binds, this.parent.children = [], this.parent.binds = []) : (e.vnode.parent = this, this.pointer = e.vnode);
 			else if (t) {
 				e.vnode = this, this.blocked = t.blocked, this.type = t.type, t.binds.forEach(e => {
@@ -1244,39 +1244,39 @@
 				a = f(e, null, !0),
 				c = {},
 				l = [],
-				d = Object.assign({
+				h = Object.assign({
 					$id: m++,
 					$(e) {
-						if (a) return e ? u || (u = r(() => d.$())) : (u && (u = u()), a.updateBinds(d), v(c, "update"), l.forEach(e => {
-									const t = o(e.ast, d).value;
+						if (a) return e ? u || (u = r(() => h.$())) : (u && (u = u()), a.updateBinds(h), v(c, "update"), l.forEach(e => {
+									const t = o(e.ast, h).value;
 									t !== e.val && (e.val = t, e.cb(t))
-								})), d
+								})), h
 					},
 					$destroy() {
-						return a.destroyBinds(d), v(c, "destroy"), a = void 0, d
+						return a.destroyBinds(h), v(c, "destroy"), a = void 0, h
 					},
 					$on(e, t) {
-						return c[e] = [t].concat(c[e] || []), d
+						return c[e] = [t].concat(c[e] || []), h
 					},
 					$off(e, n) {
-						return t(c[e], n), d
+						return t(c[e], n), h
 					},
 					$watch(e, t) {
 						return l.push({
 								expr: e,
 								ast: s(e),
 								cb: t
-							}), d
+							}), h
 					},
 					$unwatch(e, n) {
 						const r = l.find(t => t.expr === e && t.cb === n);
-						return t(l, r), d
+						return t(l, r), h
 					},
 					get $parent() {
 						return i || a.parent && a.parent.scope || y.root
 					}
 				}, n);
-			a.createBinds(d);d.$(!0);return x(d, d)
+			a.createBinds(h);h.$(!0);return x(h, h)
 		},
 		g = e => {
 			let t = e.query.match(/<([^\s>="]+)((?:\s+[^\s>="]+(?:\s*=\s*"[^"]*")?)*)>/);
@@ -1482,7 +1482,7 @@
 				this.view.$()
 			}
 		}, {
-			query: "<.+ {prefix}transclude>",
+			query: "<.+ {prefix}inherit>",
 			block: !0,
 			create(e, t) {
 				let n,

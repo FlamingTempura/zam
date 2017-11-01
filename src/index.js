@@ -11,10 +11,10 @@ import dOn from './directives/on';
 import dSkip from './directives/skip';
 import dCloak from './directives/cloak';
 import dIsolate from './directives/isolate';
-import dTransclude from './directives/transclude';
+import dInherit from './directives/inherit';
 import dValue from './directives/value';
 
 [dText, dShow, dAttr, dClass, dExist, dStyle, dModel, dIn, dOn, dSkip, dCloak,
-	dIsolate, dTransclude, dValue].forEach(zam.directive);
+	dIsolate, dInherit, dValue].forEach(zam.directive);
 
 export default zam;
