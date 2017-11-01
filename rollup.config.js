@@ -20,7 +20,7 @@ const browsers = [
 	'Samsung >=5'
 ];
 
-const zamscript = fs.readFileSync('./zam.js', 'utf8');
+let zamscript;
 const renderExample = (html, cb) => { // set global document to new dom
 	try {
 		let window = (new jsdom.JSDOM(html, { runScripts: 'outside-only' })).window,
@@ -44,6 +44,7 @@ const renderExample = (html, cb) => { // set global document to new dom
 };
 
 const generateDocs = () => {
+	zamscript = fs.readFileSync('./zam.js', 'utf8');
 	let readme = fs.readFileSync('README.md', 'utf8'),
 		docs = fs.readdirSync('src/directives')
 			.map(file => {
@@ -90,7 +91,7 @@ const generateDocs = () => {
 export default {
 	input: 'src/index.js',
 	plugins: [
-		{ ongenerate: generateDocs },
+		{ onwrite: generateDocs },
 		pegjs({
 			allowedStartRules: ['Text', 'Expression'],
 			optimize: 'speed', // 'speed'
