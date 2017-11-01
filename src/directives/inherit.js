@@ -1,6 +1,6 @@
 /*
 `z-inherit` - Set where template should inherit specified contents
-@ORDER 10
+@ORDER 11
 
 For use in directives, this allows the original content of an element to be
 placed within a templated directive.

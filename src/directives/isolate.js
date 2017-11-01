@@ -1,6 +1,6 @@
 /*
 `z-isolate` - Create an isolate scope
-@ORDER 1
+@ORDER 10
 
 Creates a new scope for the DOM element and its children.
 

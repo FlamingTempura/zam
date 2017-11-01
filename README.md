@@ -134,34 +134,6 @@ Some HTML: <span><em>Bob</em></span>
 Together: <span>Bob, <span><em>Bob</em></span></span>
 ```
 
-### `z-isolate` - Create an isolate scope
-
-Creates a new scope for the DOM element and its children.
-
-```html
-{{ name }}
-<input ng-model="name">
-<div z-isolate>
-	{{ name }}
-	<input ng-model="name">
-</div>
-<script>
-	const view = zam(document.body);
-	view.name = 'Bob';
-</script>
-```
-
-Result:
-
-```html
-Bob
-<input ng-model="name">
-<div>
-	Bob
-	<input ng-model="name">
-</div>
-```
-
 ### `z-show` - Conditional visibility
 
 Displays the element only if the result of the expression is
@@ -187,10 +159,6 @@ Result:
 <div>My name is Bob</div>
 <button>Hide</button>
 ```
-
-### `z-isolate` - Create an isolate scope
-
-For <input> tags, or <option> tags within <select>.
 
 ### `z-exist` - Conditional existence
 
@@ -421,6 +389,34 @@ Result:
 </div>
 ```
 
+### `z-isolate` - Create an isolate scope
+
+Creates a new scope for the DOM element and its children.
+
+```html
+{{ name }}
+<input ng-model="name">
+<div z-isolate>
+	{{ name }}
+	<input ng-model="name">
+</div>
+<script>
+	const view = zam(document.body);
+	view.name = 'Bob';
+</script>
+```
+
+Result:
+
+```html
+Bob
+<input ng-model="name">
+<div>
+	Bob
+	<input ng-model="name">
+</div>
+```
+
 ### `z-inherit` - Set where template should inherit specified contents
 
 For use in directives, this allows the original content of an element to be
@@ -443,6 +439,10 @@ Result:
 ```html
 <p id="d">Name: <strong>Bob</strong></p>
 ```
+
+### `z-value` - Set the value of options
+
+For <input> tags, or <option> tags within <select>.
 
 [//]: # (DOC1!)
 

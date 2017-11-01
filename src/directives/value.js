@@ -1,6 +1,6 @@
 /*
-`z-isolate` - Create an isolate scope
-@ORDER 3
+`z-value` - Set the value of options
+@ORDER 30
 
 For <input> tags, or <option> tags within <select>.
 */
