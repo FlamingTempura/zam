@@ -442,7 +442,7 @@ Result:
 
 ### `z-value` - Set the value of options
 
-For <input> tags, or <option> tags within <select>.
+For `<input>` tags, or `<option>` tags within `<select>`.
 
 ```html
 <select z-model="selectedCar">

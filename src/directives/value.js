@@ -2,7 +2,7 @@
 `z-value` - Set the value of options
 @ORDER 30
 
-For <input> tags, or <option> tags within <select>.
+For `<input>` tags, or `<option>` tags within `<select>`.
 
 @CODE
 <select z-model="selectedCar">
