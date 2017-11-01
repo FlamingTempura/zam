@@ -20,12 +20,11 @@ data will also change, and the view will be kept up to date.
 @RESULT
 */
 import { stringify, hash } from '../utils';
-import { parse, evaluate } from '../expression';
-import config from '../config';
+import { evaluate } from '../expression';
 
 export default {
 	query: '<input|select|textarea {prefix}model>',
-	block: true,
+	//block: true,
 	order: 3, // must happen before z-attr-* binds with z-value on radio inputs
 	create(scope, el, tag, attr) {
 		let inputType = (el.getAttribute('type') || '').toLowerCase();
@@ -38,12 +37,7 @@ export default {
 		if (this.type === 'radio' && !el.getAttribute('name')) {
 			el.setAttribute('name', hash(scope.$id + JSON.stringify(attr.ast))); // group radios by their model and scope
 		}
-		this.getValue = option => {
-			var valExpr = option.getAttribute(config.prefix + 'value');
-			return valExpr ?
-				evaluate(parse(valExpr), scope).value :
-				option.getAttribute('value');
-		};
+		this.getValue = option => option.hasOwnProperty('val') ? option.val : option.getAttribute('value');
 		this.handler = () => {
 			if (this.type === 'radio' && !el.checked) { return; }
 			let value = this.type === 'checkbox' ? !!el.checked :
@@ -75,15 +69,11 @@ export default {
 			if (this.type === 'checkbox') {
 				el.checked = !!value;
 			} else if (this.type === 'select') {
-				el.selectedIndex = Array.from(el.options).reduce((selected, option, i) => {
-					let v = this.getValue(option);
-					option.setAttribute('value', stringify(v));
-					return v === value ? i : selected;
-				}, -1);
+				el.selectedIndex = Array.from(el.options).findIndex(option => {
+					return JSON.stringify(this.getValue(option)) === JSON.stringify(value); // TODO: don't use stringify
+				});
 			} else if (this.type === 'radio') {
-				let v = this.getValue(el);
-				el.setAttribute('value', stringify(v));
-				el.checked = value === v;
+				el.checked = JSON.stringify(value) === JSON.stringify(this.getValue(el));
 			} else if (this.type === 'number') {
 				el.value = Number(value);
 			} else if (this.type === 'date') {

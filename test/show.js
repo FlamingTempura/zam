@@ -1,16 +1,13 @@
-'use strict';
-var test = require('tap').test,
-	zam = require('../'),
-	frames = require('./test-utils').frames,
-	up = require('./test-utils').up,
-	$ = require('./test-utils').$;
+const { test } = require('tap');
+const zam = require('../');
+const { steps, up, $ } = require('./test-utils');
 
 test('z-show', t => { // Conditionally display the element. Equivelant to style-display="thing ? "" : 'none'".
 	t.plan(8);
 	up(`<div z-show="showMe">Hello</div>
 		<span z-show="!showMe">Boo</span>`);
-	var view = zam(document.body);
-	frames(
+	let view = zam(document.body);
+	steps(
 		() => {
 			t.equal($('div').style.display, 'none');
 			t.equal($('span').style.display, '');

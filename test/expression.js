@@ -1,13 +1,14 @@
-'use strict';
-var test = require('tap').test,
-	zam = require('../');
+const { test } = require('tap');
+const zam = require('../');
+const parse = zam.__parse;
+const evaluate = zam.__evaluate;
 
 test('Expressions', t => { // The expressions used in a directive mostly include the JavaScript language.
-	var assertions = 1;
+	let assertions = 1;
 	global.i = 0;
-	var assert = function (expr, val) {
+	let assert = (expr, val) => {
 		assertions++;
-		var result = zam.evaluate(zam.parse(expr), global);
+		let result = evaluate(parse(expr), global);
 		if (typeof val === 'object') {
 			t.same(result.value, val);
 		} else {
@@ -15,7 +16,7 @@ test('Expressions', t => { // The expressions used in a directive mostly include
 		}
 	};
 
-	var syntax = zam.parse('blah', 'Text');
+	let syntax = parse('blah', 'Text');
 	t.same(syntax, ['blah']);
 
 	// Arithmatic

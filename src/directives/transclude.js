@@ -22,7 +22,12 @@ import virtualdom from '../virtualdom';
 export default {
 	query: '<.+ {prefix}transclude>',
 	block: true,
+	//order: 1,
+	initialize(el) {
+		console.log('~~~## transclude init', el.outerHTML);
+	},
 	create(scope, el) {
+		console.log('~~~## transclude create', el.outerHTML);
 		let vnode = el.vnode,
 			originalNode;
 		while (!originalNode && vnode) {
@@ -30,7 +35,9 @@ export default {
 			vnode = vnode.node.parentNode && vnode.node.parentNode.vnode;
 		}
 		if (originalNode) {
+			console.log('qq', originalNode.outerHTML)
 			Array.from(originalNode.childNodes).forEach(child => {
+				console.log('qq-->', child.outerHTML)
 				let v = virtualdom(child);
 				el.appendChild(v.node);
 				el.vnode.children.push(v);

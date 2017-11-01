@@ -1,18 +1,15 @@
-'use strict';
-var test = require('tap').test,
-	zam = require('../'),
-	frames = require('./test-utils').frames,
-	up = require('./test-utils').up,
-	$ = require('./test-utils').$;
+const { test } = require('tap');
+const zam = require('../');
+const { steps, up, $ } = require('./test-utils');
 
 test('create', t => {
 	t.plan(8);
 	up(`<div id="a">{{ name }}</div>
 		<div id="b" z-text="name"></div>
 		<div id="c" z-text="name">{{ name }}</div>`);
-	var jq = [$('#c')]; // jquery-like
+	let jq = [$('#c')]; // jquery-like
 	jq.jquery = 'blah';
-	var view1 = zam('#a'),
+	let view1 = zam('#a'),
 		view2 = zam($('#b')),
 		view3 = zam(jq);
 	t.equal($('#a').textContent, '');
@@ -21,7 +18,7 @@ test('create', t => {
 	t.equal($('#c').textContent, '');
 	t.equal($('#c').getAttribute('z-text'), null);
 	view1.name = view2.name = view3.name = 'Lizzy';
-	frames(
+	steps(
 		() => {
 			t.equal($('#a').textContent, 'Lizzy');
 			t.equal($('#b').textContent, 'Lizzy');
@@ -34,9 +31,9 @@ test('destroy', t => {
 	t.plan(4);
 	up(`<div z-text="bar"></div>`);
 	t.equal($('div').getAttribute('z-text'), 'bar');
-	var view = zam(document.body);
-	var count = 0;
-	frames(
+	let view = zam(document.body);
+	let count = 0;
+	steps(
 		() => {
 			t.equal($('div').getAttribute('z-text'), null);
 			view.$on('destroy', () => { count++; });

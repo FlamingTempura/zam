@@ -1,5 +1,3 @@
-'use strict';
-
 const jsdom = require('jsdom');
 const moment = require('moment');
 
@@ -27,11 +25,11 @@ const up = html => { // set global document to new dom
 };
 const $ = selector => global.document.querySelector(selector);
 const $$ = selector => global.document.querySelectorAll(selector);
-const frames = (...callbacks) => { // each frame happens following the previous frame, giving time for dom updates
+const steps = (...callbacks) => { // each frame happens following the previous frame, giving time for dom updates
 	setTimeout(() => {
 		callbacks.shift()();
 		if (callbacks.length > 0) {
-			frames(...callbacks);
+			steps(...callbacks);
 		}
 	});
 };
@@ -40,4 +38,4 @@ const trigger = (element, eventname) => {
 	element.dispatchEvent(event);
 };
 
-module.exports = { up, $, $$, frames, trigger };
+module.exports = { up, $, $$, steps, trigger };

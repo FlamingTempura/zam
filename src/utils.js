@@ -9,19 +9,19 @@ const arrayRemove = (array, element) => {
 const hash = str => str.split('').reduce((hash, char) => (hash << 5) - hash + char.charCodeAt(0) | 0, 0).toString(16);
 
 const nextTick = cb => {
-	var cancelled,
-		fn = () => { if (!cancelled) { cb(); } };
+	let cancelled;
+	const fn = () => { if (!cancelled) { cb(); } };
 	if (typeof process !== 'undefined') {
 		process.nextTick(fn);
 	} else {
-		let id = String(Math.random()),
-			handler = e => {
-				if (e.data === id) {
-					e.stopPropagation();
-					fn();
-					window.removeEventListener('message', handler, true);
-				}
-			};
+		const id = String(Math.random());
+		const handler = e => {
+			if (e.data === id) {
+				e.stopPropagation();
+				fn();
+				window.removeEventListener('message', handler, true);
+			}
+		};
 		window.addEventListener('message', handler, true);
 		window.postMessage(id, '*');
 	}

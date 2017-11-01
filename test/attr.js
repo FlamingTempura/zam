@@ -1,17 +1,14 @@
-'use strict';
-var test = require('tap').test,
-	zam = require('../'),
-	frames = require('./test-utils').frames,
-	up = require('./test-utils').up,
-	$ = require('./test-utils').$;
+const { test } = require('tap');
+const zam = require('../');
+const { steps, up, $ } = require('./test-utils');
 
 test('z-attr-*', t => { // Attribute value
 	t.plan(6);
 	up(`<input type="text" z-attr-disabled="!showMe" z-value="!showMe"></input>
 		<div z-attr-lang="showMe ? 'english' : 'french'"></div>`);
-	var view = zam(document.body);
+	let view = zam(document.body);
 	view.showMe = false;
-	frames(
+	steps(
 		() => {
 			t.equal($('input').getAttribute('disabled'), 'disabled');
 			t.equal($('input').getAttribute('value'), 'true');

@@ -1,9 +1,6 @@
-'use strict';
-var test = require('tap').test,
-	zam = require('../'),
-	frames = require('./test-utils').frames,
-	up = require('./test-utils').up,
-	$ = require('./test-utils').$;
+const { test } = require('tap');
+const zam = require('../');
+const { steps, up, $ } = require('./test-utils');
 
 test('text interpolation', t => {
 	t.plan(14);
@@ -12,11 +9,11 @@ test('text interpolation', t => {
 		<div id="c">{{ something }}</div>
 		<div id="e">{{ date.toISOString() }}</div>
 		<form><div>{{name + 'y'}}</div><button>ok</button></form>`); // check that forms don't break things
-	var view = zam(document.body);
+	let view = zam(document.body);
 	view.date = new Date(1509028530345);
 	t.equal($('#a').textContent, '');
 	t.equal($('#b').textContent, '');
-	frames(
+	steps(
 		() => {
 			t.equal($('#a').textContent, '');
 			t.equal($('#b').textContent, 'y');
@@ -47,8 +44,8 @@ test('html interpolation', t => {
 	t.plan(10);
 	up(`<div id="a">{{{ name }}}</div>
 		<div id="b">{{{ name + 'y' }}} boo</div>`);
-	var view = zam(document.body);
-	frames(
+	let view = zam(document.body);
+	steps(
 		() => {
 			t.equal($('#a').textContent, '');
 			t.equal($('#b').textContent, 'y boo');
@@ -74,8 +71,8 @@ test('z-text', t => { // set text content
 	t.plan(6);
 	up(`<div>Name: <span z-text="person.name">delete me</span></div>
 		<strong z-text="'Welcome ' + person.name"></strong>`);
-	var view = zam(document.body);
-	frames(
+	let view = zam(document.body);
+	steps(
 		() => {
 			t.equal($('span').textContent, '');
 			t.equal($('strong').textContent, 'Welcome ');
@@ -97,8 +94,8 @@ test('z-html', t => { // Set HTML content
 	t.plan(10);
 	up(`<div z-html="boldName">Some HTML</div>
 		Even more HTML: <span z-html="italicName + 'boo'"></span>`);
-	var view = zam(document.body);
-	frames(
+	let view = zam(document.body);
+	steps(
 		() => {
 			t.equal($('div').textContent, '');
 			t.equal($('span').textContent, 'boo');
@@ -134,9 +131,9 @@ test('incomplete tags', t => {
 		<div id="f">{ {{ hello }} }</div>
 		<div id="g">{{ hello }} {{</div>
 		<div id="h">{{{ hello }}} {{</div>`);
-	var view = zam(document.body);
+	let view = zam(document.body);
 	view.hello = 'boo';
-	frames(
+	steps(
 		() => {
 			t.equal($('#a').textContent, '{{ hello');
 			t.equal($('#b').textContent, '{{ hello }');

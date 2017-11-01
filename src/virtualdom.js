@@ -90,15 +90,16 @@ class VirtualNode {
 
 					let attrMatches = directive.attributeQueries.map(attrQ => {
 						if (!isMatch) { return; }
-						let match;
+						let attrPattern = attrQ.name.replace('{prefix}', config.prefix),
+							match;
 						this.attributes.find(attr => {
-							match = attr.name.match(new RegExp(`^${attrQ.name.replace('{prefix}', config.prefix)}$`, 'i'));
+							match = attr.name.match(new RegExp(`^${attrPattern}$`, 'i'));
 							return match;
 						});
 						if (match) {
 							return { name: match[0], match: match.slice(1) };
 						} else if (attrQ.defaultValue) {
-							return { name: attrQ.name, ast: attrQ.defaultValue, default: true };
+							return { name: attrPattern, ast: attrQ.defaultValue, default: true };
 						}
 						isMatch = false;
 					});
@@ -184,7 +185,9 @@ class VirtualNode {
 				vnode.node.setAttribute(attr.name, attr.value); // copy over attributes
 			});
 			this.originalNode = this.node;
-			this.node.parentNode.replaceChild(vnode.node, this.node);
+			if (this.node.parentNode) {
+				this.node.parentNode.replaceChild(vnode.node, this.node);
+			}
 			this.node = vnode.node;
 			this.node.vnode = this;
 			this.binds = this.binds.concat(vnode.binds);

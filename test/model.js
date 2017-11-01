@@ -1,21 +1,17 @@
-'use strict';
-var test = require('tap').test,
-	moment = require('moment'),
-	zam = require('../'),
-	frames = require('./test-utils').frames,
-	up = require('./test-utils').up,
-	$ = require('./test-utils').$,
-	trigger = require('./test-utils').trigger;
+const { test } = require('tap');
+const moment = require('moment');
+const zam = require('../');
+const { $, $$, up, steps, trigger } = require('./test-utils');
 
 test('z-model', t => { // Two way binding with element value
 	t.plan(10);
 	up(`<input id="a" type="text" z-model="blah">
 		<input id="b" type="text" z-model="thing.blah">
 		<div>such {{ blah }}</div>`);
-	var view = zam(document.body);
+	let view = zam(document.body);
 	view.blah = 'boo';
 	view.thing = { blah: 'foo' };
-	frames(
+	steps(
 		() => {
 			t.equal($('#a').value, 'boo');
 			t.equal($('#b').value, 'foo');
@@ -47,8 +43,8 @@ test('input text and textarea', t => {
 	t.plan(6);
 	up(`<input type="text" z-model="blah">
 		<textarea z-model="blah">`);
-	var view = zam(document.body);
-	frames(
+	let view = zam(document.body);
+	steps(
 		() => {
 			view.blah = 'boo';
 		},
@@ -75,8 +71,8 @@ test('input text and textarea', t => {
 test('input password', t => {
 	t.plan(3);
 	up(`<input type="password" z-model="blah">`);
-	var view = zam(document.body);
-	frames(
+	let view = zam(document.body);
+	steps(
 		() => {
 			view.blah = 'boo';
 		},
@@ -98,8 +94,8 @@ test('input password', t => {
 test('input search', t => {
 	t.plan(3);
 	up(`<input type="search" z-model="blah">`);
-	var view = zam(document.body);
-	frames(
+	let view = zam(document.body);
+	steps(
 		() => {
 			view.blah = 'boo';
 		},
@@ -121,8 +117,8 @@ test('input search', t => {
 test('input hidden', t => {
 	t.plan(3);
 	up(`<input type="hidden" z-model="blah">`);
-	var view = zam(document.body);
-	frames(
+	let view = zam(document.body);
+	steps(
 		() => {
 			view.blah = 'boo';
 		},
@@ -144,8 +140,8 @@ test('input hidden', t => {
 test('input url', t => {
 	t.plan(3);
 	up(`<input type="url" z-model="blah">`);
-	var view = zam(document.body);
-	frames(
+	let view = zam(document.body);
+	steps(
 		() => {
 			view.blah = 'http://foo.bar';
 		},
@@ -167,8 +163,8 @@ test('input url', t => {
 test('input email', t => {
 	t.plan(3);
 	up(`<input type="email" z-model="blah">`);
-	var view = zam(document.body);
-	frames(
+	let view = zam(document.body);
+	steps(
 		() => {
 			view.blah = 'boo@foo.bar';
 		},
@@ -190,8 +186,8 @@ test('input email', t => {
 test('input number', t => {
 	t.plan(3);
 	up(`<input type="number" z-model="blah">`);
-	var view = zam(document.body);
-	frames(
+	let view = zam(document.body);
+	steps(
 		() => {
 			view.blah = 102;
 		},
@@ -213,8 +209,8 @@ test('input number', t => {
 test('input range', t => {
 	t.plan(3);
 	up(`<input type="range" min="0" max="10" step="1" z-model="blah">`);
-	var view = zam(document.body);
-	frames(
+	let view = zam(document.body);
+	steps(
 		() => {
 			view.blah = 1;
 		},
@@ -241,10 +237,10 @@ test('input date/month/week/time', t => {
 		<input id="week" type="week" z-model="blah">
 		<input id="time" type="time" z-model="blah">`);
 	
-	var date = moment().toDate();
-	var view = zam(document.body);
+	let date = moment().toDate();
+	let view = zam(document.body);
 	view.blah = date;
-	frames(
+	steps(
 		() => {
 			t.equal($('#datetime').value, moment(date).format('YYYY-MM-DD[T]HH:mm:ss.SS'));
 			t.equal($('#date').value, moment(date).format('YYYY-MM-DD'));
@@ -290,8 +286,8 @@ test('input date/month/week/time', t => {
 test('input checkbox', t => {
 	t.plan(4);
 	up(`<input type="checkbox" z-model="blah">`);
-	var view = zam(document.body);
-	frames(
+	let view = zam(document.body);
+	steps(
 		() => {
 			view.blah = true;
 		},
@@ -314,35 +310,37 @@ test('input checkbox', t => {
 });
 
 test('input select', t => {
-	t.plan(22);
+	t.plan(24);
 	up(`<select z-model="blah">
 			<option value="hello">test1</option>
 			<option value="1">test2</option>
 			<option z-value="'boo'">test3</option>
 			<option z-value="2">test4</option>
-			<option z-value="{ a: 1 }">test5</option>
-			<option z-value="foo">test6</option>
+			<option z-value="foo">test5</option>
+			<option z-value="a">test6</option>
 		</select>`);
 
-	var view = zam(document.body),
-		fs = [() => {
-			view.foo = 'bar';	
-		}];
-	['hello', '1', 'boo', 2, { a: 1 }, 'bar'].forEach(function (val, i) {
+	let view = zam(document.body),
+		fs = [];
+	view.foo = 'bar';
+	view.a = { boo: {q:1} };
+	['hello', '1', 'boo', 2, 'bar', view.a].forEach((val, i) => {
 		fs.push(() => {
 			view.blah = val;
 		}, () => {
-			if (typeof val !== 'object') {
-				t.equal($('select').value, String(val));
-				t.equal($('select').selectedIndex, i);
-			}
+			t.equal($('select').selectedIndex, i);
+			t.equal($('select').value, i < 2 ? String(val) : JSON.stringify(val));
 		});
 	});
-	['hello', '1', 'boo', 2, { a: 1 }, 'bar'].forEach(function (val, i) {
+	['hello', '1', 'boo', 2, 'bar', view.a].forEach((val, i) => {
 		fs.push(() => {
 			$('select').selectedIndex = i;
 			trigger($('select'), 'change');
-			t.equal($('select').value, String(val));
+			if (i < 2) {
+				t.equal($('select').value, String(val));
+			} else {
+				t.equal($('select').value, JSON.stringify(val));
+			}
 			if (typeof val === 'string') {
 				t.equal(view.blah, val);
 			} else {
@@ -350,17 +348,49 @@ test('input select', t => {
 			}
 		});
 	});
-	frames.apply(null, fs);
+	steps(...fs);
+});
+
+test('input select (array of options)', t => {
+	t.plan(5);
+	up(`<select z-model="myjob">
+			<option value="none">No job</option>
+			<option z-job-in="jobs" z-value="job">{{ job.name }}</option>
+		</select>`);
+
+	let view = zam(document.body);
+	view.jobs = [
+		{ id: 1, name: 'farmer' },
+		{ id: 2, name: 'programmer' },
+		{ id: 3, name: 'cook' }
+	];
+	steps(
+		() => {
+			t.equal($$('option').length, 4);
+			$('select').selectedIndex = 0;
+			trigger($('select'), 'change');
+			t.equal(view.myjob, 'none');
+			$('select').selectedIndex = 1;
+			trigger($('select'), 'change');
+			t.same(view.myjob, view.jobs[0]);
+			$('select').selectedIndex = 2;
+			trigger($('select'), 'change');
+			t.same(view.myjob, view.jobs[1]);
+			$('select').selectedIndex = 3;
+			trigger($('select'), 'change');
+			t.same(view.myjob, view.jobs[2]);
+		}
+	);
 });
 
 test('input radio', t => {
-	t.plan(28);
+	t.plan(30);
 	up(`<div class="a">
 			<input type="radio" z-model="blah" value="hello">
 			<input type="radio" z-model="blah" value="1">
 			<input type="radio" z-model="blah" z-value="'boo'">
 			<input type="radio" z-model="blah" z-value="2">
-			<input type="radio" z-model="blah" z-value="{ a: 1 }">
+			<input type="radio" z-model="blah" z-value="a">
 			<input type="radio" z-model="blah" z-value="foo">
 		</div>
 		<div class="b">
@@ -368,26 +398,29 @@ test('input radio', t => {
 			<input type="radio" z-model="moo" value="y">
 		</div>`);
 
-	var view = zam(document.body),
-		fs = [() => {
-			view.foo = 'bar';
-			view.moo = 'y';
-		}];
-	['hello', '1', 'boo', 2, { a: 1 }, 'bar'].forEach(function (val) {
+	let view = zam(document.body),
+		fs = [];
+	view.foo = 'bar';
+	view.moo = 'y';
+	view.a = { a: 1 };
+	['hello', '1', 'boo', 2, view.a, 'bar'].forEach((val, i) => {
+
 		fs.push(() => {
 			view.blah = val;
 		}, () => {
-			if (typeof val !== 'object') {
-				t.equal($('.a input:checked').value, String(val));
-				t.equal($('.b input:checked').value, 'y');
-			}
+			t.equal($('.a input:checked').value, i < 2 ? String(val) : JSON.stringify(val));
+			t.equal($('.b input:checked').value, 'y');
 		});
 	});
-	['hello', '1', 'boo', 2, { a: 1 }, 'bar'].forEach(function (val, i) {
+	['hello', '1', 'boo', 2, view.a, 'bar'].forEach((val, i) => {
 		fs.push(() => {
-			$('.a input:nth-child(' + (i + 1) + ')').checked = true;
-			trigger($('.a input:nth-child(' + (i + 1) + ')'), 'change');
-			t.equal($('.a input:checked').value, String(val));
+			$(`.a input:nth-child(${i + 1})`).checked = true;
+			trigger($(`.a input:nth-child(${i + 1})`), 'change');
+			if (i < 2) {
+				t.equal($('.a input:checked').value, String(val));
+			} else {
+				t.equal($('.a input:checked').value, JSON.stringify(val));
+			}
 			t.equal($('.b input:checked').value, 'y');
 			if (typeof val === 'string') {
 				t.equal(view.blah, val);
@@ -396,15 +429,15 @@ test('input radio', t => {
 			}
 		});
 	});
-	frames.apply(null, fs);
+	steps(...fs);
 });
 
 test('z-model destruction', t => {
 	t.plan(4);
 	up(`<input type="button" z-model="i">`);
-	var view = zam(document.body);
+	let view = zam(document.body);
 	view.i = 'a';
-	frames(
+	steps(
 		() => {
 			trigger($('input'), 'input');
 			t.equal($('input').value, 'a');

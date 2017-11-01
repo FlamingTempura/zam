@@ -1,15 +1,12 @@
-'use strict';
-var test = require('tap').test,
-	zam = require('../'),
-	frames = require('./test-utils').frames,
-	up = require('./test-utils').up,
-	$ = require('./test-utils').$;
+const { test } = require('tap');
+const zam = require('../');
+const { steps, up, $ } = require('./test-utils');
 
 test('z-exist', t => { // Conditional existance
 	t.plan(5);
 	up(`<div z-exist="showMe">My name is {{ me.name }}</div>`);
-	var view = zam(document.body);
-	frames(
+	let view = zam(document.body);
+	steps(
 		() => {
 			view.me = { name: 'moi' };
 			view.showMe = false;

@@ -1,9 +1,6 @@
-'use strict';
-var test = require('tap').test,
-	zam = require('../'),
-	frames = require('./test-utils').frames,
-	up = require('./test-utils').up,
-	$ = require('./test-utils').$;
+const { test } = require('tap');
+const zam = require('../');
+const { steps, up, $ } = require('./test-utils');
 
 test('cloak', t => {
 	t.plan(3);
@@ -12,7 +9,7 @@ test('cloak', t => {
 	t.equal(window.getComputedStyle($('#a')).getPropertyValue('display'), 'none');
 	zam(document.body);
 	t.equal(window.getComputedStyle($('#a')).getPropertyValue('display'), 'block');
-	frames(
+	steps(
 		() => {
 			t.equal(window.getComputedStyle($('#a')).getPropertyValue('display'), 'block');
 		}

@@ -1,16 +1,13 @@
-'use strict';
-var test = require('tap').test,
-	zam = require('../'),
-	frames = require('./test-utils').frames,
-	up = require('./test-utils').up,
-	$ = require('./test-utils').$;
+const { test } = require('tap');
+const zam = require('../');
+const { steps, up, $ } = require('./test-utils');
 
 test('z-class-*', t => { // Conditional class name
 	t.plan(2);
 	up(`<h4 class="thing" z-class-red="warning" z-class-blue="!warning"></h4>`);
-	var view = zam(document.body);
+	let view = zam(document.body);
 	view.warning = false;
-	frames(
+	steps(
 		() => {
 			t.equal($('h4').getAttribute('class'), 'thing blue');
 			view.warning = true;

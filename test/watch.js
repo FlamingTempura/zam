@@ -1,19 +1,15 @@
-'use strict';
-var test = require('tap').test,
-	zam = require('../'),
-	frames = require('./test-utils').frames,
-	up = require('./test-utils').up,
-	$ = require('./test-utils').$,
-	trigger = require('./test-utils').trigger;
+const { test } = require('tap');
+const zam = require('../');
+const { steps, up, $, trigger } = require('./test-utils');
 
 test('$watch', t => {
 	t.plan(9);
 	up(`<input type="text" z-model="foo">
 		<input type="button" z-click="foo = 'boo'">`);
-	var view = zam(document.body),
+	let view = zam(document.body),
 		count = 0,
 		handler = () => { count++; };
-	frames(
+	steps(
 		() => { // should trigger watch
 			view.$watch('foo', handler);
 			view.foo = 1;

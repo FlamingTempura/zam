@@ -36,7 +36,7 @@ const standardAttributes = [
 	'rowspan', 'sandbox', 'scope', 'scoped', 'seamless', 'selected', 'shape',
 	'size', 'sizes', 'slot', 'span', 'spellcheck', 'src', 'srcdoc', 'srclang',
 	'srcset', 'start', 'step', 'style', 'summary', 'tabindex', 'target', 'title',
-	'type', 'usemap', 'value', 'wrap'];
+	'type', 'usemap', 'wrap'];
 
 const booleanAttributes = [
 	'selected', 'checked', 'disabled', 'readonly', 'multiple', 'ismap', 'defer', 

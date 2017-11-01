@@ -38,26 +38,22 @@ import zam from '../zam';
 import virtualdom from '../virtualdom';
 import { parse, evaluate } from '../expression';
 import { arrayRemove } from '../utils';
-import config from '../config';
 
 export default {
-	query: '<.+ {prefix}(.+)-in>',
+	query: '<.+ {prefix}(.+)-in {prefix}key="">',
 	order: 2,
 	block: true, // do not continue traversing through this dom element (separate zam will be created)
-	initialize(el, tag, attr) { // dom manipulation shouldn't happen in init as it will interfere with the virtualdom
+	initialize(el) { // dom manipulation shouldn't happen in init as it will interfere with the virtualdom
 		this.items = [];
-		const zKey = el.getAttribute(config.prefix + 'key');
+		this.template = virtualdom(el.cloneNode(true));
+	},
+	create(scope, el, tag, attr, key) {
+		const zKey = key.value();
 		if (zKey) {
-			const keyAST = parse(zKey);
-			el.removeAttribute(config.prefix + 'key');
-			this.key = data => evaluate(keyAST, { [attr.match[0]]: data }).value;
+			this.key = data => evaluate(parse(zKey), { [attr.match[0]]: data }).value;
 		} else {
 			this.key = data => JSON.stringify(data);
 		}
-		console.log('boooo')
-		this.template = virtualdom(el.cloneNode(true));
-	},
-	create(scope, el, tag, attr) {
 		this.marker = document.createComment(attr.name);
 		el.parentNode.replaceChild(this.marker, el);
 	},
@@ -91,6 +87,5 @@ export default {
 			item.view.$();
 			this.items.push(item);
 		});
-		console.log('ITEMS', this.items);
 	}
 };

@@ -16,7 +16,7 @@ const deepProxy = (view, obj, parents = []) => { // when something in the scope 
 	parents = parents.concat([obj]);
 	return new Proxy(obj, {
 		get(target, prop, receiver) {
-			var q = Reflect.get(target, prop, receiver);
+			const q = Reflect.get(target, prop, receiver);
 			if (target instanceof Date && typeof prop === 'string') {
 				if (prop.startsWith('set')) { // some properties are Symbols, not strings
 					view.$(true);
@@ -33,7 +33,7 @@ const deepProxy = (view, obj, parents = []) => { // when something in the scope 
 				view.$(true);
 			}
 			preparingProxy = true; // prevents triggering parent views which also proxy this object
-			let a = Reflect.set(target, prop, value, receiver);
+			const a = Reflect.set(target, prop, value, receiver);
 			preparingProxy = false;
 			return a;
 		},
@@ -42,7 +42,7 @@ const deepProxy = (view, obj, parents = []) => { // when something in the scope 
 				view.$(true);
 			}
 			preparingProxy = true; // prevents triggering parent views which also proxy this object
-			let a = Reflect.deleteProperty(target, prop);
+			const a = Reflect.deleteProperty(target, prop);
 			preparingProxy = false;
 			return a;
 		}
@@ -131,7 +131,7 @@ const directive = directive => {
 	
 	if (directive.template) {
 		directive.block = true;
-		var node = document.createElement('span');
+		let node = document.createElement('span');
 		node.innerHTML = directive.template;
 		if (node.childNodes.length === 1) {
 			node = node.childNodes[0];

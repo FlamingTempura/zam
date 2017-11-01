@@ -1,5 +1,4 @@
 import zam from './zam';
-//import directive from './directive';
 import dText from './directives/text';
 import dShow from './directives/show';
 import dAttr from './directives/attr';
@@ -13,8 +12,9 @@ import dSkip from './directives/skip';
 import dCloak from './directives/cloak';
 import dIsolate from './directives/isolate';
 import dTransclude from './directives/transclude';
+import dValue from './directives/value';
 
 [dText, dShow, dAttr, dClass, dExist, dStyle, dModel, dIn, dOn, dSkip, dCloak,
-	dIsolate, dTransclude].forEach(zam.directive);
+	dIsolate, dTransclude, dValue].forEach(zam.directive);
 
 export default zam;
