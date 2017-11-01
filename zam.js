@@ -1296,7 +1296,7 @@
 			u.directives.splice(-1 === n ? u.directives.length : n, 0, e);return e
 		};
 	Object.assign(y, {
-		version: "0.6.2",
+		version: "0.6.3",
 		directive: g,
 		__evaluate: o,
 		__parse: s,
