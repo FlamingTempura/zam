@@ -66,7 +66,7 @@ const zam = (el, data, parent) => {
 					emit(events, 'update');
 					watchers.forEach(watcher => {
 						const val = evaluate(watcher.ast, view).value;
-						if (val !== watcher.val) {
+						if (val !== watcher.val || watcher.deep && JSON.stringify(val) !== JSON.stringify(watcher.val)) {
 							watcher.val = val;
 							watcher.cb(val);
 						}
@@ -90,8 +90,8 @@ const zam = (el, data, parent) => {
 				arrayRemove(events[event], cb);
 				return view;
 			},
-			$watch(expr, cb) {
-				watchers.push({ expr, ast: parse(expr), cb });
+			$watch(expr, cb, deep) {
+				watchers.push({ expr, ast: parse(expr), cb, deep });
 				return view;
 			},
 			$unwatch(expr, cb) {

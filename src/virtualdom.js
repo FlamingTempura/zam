@@ -17,7 +17,7 @@ const execBind = (vnode, method, bind) => {
 	}
 };
 
-const createVNode = (node, source, override) => {
+const virtualdom = (node, source, override) => {
 	if (node instanceof VirtualNode) {
 		return node;
 	} else if (typeof node === 'string') { // selector
@@ -57,18 +57,19 @@ class VirtualNode {
 			node.vnode = this;
 			this.blocked = source.blocked;
 			this.type = source.type;
-			source.binds.forEach(({ directive, args }) => {
-				//this.bind({ ast: bind.ast, directive: bind.directive, args: bind.args, key: bind.key, template: bind.template });
-				this.bindDirective(directive, ...args);
-			});
+			source.binds.forEach(({ directive, args }) => this.bindDirective(directive, ...args));
 			if (source.attributes) {
 				this.attributes = source.attributes.map(cloneAttribute);
 				this.removedAttrs = source.removedAttrs.map(cloneAttribute);
 			}
 			let childNodes = Array.from(node.childNodes).filter(cnode => cnode.nodeType === 1 || cnode.nodeType === 3);
+			if (node.childNodes.length < source.children.length) {
+				console.log(node.childNodes.length + '<' + source.children.length + '!', this.node.outerHTML || this.node.nodeValue)
+			}
 			source.children.forEach(vnode => {
-				if (!vnode.fragment && childNodes.length === 0) { return; }
-				this.children.push(createVNode(vnode.fragment ? node : childNodes.shift(), vnode));
+				//if (!vnode.fragment && childNodes.length === 0) { return; }
+				console.log(vnode.node.outerHTML || vnode.node.nodeValue, '-->', vnode.fragment ? node.outerHTML || node.nodeValue : childNodes[0])
+				this.children.push(virtualdom(vnode.fragment ? node : childNodes.shift(), vnode));
 			});
 		} else {
 			node.vnode = this;
@@ -128,7 +129,7 @@ class VirtualNode {
 			if (!this.blocked && node.childNodes) {
 				Array.from(node.childNodes)
 					.filter(node => node.nodeType === 1 || node.nodeType === 3)
-					.map(node => this.children.push(createVNode(node)));
+					.map(node => this.children.push(virtualdom(node)));
 			}
 		} else
 
@@ -155,7 +156,7 @@ class VirtualNode {
 					let newNode = typeof part === 'string' ? document.createTextNode(part) :
 					              part.html ? document.createElement('span') :
 					              document.createTextNode(''),
-						newVNode = createVNode(newNode);
+						newVNode = virtualdom(newNode);
 					if (typeof part !== 'string') {
 						newVNode.bindDirective(config.inlineParser, null, {
 							match: [part.html ? 'html' : 'text'],
@@ -198,7 +199,7 @@ class VirtualNode {
 		execBind(this, 'initialize', binding);
 	}
 	clone() {
-		return createVNode(this.node.cloneNode(true), this);
+		return virtualdom(this.node.cloneNode(true), this);
 	}
 	createBinds(scope) {
 		this.scope = scope;
@@ -217,4 +218,4 @@ class VirtualNode {
 	}
 }
 
-export default createVNode;
+export default virtualdom;

@@ -45,7 +45,7 @@ export default {
 	block: true, // do not continue traversing through this dom element (separate zam will be created)
 	initialize(el) { // dom manipulation shouldn't happen in init as it will interfere with the virtualdom
 		this.items = [];
-		this.template = virtualdom(el.cloneNode(true));
+		this.source = virtualdom(el.cloneNode(true));
 	},
 	create(scope, el, tag, attr, key) {
 		const zKey = key.value();
@@ -75,8 +75,8 @@ export default {
 		data.forEach(k => {
 			let item = this.items.find(item_ => k.computed === item_.key);
 			if (!item) {
-				let vnode = this.template.clone();
-				vnode.originalNode = el.cloneNode(true); // pffft... whatever
+				let vnode = this.source.clone();
+				vnode.originalNode = el.cloneNode(true); // pffft... whatever, this is for z-inherit
 				//vnode.originalNode = vnode.node;
 				item = { key: k.computed, datum: k.datum, node: vnode.node };
 				this.marker.parentNode.insertBefore(item.node, this.marker);
