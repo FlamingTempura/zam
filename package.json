@@ -19,9 +19,9 @@
     "babel-plugin-external-helpers": "^6.22.0",
     "babel-preset-env": "^1.6.1",
     "babel-tap": "^5.0.0",
-    "jsdom": "^11.3.0",
-    "moment": "^2.19.1",
-    "rollup": "^0.50.0",
+    "jsdom": "^11.4.0",
+    "moment": "^2.19.2",
+    "rollup": "^0.51.8",
     "rollup-plugin-babel": "^3.0.2",
     "rollup-plugin-esformatter": "^0.4.0",
     "rollup-plugin-json": "^2.3.0",
@@ -29,7 +29,7 @@
     "rollup-plugin-strip": "^1.1.1",
     "rollup-plugin-uglify-es": "0.0.1",
     "rollup-watch": "^4.3.1",
-    "tap": "^10.7.2"
+    "tap": "^10.7.3"
   },
   "repository": {
     "type": "git",
