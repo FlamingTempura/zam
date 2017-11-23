@@ -67,6 +67,7 @@ class VirtualNode {
 			}
 			let childNodes = Array.from(node.childNodes).filter(cnode => cnode.nodeType === 1 || cnode.nodeType === 3);
 			source.children.forEach(vnode => {
+				if (!vnode.fragment && childNodes.length === 0) { return; }
 				this.children.push(createVNode(vnode.fragment ? node : childNodes.shift(), vnode));
 			});
 		} else {
@@ -77,7 +78,6 @@ class VirtualNode {
 	initialize() {
 		let node = this.node;
 		this.type = node.nodeType; // 1 = ELEMENT_NODE, 3 = TEXT_NODE
-		//log('vnode.init', this.outerHTML, node.nodeValue, this.type, node.nodeType);
 		if (this.type === 1) {
 			this.tag = node.tagName;
 			this.attributes = Array.from(node.attributes).map(cloneAttribute);

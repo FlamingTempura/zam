@@ -41,28 +41,34 @@ test('text interpolation', t => {
 });
 
 test('html interpolation', t => {
-	t.plan(10);
+	t.plan(15);
 	up(`<div id="a">{{{ name }}}</div>
-		<div id="b">{{{ name + 'y' }}} boo</div>`);
+		<div id="b">{{{ name + 'y' }}} boo</div>
+		<div id="c"><b>qq</b>{{{ name + 'y' }}} <a>moo</a></div>`);
 	let view = zam(document.body);
 	steps(
 		() => {
 			t.equal($('#a').textContent, '');
 			t.equal($('#b').textContent, 'y boo');
+			t.equal($('#c').textContent, 'qqy moo');
 			view.name = '<strong>dave</strong>';
 		},
 		() => {
 			t.equal($('#a').textContent, 'dave');
 			t.equal($('#b').textContent, 'davey boo');
+			t.equal($('#c').textContent, 'qqdavey moo');
 			t.equal($('#a strong').textContent, 'dave');
 			t.equal($('#b strong').textContent, 'dave');
+			t.equal($('#c strong').textContent, 'dave');
 			view.name = '<em>bob</em>';
 		},
 		() => {
 			t.equal($('#a').textContent, 'bob');
 			t.equal($('#b').textContent, 'boby boo');
+			t.equal($('#c').textContent, 'qqboby moo');
 			t.equal($('#a em').textContent, 'bob');
 			t.equal($('#b em').textContent, 'bob');
+			t.equal($('#c em').textContent, 'bob');
 		}
 	);
 });

@@ -4,7 +4,7 @@ const { steps, up, $, $$ } = require('./test-utils');
 
 test('z-*-in', t => { // Iterate through an array
 	t.plan(4);
-	up(`<div z-todo-in="todos">{{ $index }}: {{ todo }}</div>`);
+	up(`<div z-todo-in="todos">{{ $index }}: {{ todo }}<b>!</b></div>`);
 	let view = zam(document.body);
 	view.todos = ['Buy food', 'Fix code', 'Wash clothes'];
 	steps(
@@ -12,7 +12,7 @@ test('z-*-in', t => { // Iterate through an array
 			let els = $$('div');
 			t.equal(els.length, 3);
 			view.todos.forEach((todo, i) => {
-				t.equal(els[i].textContent, `${i}: ${todo}`);
+				t.equal(els[i].textContent, `${i}: ${todo}!`);
 			});
 		}
 	);

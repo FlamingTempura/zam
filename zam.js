@@ -1115,6 +1115,7 @@
 				}), t.attributes && (this.attributes = t.attributes.map(a), this.removedAttrs = t.removedAttrs.map(a));
 				let n = Array.from(e.childNodes).filter(e => 1 === e.nodeType || 3 === e.nodeType);
 				t.children.forEach(t => {
+					if (!t.fragment && 0 === n.length) return;
 					this.children.push(f(t.fragment ? e : n.shift(), t))
 				})
 			} else e.vnode = this, this.initialize()
