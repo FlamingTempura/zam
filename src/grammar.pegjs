@@ -48,6 +48,10 @@ InlineExpression
   / '{{' _ expression:Expression _ '}}' { return { html: false, expression: expression }; }
 
 Expression
+  = '::' _ expression:AssignmentExpression { return Object.assign(expression, { onetime: true }); }
+  / expression:AssignmentExpression { return expression; }
+
+AssignmentExpression
   = left:LeftHandSideExpression _
     operator:("=" / "*=" / "/=" / "%=" / "+=" / "-=") _
     right:Expression

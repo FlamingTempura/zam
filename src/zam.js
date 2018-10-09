@@ -64,17 +64,21 @@ const zam = (el, data, parent) => {
 					//log('view#' + view.$id + '.update');
 					vnode.updateBinds(view);
 					emit(events, 'update');
-					watchers.forEach(watcher => {
-						const val = evaluate(watcher.ast, view).value;
-						if (val !== watcher.val || watcher.deep && JSON.stringify(val) !== JSON.stringify(watcher.val)) {
-							watcher.val = val;
-							watcher.cb(val);
-						}
-					});
+					view._checkWatchers();
 				} else if (!deferringUpdate) {
 					deferringUpdate = nextTick(() => view.$());
 				}
 				return view;
+			},
+			_checkWatchers() {
+				watchers.forEach(watcher => {
+					const val = evaluate(watcher.ast, view).value;
+					if (watcher.deep ? JSON.stringify(val) !== JSON.stringify(watcher.val) : val !== watcher.val) {
+						watcher.val = watcher.deep ? JSON.parse(JSON.stringify(val)) : val;
+						watcher.cb(val);
+					}
+				});
+				if (view.$parent._checkWatchers) { view.$parent._checkWatchers(); }
 			},
 			$destroy() {
 				vnode.destroyBinds(view);

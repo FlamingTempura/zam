@@ -54,6 +54,7 @@ export default {
 					left: attr.ast,
 					right: { type: 'Literal', value }
 				}, scope);
+				console.log('MO')
 				scope.$();
 			}
 		};

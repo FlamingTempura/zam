@@ -100,7 +100,7 @@ Hello. <div z-cloak>this div will not be visible until zam has initiated {{ me.n
 Result:
 
 ```html
-Hello. <div>this div will not be visible until zam has initiated Bob</div>
+
 ```
 
 ### `z-text` and `z-html` - Set text or HTML content
@@ -127,11 +127,7 @@ Together: <span>{{ me.name }}, {{{ boldName }}}</span>
 Result:
 
 ```html
-My name is <div>Bob</div>
-My name is <div>Bob</div>
-Some HTML: <span><span><em>Bob</em></span></span>
-Some HTML: <span><em>Bob</em></span>
-Together: <span>Bob, <span><em>Bob</em></span></span>
+
 ```
 
 ### `z-show` - Conditional visibility
@@ -156,8 +152,7 @@ Displays the element only if the result of the expression is
 Result:
 
 ```html
-<div>My name is Bob</div>
-<button>Hide</button>
+
 ```
 
 ### `z-exist` - Conditional existence
@@ -188,8 +183,7 @@ Note: this is equivalent to `ng-if` in angular.
 Result:
 
 ```html
-<div>My name is Bob</div>
-<button>Hide</button>
+
 ```
 
 ### `z-*-in` - Iterate through an array
@@ -225,18 +219,7 @@ array/object is assigned to a variable name specified in the attribute name
 Result:
 
 ```html
-<div>0: food</div>
-<div>1: code</div>
-<div>2: clothes</div>
-<em>Buy food</em>
-<em>Fix code</em>
-<em>Wash clothes</em>
-<p>Chair</p>
-<p>Table</p>
-<ul>
-	<li>type: granny smith</li>
-	<li>color: green</li>
-</ul>
+
 ```
 
 If `z-key` is not specified, `JSON.stringify` is used.
@@ -263,10 +246,7 @@ omitted for standard HTML attributes, like `disabled`, `src`, and `alt`.
 Result:
 
 ```html
-<img src="photo.png">
-<img src="photo.png">
-<input disabled="disabled">
-<button></button>
+
 ```
 
 ### `z-class-*` - Conditional class name
@@ -286,7 +266,7 @@ Adds the specified classname only if the result of the expression is
 Result:
 
 ```html
-<h4 class="red"></h4>
+
 ```
 
 ### `z-style-*` - Style value
@@ -310,9 +290,7 @@ and `width`.
 Result:
 
 ```html
-<h1 style="font-weight: bold;"></h1>
-<em style="font-weight: bold;"></em>
-<p style="color: red; font-size: 12pt;"></p>
+
 ```
 
 ### `z-model` - Bind input
@@ -337,9 +315,7 @@ data will also change, and the view will be kept up to date.
 Result:
 
 ```html
-<input type="text">
-foo 
-<input type="button">
+
 ```
 
 ### `z-on-*` - Event handler
@@ -362,8 +338,7 @@ events, such as `click`, `mousemove`, and `mousedown`.
 Result:
 
 ```html
-<input type="button">
-<input type="button">
+
 ```
 
 ### `z-skip` - Skip compilation of this element
@@ -383,10 +358,7 @@ Stops Zam from parsing content within the element.
 Result:
 
 ```html
-<div>
-	{{ this will appear as it is (including curly braces) }}
-	<div z-font-size="'12pt'">Directives will not be parsed</div>
-</div>
+
 ```
 
 ### `z-isolate` - Create an isolate scope
@@ -409,12 +381,7 @@ Creates a new scope for the DOM element and its children.
 Result:
 
 ```html
-Bob
-<input ng-model="name">
-<div>
-	Bob
-	<input ng-model="name">
-</div>
+
 ```
 
 ### `z-inherit` - Set where template should inherit specified contents
@@ -437,7 +404,7 @@ placed within a templated directive.
 Result:
 
 ```html
-<p id="d">Name: <strong>Bob</strong></p>
+
 ```
 
 ### `z-value` - Set the value of options
@@ -461,192 +428,5 @@ You have selected: {{ selectedCar.make }} {{ selectedCar.model }}
 Result:
 
 ```html
-<select>
-	<option value="null">None</option>
-	<option value="{&quot;make&quot;:&quot;Toyota&quot;,&quot;model&quot;:&quot;Prius&quot;}">Prius</option>
-	<option value="{&quot;make&quot;:&quot;Aston Martin&quot;,&quot;model&quot;:&quot;DB9&quot;}">DB9</option>
-</select>
-You have selected: Aston Martin DB9
-```
-
-[//]: # (DOC1!)
-
-## Scope
-
-Directives have access to their parent scopes through `$parent`:
-
-```html
-<div class="foo">
-	{{ food }} <!-- chips -->
-	{{ drink }} <!-- tea -->
-	<div class="bar">
-		{{ food }} <!-- chips -->
-		{{ drink }} <!-- coffee -->
-		{{ $parent.drink }} <!-- tea -->
-	</div>
-</div>
-<script>
-	let foo = zam('.foo'),
-		bar = zam('.bar');
-	foo.food = 'chips';
-	foo.drink = 'tea';
-	bar.drink = 'coffee';
-</script>
-```
-
-Result:
-
-```html
-<div class="foo">chips  tea 
-<div class="bar">chips  coffee  tea </div>
-</div>
 
 ```
-
-## Custom directives
-
-A directive can be defined to bind DOM elements to certain defined functionality. Each directive should have a query defined to identify elements (by their tag or attribute
-names) to apply the directive to, and which attributes to bind. Directives must be defined prior to creating a view.
-
-The following options may be specified:
-* `query` - elements with matching this pattern will use this directive. This can contain regular expressions. Results from capture groups will be provided to create, update, and remove methods.
-* `template` - HTML to insert to replace the element with.
-* `scope` - set to true to create an isolate scope. The parent scope can be accessed via `scope.$parent`.
-* `block` - whether to stop further directives in this element and it's children.
-* `order` - when to run this directive; lower numbers run first.
-* `initialize(el)` - function called when the virtualdom is being created.
-* `create(scope, el)` - function called when directive is first bound with a scope.
-* `update(scope, el, val)` - function called when directive is updating.
-* `destroy(scope, el)` - function called when directive is being destoryed.
-
-```js
-zam.directive({
-	query: '<memo>' // this will bind to all <memo> elements
-});
-//<memo></memo> <!-- matches -->
-//<memo color="red">Hello</memo> <!-- matches -->
-//<mem>Boo</mem> <!-- does not match -->
-
-zam.directive({
-	query: '<.+ hide>', // bind all elements with hide attribute
-	create(scope, el) {
-		el.style.display = 'none'
-	},
-});
-// <div hide></div> <!-- element will be hidden -->
-
-zam.directive({
-	query: '<message author>', // bind to all <message> elements with the author attribute 
-	create(scope, el, tag, author) {
-		el.textContent = author.value(); // set the text of the element to the author
-	}
-})
-//<message></message> <!-- does not match -->
-//<message author="Bob">Hello</message> <!-- matches, and will replace "Hello" with "Bob" -->
-
-zam.directive({
-	query: '<product name description="Jane">', // define a default value to make an attribute optional
-	template: '<div><h1>{{ name }}<p>{{ description }}</p></div>', // the <product> elements will be replaced with this template
-	scope: true, // isolate the scope within this directive
-	update(scope, el, tag, description) {
-		scope.description = description.value(); // set the text of the element to the author
-	}
-})
-// <product name="fancy watch"></product> <!-- matches -->
-// <product description="the cheapest phone around" name="phone">Hello</product> <!-- matches - note that attribute order does not matter -->
-
-zam.directive({
-	query: '<mem(.*) auth(.*)="Jane" number="1">', // a query may contain regular expressions
-	create(scope, el, tag, auth, number) {
-		tag.name // "memooo"
-		tag.match[0] // "ooo" // capture groups can be accessed in the match array
-		auth.name // "authorrrr"
-		auth.value() // "bob"
-		auth.match[0] // "orrrr"
-		number.name // "number"
-		number.value() // 1
-	}
-})
-// <memooo authorrrr="'bob'" number="2"></memooo> <!-- matches -->
-
-let view = zam(); // directives must be defined before creating the view
-```
-
-## Expressions
-
-The expressions used in a directive mostly include the JavaScript language.
-```html
-{{ 1 + 1 }} <!-- shows 2 -->
-{{ a.b() }} <!-- shows the result of b() -->
-
-{{ 1 + 1; "my" + "name" }} <!-- invalid - multiple expressions are not allowed -->
-{{ "my" + "name" }} <!-- shows myname -->
-{{ Date.now() }} <!-- current unix timestamp -->
-{{ JSON.stringify({ a: 1, b: 2 }) }} <!-- shows {a:1,b:2} -->
-
-<div z-on-mousemove="b().c = d"></div>
-<div z-on-mousemove="thing++"></div>
-<div z-on-click="thing /= 7"></div>
-```
-
-## Events and watchers
-
-```js
-const view = zam(document.body);
-const oncreate = () => { console.log('hello world!'); }
-view.$on('create', oncreate); // listen for creation event (happens when view is created)
-view.$off('create', oncreate); // remove event handler
-view.$on('update', () => {}); // gets called whenever the view is updated
-view.$on('destroy', () => {}); // view destroyed
-
-const change = starsign => { console.log('star sign is', starsign); } 
-view.$watch('starsign', change); // watch view.starsign for changes
-view.$unwatch('starsign', change); // stop watching view.starsign
-view.$watch('thing.a + 1', change); // you can watch any expression for changes
-```
-
-## Other things
-
-### `zam.root`
-
-The root object is provided to all views and can be used to provide methods and data which should be available to all views.
-
-```html
-{{ food }}, {{ drink }}, {{ sweet }} <!-- chips, beer, cake -->
-<script>
-	zam.root.food = 'chips';
-	zam.root.drink = 'water';
-	const view = zam(document.body);
-	view.drink = 'beer';
-	zam.root.sweet = 'cake';
-</script>
-```
-
-A couple of utility functions are included in root:
-* `number(number, decimals)` (decimals defaults to 2)
-* `percent(number, decimals)` (decimals defaults to 2)
-
-You may wish to define other utility functions in root:
-
-```html
-{{ number(1.553, 2) }} <!-- 1.55 -->
-{{ percent(0.17) }} <!-- 17.00% -->
-{{ date(d, 'DD MMM' }} <!-- 17 Jan -->
-<script>
-	zam.root.date = (date, format) => moment(date).format(format);
-	const view = zam(document.body);
-	view.d = new Date(2017, 0, 17);
-</script>
-```
-
-### `zam.prefix` - Directive attribute prefix
-
-Set the prefix (by default `z-`).
-```html
-<div foo-text="blah"></div>
-<script>zam.prefix = 'foo-';</script>
-```
-
-### `zam.version` - Version
-
-Gets the version of zam (e.g. `"0.1.0"`).

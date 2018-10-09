@@ -64,11 +64,11 @@ class VirtualNode {
 			}
 			let childNodes = Array.from(node.childNodes).filter(cnode => cnode.nodeType === 1 || cnode.nodeType === 3);
 			if (node.childNodes.length < source.children.length) {
-				console.log(node.childNodes.length + '<' + source.children.length + '!', this.node.outerHTML || this.node.nodeValue)
+				//console.log(node.childNodes.length + '<' + source.children.length + '!', this.node.outerHTML || this.node.nodeValue)
 			}
 			source.children.forEach(vnode => {
 				//if (!vnode.fragment && childNodes.length === 0) { return; }
-				console.log(vnode.node.outerHTML || vnode.node.nodeValue, '-->', vnode.fragment ? node.outerHTML || node.nodeValue : childNodes[0])
+				//console.log(vnode.node.outerHTML || vnode.node.nodeValue, '-->', vnode.fragment ? node.outerHTML || node.nodeValue : childNodes[0])
 				this.children.push(virtualdom(vnode.fragment ? node : childNodes.shift(), vnode));
 			});
 		} else {
